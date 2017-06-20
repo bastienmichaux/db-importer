@@ -1,0 +1,62 @@
+# outline for database schema importation module
+
+importDbSchema :
+  require : function of application database type
+  prompt : db connection credentials (host, user, password, database)
+  open connection
+  query : function of application database type
+  get db schema : from db (query)
+    if possible as json
+    if not json, convert db schema to json (using external modules)
+  close connection
+  write db schema as json file : from db schema
+
+selectTables :
+  # ajouter options globales pour questions dans prompt
+  # ex : type Java préféré pour mapping de type sql
+  # --> permet d'économiser des inputs et de gagner du temps
+
+  list tables from db schema
+  user : select tables from list
+
+  for each selected table :
+    ask & validate Java class name # hint default class name
+    discover fields
+    discover relationships
+    discover constraints
+
+  select fields :
+    list discovered fields
+    select fields
+
+    for each selected field :
+      ask Java field name, type & validate # hint default field name
+      for each constraint : confirm / modify constraint
+      prompt : add / remove constraints
+
+  select relationships :
+    list discovered relationships
+    select relationships
+
+    for each selected relationship :
+      ask JPA relation type & validate # hint default relation type
+
+  log & confirm changes # let the user modify something if needed
+
+  return javascript object
+
+generateEntities :
+  for each entity (function of selectTables) :
+    write .jhipster.Foo.json file
+
+  # because of how JHipster handles relationships,
+  # some entities need to be generated before the others
+  # we can use a queue
+  get entity generation precedence (function of relationships)
+  set entity generation queue (function of entity generation precedence)
+  # note : comment gérer dépendances circulaires ?
+  # prévoir test cases, notamment pour la génération de changelogs liquibase
+
+  for each entity (function of queue priority) :
+    (using jhipster:entity functionalities)
+    generate entity, java test file, changelog liquibase, etc

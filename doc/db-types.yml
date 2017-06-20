@@ -1,0 +1,67 @@
+Db-types:
+
+JHipster
+
+#---------#
+
+Mysql:
+  # numeric, integer
+  bit # BIT[(M)]
+  tinyint # TINYINT[(M)] [UNSIGNED] [ZEROFILL]
+    bool # synonym for TINYINT(1)
+    boolean # synonym for TINYINT(1)
+  smallint # SMALLINT[(M)] [UNSIGNED] [ZEROFILL]
+  mediumint # MEDIUMINT[(M)] [UNSIGNED] [ZEROFILL]
+  int # INT[(M)] [UNSIGNED] [ZEROFILL]
+    integer # INTEGER[(M)] [UNSIGNED] [ZEROFILL]
+  bigint # BIGINT[(M)] [UNSIGNED] [ZEROFILL]
+    serial # alias for BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE
+  # numeric, decimal
+  decimal # DECIMAL[(M[,D])] [UNSIGNED] [ZEROFILL]  
+    dec # DEC[(M[,D])] [UNSIGNED] [ZEROFILL]
+    numeric # NUMERIC[(M[,D])] [UNSIGNED] [ZEROFILL]
+    fixed # FIXED[(M[,D])] [UNSIGNED] [ZEROFILL]
+  float # FLOAT[(M,D)] [UNSIGNED] [ZEROFILL]
+    float # FLOAT(p) [UNSIGNED] [ZEROFILL]
+    float # FLOAT(p) syntax is provided for ODBC compatibility.
+  double # DOUBLE[(M,D)] [UNSIGNED] [ZEROFILL]
+    double precision # DOUBLE PRECISION[(M,D)] [UNSIGNED] [ZEROFILL], REAL[(M,D)] [UNSIGNED] [ZEROFILL]
+  # date & time
+  date # DATE
+  datetime # DATETIME[(fsp)]
+  timestamp # TIMESTAMP[(fsp)]
+  time # TIME[(fsp)]
+  year # YEAR[(4)]
+  # string
+  char # [NATIONAL] CHAR[(M)] [CHARACTER SET charset_name] [COLLATE collation_name]
+    character
+  national_char
+    nchar
+  varchar # [NATIONAL] VARCHAR(M) [CHARACTER SET charset_name] [COLLATE collation_name]
+    varbinary # VARBINARY(M)
+  national_varchar
+    nvarchar
+  tinytext
+  text
+  longtext
+  # binary
+  tinyblob
+  blob
+  mediumblob
+  longblob
+  binary
+    char_byte # alias, compatibility feature
+  # data structures
+  enum
+  set
+  # spatial data (extension)
+  geometry
+  point
+  linestring
+  polygon
+  multipoint
+  multilinestring
+  multipolygon
+  geometrycollection
+  # json
+  json # size: ~same as longblog or longtext
