@@ -1,8 +1,8 @@
 # node-db-importer
 
-This module produces JSON files from a database. You can then use these files to setup projects like [JHipster](www.jhipster.github.io).
+This module produces JSON files from a database. You can then use these files for other applications like [JHipster](www.jhipster.github.io).
 
-*(This module is still a prototype, it doesn't do anything at the moment.)*
+**Note:** This module is a prototype, it doesn't do much at the moment. However it is easy to contribute to the project, just keep reading this document.
 
 When completed, this module will :
 
@@ -11,23 +11,25 @@ When completed, this module will :
 * Get a SQL dump of the table entries (if you need it)
 * Convert both to JSON, according to your preferences
 
-## Install
+## Install and start
 
-Global install :
+Add this line to your `package.json` dependencies :
+
+`"node-db-importer":"^0.0.1"`
+
+Then run `$ npm install`.
+
+For a global installation :
 
 `$ npm install -g node-db-importer`
 
-Local install :
+Then start the tool with :
 
-`$ npm install node-db-importer`
+`$ node index`
 
 ### Requisites
 
 Node latest stable release (v6.8 at least). [Upgrade Node](https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version) if necessary.
-
-## Start
-
-*(to do)*
 
 ## Contributing
 
@@ -35,7 +37,7 @@ Check our [doc](doc) for more info.
 
 This module is test-driven. As long as your commits include unit tests, it should work fine !
 
-**Workflow**: we merge all new commits into our **dev** branch, and if the build passes we merge the dev branch into **master**. Unless your commit is trivial (typos, etc), don't push to master.
+**Workflow**: Your contributions are welcome. If you have questions, contact the author. You can also create a Github issue to discuss enhancements, new features, etc. Unless your commit is trivial (typo, etc), don't push to master: make a pull request and push to the `dev` branch.
 
 **Testing**: All tests must pass. We use **Mocha** and **Istanbul** for unit testing, and **Travis** for integration testing.
 
@@ -43,7 +45,7 @@ This module is test-driven. As long as your commits include unit tests, it shoul
 npm test
 ```
 
-**Linting**: We use **eslint** with the AirBnB ruleset + custom rules. Please lint your branch before making a pull request.
+**Linting**: Linting enforces code conventions. We use **eslint** with the AirBnB ruleset + custom rules. Before making a pull request, please lint your branch with :
 
 ```bash
 # lint a file
@@ -55,9 +57,13 @@ eslint .
 
 You can ignore some cumbersome rules by inserting into your code [eslint-disable](http://eslint.org/docs/user-guide/configuring#disabling-rules-with-inline-comments).
 
+## Help
+
+**MySQL :** if you have trouble connecting to a local MySQL database, try leaving the 'Host address' field blank.
+
 ## Contact
 
-Send me a private message : **@bastienmichaux** on [Gitter](https://gitter.im).
+Send me a private message : **@bastienmichaux** on [Gitter](https://gitter.im). Or create a Github issue.
 
 ## License
 
@@ -65,4 +71,4 @@ Send me a private message : **@bastienmichaux** on [Gitter](https://gitter.im).
 
 ## Thanks
 
-[fhemberger](https://github.com/fhemberger), [Joshua Austill](https://jlaustill.github.io), [Notso](https://gitter.im/notsonotso) [WORMSS](http://wormss.net)
+[fhemberger](https://github.com/fhemberger), [Joshua Austill](https://jlaustill.github.io), [Notso](https://gitter.im/notsonotso), [WORMSS](http://wormss.net)
