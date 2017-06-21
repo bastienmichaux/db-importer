@@ -4,7 +4,11 @@
 const assert = require('assert');
 
 describe('importer.js', function () {
-    describe('', function () {
-        it('');
+    describe('getMysqlTableNames', function () {
+        it('works as expected');
+    });
+
+    describe('getTableNames', function () {
+        it('works as expected');
     });
 });
