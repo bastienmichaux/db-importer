@@ -1,9 +1,9 @@
 {
   "name": "node-db-importer",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A prototype for a database importer",
   "main": "index.js",
-  "start": "node src/index.js",
+  "start": "node index.js",
   "scripts": {
     "test": "istanbul cover node_modules/.bin/_mocha"
   },
