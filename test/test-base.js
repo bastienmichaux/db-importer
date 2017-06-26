@@ -35,12 +35,14 @@ describe('base.js', function () {
             assert(base.validateDatabaseType('postgresql'));
             assert(base.validateDatabaseType('sqlite'));
 
-            assert(base.validateDatabaseType('MariaDB'));
-            assert(base.validateDatabaseType('MSSQL'));
-            assert(base.validateDatabaseType('MySQL'));
-            assert(base.validateDatabaseType('Oracle'));
-            assert(base.validateDatabaseType('PostgreSQL'));
+            assert(base.validateDatabaseType('MariaDB '));
+            assert(base.validateDatabaseType(' MSSQL '));
+            assert(base.validateDatabaseType(' MySQL'));
+            assert(base.validateDatabaseType('Oracle\t'));
+            assert(base.validateDatabaseType('PostgreSQL\n'));
             assert(base.validateDatabaseType('SQLite'));
+
+            assert(base.validateDatabaseType('') === false);
 
             assert(base.validateDatabaseType('cassandra') === false);
             assert(base.validateDatabaseType('mongodb') === false);
