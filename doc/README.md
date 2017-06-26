@@ -27,6 +27,12 @@ We support first MySQL. We aim to support all SQL databases supported by JHipste
 * PostgreSQL
 * SQLite
 
+### Testing
+
+We focus first on unit testing where we **isolate** our code. That's why we can mock the result of SQL queries passed with Knex, the expected JSON files after an importation, etc.
+
+When we have a solid set of unit tests, we should start integration tests using Travis.
+
 ### Interesting node modules
 
 We may have to try several solutions. [knex](http://knexjs.org/) integrates all sql databases suported by JHipster.

@@ -25,7 +25,7 @@ describe('base.js', function () {
             assert.deepStrictEqual(arr, base.objectValuesToArray(obj));
         });
     });
-    
+
     describe('validateDatabaseType', function () {
         it('works as expected', function () {
             assert(base.validateDatabaseType('mariadb'));
@@ -48,7 +48,7 @@ describe('base.js', function () {
             assert(base.validateDatabaseType('mongodb') === false);
         });
     });
-    
+
     describe('validateMysqlCredentials', function () {
         it('returns true when credentials are ok', function () {
             const goodCred = {
@@ -69,7 +69,7 @@ describe('base.js', function () {
                 databaseType: 'oracle',
                 database: 'vaticano_secret_archives'
             };
-            let x = base.validateMysqlCredentials(badCred);
+            const x = base.validateMysqlCredentials(badCred);
             assert(x.constructor === TypeError);
         });
     });
