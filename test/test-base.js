@@ -67,9 +67,8 @@ describe('base.js', function () {
                 databaseType: 'oracle',
                 database: 'vaticano_secret_archives'
             };
-            assert.throws(() => {
-                let x = base.validateMysqlCredentials(badCred);
-            }, TypeError);
+            let x = base.validateMysqlCredentials(badCred);
+            assert(x.constructor === TypeError);
         });
     });
 });
