@@ -35,9 +35,7 @@ Node latest stable release (v6.8 at least). [Upgrade Node](https://stackoverflow
 
 Check our [doc](doc) for more info.
 
-This module is test-driven. As long as your commits include unit tests, it should work fine !
-
-**Workflow**: Your contributions are welcome. If you have questions, contact the author. You can also create a Github issue to discuss enhancements, new features, etc. Unless your commit is trivial (typo, etc), don't push to master: make a pull request and push to the `dev` branch.
+**Workflow**: Your contributions are welcome. If you have questions, contact the author. You can also create a Github issue to discuss enhancements, new features, etc. Please make pull requests to the `dev` branch.
 
 **Testing**: All tests must pass. We use **Mocha** and **Istanbul** for unit testing, and **Travis** for integration testing.
 
