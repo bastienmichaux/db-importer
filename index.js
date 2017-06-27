@@ -1,4 +1,6 @@
 const chalk = require('chalk');
+const fs = require('fs');
+const util = require('util');
 
 const connect = require('./lib/connect.js');
 const importer = require('./lib/importer.js');
@@ -10,6 +12,8 @@ const prompt = require('./lib/prompt.js');
  * this function is called to greet the user.
  */
 const start = () => {
+    const getFilepath = tableName => `dump/${tableName}.json`;
+
     // oracle, mysql, sqlite, etc
     let dbType = null;
 
@@ -17,13 +21,18 @@ const start = () => {
     let credentials = null;
 
      // knex connection object // eslint is derping here
-    let connection = null; // eslint-disable-line no-unused-vars
+    let connection = null;
 
     // the database tables as an array of strings
     let tables = null;
 
     // store the errors of rejected promises
     const errors = {};
+
+    // what we will write to the files
+    let fileContent = null;
+
+    let filePath = null;
 
     console.log(`${cst.messages.cat} ${cst.messages.hello}`);
 
@@ -81,8 +90,10 @@ const start = () => {
     )
     .then(
         (onFulfilled) => {
-            console.log(`Table '${tables[0]}' from db ${credentials.database}`);
-            console.log(onFulfilled);
+            console.log(`Node-db-importer: Table '${tables[0]}' from db ${credentials.database}`);
+            fileContent = JSON.stringify(onFulfilled);
+            filePath = getFilepath(tables[0]);
+            fs.writeFileSync(filePath, fileContent, 'utf-8');
         },
         (onRejected) => {
             errors.getMysqlTableStructure = onRejected;
