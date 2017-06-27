@@ -27,7 +27,7 @@ const start = () => {
         },
         (onRejected) => {
             errors.askDatabaseType = onRejected;
-            console.log('Promise rejected');
+            console.log('Promise rejected on prompt/askDatabaseType');
             console.log(errors);
         }
     )
@@ -42,31 +42,42 @@ const start = () => {
         },
         (onRejected) => {
             errors.askCredentials = onRejected;
-            console.log('!!! Promise rejected !!!');
+            console.log('Promise rejected on prompt/askCredentials');
             console.log(errors);
         }
     )
     // having a connection to the db, fetch all the database tables
     .then(
         (onFulfilled) => {
-            console.log(chalk.bold(`Fetching all the tables for the database '${credentials.database}'`));
+            console.log(chalk.bold(`Node-db-importer: Fetching all the tables for the database '${credentials.database}'`));
             return importer.getMysqlTableNames(credentials);
         },
         (onRejected) => {
             errors.getMysqlConnectionObject = onRejected;
-            console.log('!!! Promise rejected !!!');
+            console.log(chalk.bold('Promise rejected on connect/getMysqlConnectionObject'));
             console.log(errors);
         }
     )
     .then(
         (onFulfilled) => {
             tables = onFulfilled;
-            console.log(`Found ${tables.length} tables`);
-            console.log(tables);
+            console.log(chalk.bold(`Node-db-importer: Found ${tables.length} tables`));
+            return importer.getMysqlTableStructure(credentials, tables[0]);
         },
         (onRejected) => {
-            console.log('!!! Promise rejected !!!');
-            console.log(onRejected);
+            errors.getMysqlTableNames = onRejected;
+            console.log(chalk.bold('Promise rejected on importer/getMysqlTableNames'));
+            console.log(errors);
+        }
+    )
+    .then(
+        (onFulfilled) => {
+            console.log(`Table '${tables[0]}' from db ${credentials.database}`)
+            console.log(onFulfilled);
+        },
+        (onRejected) => {
+            errors.getMysqlTableStructure = onRejected;
+            console.log(chalk.bold('Promise rejected on importer/getMysqlTableStructure'));
             console.log(errors);
         }
     );
