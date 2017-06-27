@@ -10,10 +10,19 @@ const prompt = require('./lib/prompt.js');
  * this function is called to greet the user.
  */
 const start = () => {
-    let dbType = null; // oracle, mysql, sqlite, etc
-    let credentials = null; // user, password, host address, database name
-    let connection = null; // knex connection object
-    let tables = null; // the database tables as an array of strings
+    // oracle, mysql, sqlite, etc
+    let dbType = null;
+
+    // user, password, host address, database name
+    let credentials = null;
+
+     // knex connection object // eslint is derping here
+    let connection = null; // eslint-disable-line no-unused-vars
+
+    // the database tables as an array of strings
+    let tables = null;
+
+    // store the errors of rejected promises
     const errors = {};
 
     console.log(`${cst.messages.cat} ${cst.messages.hello}`);
@@ -38,7 +47,7 @@ const start = () => {
         (onFulfilled) => {
             credentials = onFulfilled;
             credentials.databaseType = dbType;
-            connection = connect.getMysqlConnectionObject(credentials);
+            connection = connect.getConnectionObject(credentials);
         },
         (onRejected) => {
             errors.askCredentials = onRejected;
@@ -50,11 +59,11 @@ const start = () => {
     .then(
         (onFulfilled) => {
             console.log(chalk.bold(`Node-db-importer: Fetching all the tables for the database '${credentials.database}'`));
-            return importer.getMysqlTableNames(credentials);
+            return importer.getTableNames(credentials);
         },
         (onRejected) => {
             errors.getMysqlConnectionObject = onRejected;
-            console.log(chalk.bold('Promise rejected on connect/getMysqlConnectionObject'));
+            console.log(chalk.bold('Promise rejected on connect/getConnectionObject'));
             console.log(errors);
         }
     )
@@ -62,22 +71,22 @@ const start = () => {
         (onFulfilled) => {
             tables = onFulfilled;
             console.log(chalk.bold(`Node-db-importer: Found ${tables.length} tables`));
-            return importer.getMysqlTableStructure(credentials, tables[0]);
+            return importer.getTableStructure(credentials, tables[0]);
         },
         (onRejected) => {
             errors.getMysqlTableNames = onRejected;
-            console.log(chalk.bold('Promise rejected on importer/getMysqlTableNames'));
+            console.log(chalk.bold('Promise rejected on importer/getTableNames'));
             console.log(errors);
         }
     )
     .then(
         (onFulfilled) => {
-            console.log(`Table '${tables[0]}' from db ${credentials.database}`)
+            console.log(`Table '${tables[0]}' from db ${credentials.database}`);
             console.log(onFulfilled);
         },
         (onRejected) => {
             errors.getMysqlTableStructure = onRejected;
-            console.log(chalk.bold('Promise rejected on importer/getMysqlTableStructure'));
+            console.log(chalk.bold('Promise rejected on importer/getTableStructure'));
             console.log(errors);
         }
     );
