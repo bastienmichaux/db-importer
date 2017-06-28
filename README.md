@@ -13,7 +13,7 @@ When completed, this module will :
 
 ## Install and start
 
-Add this line to your `package.json` dependencies :
+**Use it into your project:** Add this line to your `package.json` dependencies :
 
 `"node-db-importer":"^0.0.1"`
 
@@ -35,25 +35,23 @@ Node latest stable release (v6.8 at least). [Upgrade Node](https://stackoverflow
 
 Check our [doc](doc) for more info.
 
-**Workflow**: Your contributions are welcome. If you have questions, contact the author. You can also create a Github issue to discuss enhancements, new features, etc. Please make pull requests to the `dev` branch.
+**Workflow**: Your contributions are welcome. Create a Github issue to discuss enhancements, new features, etc. Please make pull requests to the `dev` branch.
 
 **Testing**: All tests must pass. We use **Mocha** and **Istanbul** for unit testing, and **Travis** for integration testing.
 
-```bash
-npm test
-```
+`$ npm test`
 
 **Linting**: Linting enforces code conventions. We use **eslint** with the AirBnB ruleset + custom rules. Before making a pull request, please lint your branch with :
 
 ```bash
 # lint a file
-eslint myfile
+$ eslint myfile
 
 # lint all files (when you're in the module's root)
-eslint .
+$ eslint .
 ```
 
-You can ignore some cumbersome rules by inserting into your code [eslint-disable](http://eslint.org/docs/user-guide/configuring#disabling-rules-with-inline-comments).
+If you need it, you can tell eslint to [ignore some rules](http://eslint.org/docs/user-guide/configuring#disabling-rules-with-inline-comments).
 
 ## Help
 
@@ -61,7 +59,9 @@ You can ignore some cumbersome rules by inserting into your code [eslint-disable
 
 ## Contact
 
-Send me a private message : **@bastienmichaux** on [Gitter](https://gitter.im). Or create a Github issue.
+Create a github issue to discuss the module.
+
+For private messages : bmichaux@altissia.org
 
 ## License
 
