@@ -30,9 +30,9 @@ const start = () => {
     const errors = {};
 
     // what we will write to the files
-    let fileContent = null;
+    const fileContent = null;
 
-    let filePath = null;
+    const filePath = null;
 
     console.log(`${cst.messages.cat} ${cst.messages.hello}`);
 
@@ -78,26 +78,14 @@ const start = () => {
     )
     .then(
         (onFulfilled) => {
+            // here, all database tables will be written in the ./dump folder
             tables = onFulfilled;
             console.log(chalk.bold(`Node-db-importer: Found ${tables.length} tables`));
-            return importer.getTableStructure(credentials, tables[0]);
+            importer.getAllTables(credentials, tables);
         },
         (onRejected) => {
             errors.getMysqlTableNames = onRejected;
             console.log(chalk.bold('Promise rejected on importer/getTableNames'));
-            console.log(errors);
-        }
-    )
-    .then(
-        (onFulfilled) => {
-            console.log(`Node-db-importer: Table '${tables[0]}' from db ${credentials.database}`);
-            fileContent = JSON.stringify(onFulfilled);
-            filePath = getFilepath(tables[0]);
-            fs.writeFileSync(filePath, fileContent, 'utf-8');
-        },
-        (onRejected) => {
-            errors.getMysqlTableStructure = onRejected;
-            console.log(chalk.bold('Promise rejected on importer/getTableStructure'));
             console.log(errors);
         }
     );
