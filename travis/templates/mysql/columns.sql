@@ -1,6 +1,7 @@
 SELECT
     tab.`TABLE_NAME`,
-    col.`COLUMN_NAME`
+    col.`COLUMN_NAME`,
+    col.`DATA_TYPE`
 
 FROM TABLES tab
 
