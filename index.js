@@ -42,16 +42,24 @@ const start = () => {
             console.log(errors);
         }
     )
-    // having the credentials, connect to the database
+    // having the credentials, connect to the database and get all the tables
     .then(
         (onFulfilled) => {
             credentials = onFulfilled;
-            databaseDriver.testConnection(credentials);
+            return databaseDriver.getTables(credentials);
         },
         (onRejected) => {
             errors.askCredentials = onRejected;
             console.log('Promise rejected on prompt/askCredentials');
             console.log(errors);
+        }
+    )
+    // having all the database tables,
+    // get their description (fields, constraints, keys, etc)
+    .then(
+        (onFulfilled) => {
+            tables = onFulfilled;
+            console.log(tables);
         }
     );
 };
