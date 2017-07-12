@@ -16,6 +16,8 @@ FROM TABLES tab
 WHERE tab.`TABLE_SCHEMA` = 'dev_life'
       -- exclude JHipster own tables
       AND tab.`TABLE_NAME` NOT LIKE 'jhi\_%'
+      -- exclude liquibase tables
+      AND ke.`TABLE_NAME` NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
       -- exclude views and alike
       AND TABLE_TYPE LIKE 'BASE TABLE'
       -- exclude foreign keys, this automatically exclude junction tables

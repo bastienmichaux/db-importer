@@ -11,7 +11,8 @@ FROM `KEY_COLUMN_USAGE` ke
 WHERE ke.`REFERENCED_TABLE_SCHEMA` = 'dev_life'
       -- exclude JHipster Tables
       AND ke.`TABLE_NAME` NOT LIKE 'jhi\_%'
-      -- todo exclude liquibase tables
+      -- exclude liquibase tables
+      AND ke.`TABLE_NAME` NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
       -- only relationship constraints, this excludes indexes and alike
       AND ke.`REFERENCED_TABLE_NAME` IS NOT NULL
       -- only many-to-many relationships
