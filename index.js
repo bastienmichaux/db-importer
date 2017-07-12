@@ -11,24 +11,14 @@ const getDatabaseDriver = (databaseType) => {
     if (databaseType === 'mysql') {
         return dbiMysql;
     }
-    else {
-        throw new Error(`No driver for db '${databaseType}'`);
-    }
-};
-
-
-const testConnection = (connectionObject) => {
-    connectionObject.query('SELECT 1+1 AS solution', function (error, results, fields) {
-        if (error) {
-            throw error;
-        }
-        return results;
-    });
+    throw new Error(`No driver for db '${databaseType}'`);
 };
 
 const start = () => {
+    let credentials = null;
     let connection = null;
     let databaseDriver = null;
+    let queryResult = null;
     let selectedDatabase = null;
 
     // stores the promise rejection errors
@@ -56,9 +46,7 @@ const start = () => {
     .then(
         (onFulfilled) => {
             credentials = onFulfilled;
-            connection = databaseDriver.getConnectionObject(credentials);
-            console.log(connection);
-            queryResult = testConnection(connection);
+            databaseDriver.testConnection(credentials);
         },
         (onRejected) => {
             errors.askCredentials = onRejected;
