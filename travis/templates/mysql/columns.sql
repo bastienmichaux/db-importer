@@ -6,11 +6,13 @@ FROM TABLES tab
 
     LEFT JOIN COLUMNS col
         ON col.`TABLE_NAME` = tab.`TABLE_NAME`
+           AND col.`TABLE_SCHEMA` = tab.`TABLE_SCHEMA`
 
     -- help to know which column correspond to a constraint (and exclude it)
     LEFT JOIN KEY_COLUMN_USAGE ke
         ON col.`TABLE_NAME` = ke.`TABLE_NAME`
            AND col.`COLUMN_NAME` = ke.`COLUMN_NAME`
+           AND ke.`TABLE_SCHEMA` = col.`TABLE_SCHEMA`
 
 -- chosen database
 WHERE tab.`TABLE_SCHEMA` = 'dev_life'

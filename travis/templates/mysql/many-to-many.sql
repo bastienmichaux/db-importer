@@ -7,6 +7,7 @@ FROM `KEY_COLUMN_USAGE` ke
     LEFT JOIN `COLUMNS` col
         ON col.`TABLE_NAME` = ke.`TABLE_NAME`
            AND col.`COLUMN_NAME` = ke.`COLUMN_NAME`
+           AND col.`TABLE_SCHEMA` = ke.`TABLE_SCHEMA`
 
 WHERE ke.`REFERENCED_TABLE_SCHEMA` = 'dev_life'
       -- exclude JHipster Tables
