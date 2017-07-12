@@ -58,7 +58,7 @@ const start = () => {
             credentials = onFulfilled;
             connection = databaseDriver.getConnectionObject(credentials);
             console.log(connection);
-            queryResult = x(connection);
+            queryResult = testConnection(connection);
         },
         (onRejected) => {
             errors.askCredentials = onRejected;
