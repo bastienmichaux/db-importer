@@ -4,6 +4,8 @@ FROM `TABLES` tab
 
 WHERE TABLE_SCHEMA LIKE 'dev_life'
       AND tab.`TABLE_NAME` NOT LIKE 'jhi\_%'
+      -- exclude liquibase tables
+      AND tab.`TABLE_NAME` NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
       -- exclude views and alike
       AND TABLE_TYPE LIKE 'BASE TABLE'
       -- exclude junction tables
@@ -15,9 +17,12 @@ WHERE TABLE_SCHEMA LIKE 'dev_life'
           LEFT JOIN `COLUMNS` col
             ON col.`TABLE_NAME` = ke.`TABLE_NAME`
                AND col.`COLUMN_NAME` = ke.`COLUMN_NAME`
+               AND col.`TABLE_SCHEMA` = ke.`TABLE_SCHEMA`
 
         WHERE ke.`REFERENCED_TABLE_SCHEMA` = 'dev_life'
               AND ke.`TABLE_NAME` NOT LIKE 'jhi\_%'
+              -- exclude liquibase tables
+              AND ke.`TABLE_NAME` NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
               -- it's not a constraint if there are no referenced table
               AND ke.`REFERENCED_TABLE_NAME` IS NOT NULL
               -- only junction tables
