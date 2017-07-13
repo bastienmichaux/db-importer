@@ -41,3 +41,27 @@ WHERE TABLE_SCHEMA = 'elearning'
         HAVING COUNT(ke.TABLE_NAME) = 2
 )
 ;`;
+
+describe('./lib/mysql/queries.js', () => {
+    const connection = {
+        escape: sqlstring.escape
+    };
+
+    beforeEach(() => {
+        sinon.spy(connection, 'escape');
+    });
+
+    afterEach(() => {
+        connection.escape.restore();
+    });
+
+    // -- assert tables === template query
+    it('returns expected query with good parameter', () => {
+        const actualTablesQuery = queries.tables('elearning', connection);
+
+        sinon.assert.calledTwice(connection.escape);
+        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
+
+        assert.equal(actualTablesQuery, expectedTablesQuery);
+    });
+});
