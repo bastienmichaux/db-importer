@@ -1,5 +1,7 @@
 .doc/
 coverage/
+dump/*
 node_modules/
 .idea/
+
 privateTest.js
