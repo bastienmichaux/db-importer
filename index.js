@@ -15,7 +15,7 @@ const getDatabaseDriver = (databaseType) => {
 };
 
 const start = () => {
-    let credentials = null;
+    let credentials = {};
     let connection = null;
     let databaseDriver = null;
     let queryResult = null;
@@ -46,6 +46,7 @@ const start = () => {
     .then(
         (onFulfilled) => {
             credentials = onFulfilled;
+            credentials.databaseType = selectedDatabase;
             return databaseDriver.getTables(credentials);
         },
         (onRejected) => {
