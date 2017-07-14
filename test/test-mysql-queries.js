@@ -94,4 +94,14 @@ describe('./lib/mysql/queries.js', () => {
 
         assert.equal(actualTablesQuery, expectedTablesQuery);
     });
+
+    // -- assert columns === template query
+    it('returns expected query with good parameter', () => {
+        const actualColumnsQuery = queries.columns('elearning', connection);
+
+        sinon.assert.calledOnce(connection.escape);
+        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
+
+        assert.equal(actualColumnsQuery, expectedColumnsQuery);
+    });
 });
