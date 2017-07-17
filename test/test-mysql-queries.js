@@ -131,4 +131,14 @@ describe('./lib/mysql/queries.js', () => {
 
         assert.equal(actualColumnsQuery, expectedColumnsQuery);
     });
+
+    // -- assert many-to-many === template query
+    it('many-to-many returns expected query with good parameter', () => {
+        const actualManyToManyQuery = queries.manyToMany('elearning', connection);
+
+        sinon.assert.calledOnce(connection.escape);
+        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
+
+        assert.equal(actualManyToManyQuery, expectedManyToManyQuery);
+    });
 });
