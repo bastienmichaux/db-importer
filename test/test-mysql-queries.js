@@ -61,7 +61,7 @@ FROM TABLES tab
            AND ke.TABLE_SCHEMA = col.TABLE_SCHEMA
 
 -- chosen database
-WHERE tab.TABLE_SCHEMA = 'dev_life'
+WHERE tab.TABLE_SCHEMA = 'elearning'
       -- exclude JHipster own tables
       AND tab.TABLE_NAME NOT LIKE 'jhi\\_%'
       -- exclude liquibase tables
@@ -86,7 +86,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert tables === template query
-    it('returns expected query with good parameter', () => {
+    it('tables returns expected query with good parameter', () => {
         const actualTablesQuery = queries.tables('elearning', connection);
 
         sinon.assert.calledTwice(connection.escape);
@@ -96,7 +96,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert columns === template query
-    it('returns expected query with good parameter', () => {
+    it('columns returns expected query with good parameter', () => {
         const actualColumnsQuery = queries.columns('elearning', connection);
 
         sinon.assert.calledOnce(connection.escape);
