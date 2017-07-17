@@ -16,11 +16,8 @@ env:
         - TRAVIS=$TRAVIS_BUILD_DIR/travis
         - SCRIPTS=$TRAVIS/scripts
         - MYSQL=$TRAVIS/templates/mysql
-before_install:
-install:
-before_script:
+after_script:
     - rm -r test
     - $SCRIPTS/query-mysql.sh
-script:
 notifications:
     email: false
