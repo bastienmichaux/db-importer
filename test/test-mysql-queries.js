@@ -197,4 +197,14 @@ describe('./lib/mysql/queries.js', () => {
 
         assert.equal(actualManyToOneQuery, expectedManyToOneQuery);
     });
+
+    // -- assert one-to-one === template query
+    it('one-to-one returns expected query with good parameter', () => {
+        const actualOneToOneQuery = queries.oneToOne('elearning', connection);
+
+        sinon.assert.calledOnce(connection.escape);
+        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
+
+        assert.equal(actualOneToOneQuery, expectedOneToOneQuery);
+    });
 });
