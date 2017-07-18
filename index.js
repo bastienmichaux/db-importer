@@ -16,10 +16,9 @@ const getDatabaseDriver = (databaseType) => {
 
 const start = () => {
     let credentials = {};
-    let connection = null;
     let databaseDriver = null;
-    let queryResult = null;
     let selectedDatabase = null;
+    let tables = [];
 
     // stores the promise rejection errors
     const errors = {};
