@@ -1,6 +1,3 @@
-/* global describe, beforeEach, it*/
-/* eslint-disable no-unused-vars, prefer-arrow-callback */
-
 const assert = require('assert');
 
 const base = require('../lib/base.js');
