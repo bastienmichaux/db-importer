@@ -14,6 +14,5 @@ describe('mysql.js', function () {
             };
             assert(dbiMysql.validateCredentials(goodCred) === true);
         });
-        // TODO: increase coverage (see Istanbul)
     });
 });
