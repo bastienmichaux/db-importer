@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const dbiMysql = require('../lib/mysql.js');
 
-describe('mysql.js', function() {
+describe('mysql.js', function () {
     describe('validateMysqlCredentials', function () {
         it('returns true when credentials are ok', function () {
             const goodCred = {
