@@ -2,6 +2,8 @@
 coverage/
 dump/*
 node_modules/
+npm-debug.log
 .idea/
 
 privateTest.js
+yarn-error.log
