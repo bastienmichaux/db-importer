@@ -145,21 +145,21 @@ WHERE ke.REFERENCED_TABLE_SCHEMA = 'elearning'
       AND col.COLUMN_KEY = 'UNI'
 ;`;
 
-describe('./lib/mysql/queries.js', () => {
+describe('./lib/mysql/queries.js', function () {
     const connection = {
         escape: sqlstring.escape
     };
 
-    beforeEach(() => {
+    beforeEach(function () {
         sinon.spy(connection, 'escape');
     });
 
-    afterEach(() => {
+    afterEach(function () {
         connection.escape.restore();
     });
 
     // -- assert tables === template query
-    it('tables returns expected query with good parameter', () => {
+    it('tables returns expected query with good parameter', function () {
         const actualTablesQuery = queries.tables('elearning', connection);
 
         sinon.assert.calledTwice(connection.escape);
@@ -169,7 +169,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert columns === template query
-    it('columns returns expected query with good parameter', () => {
+    it('columns returns expected query with good parameter', function () {
         const actualColumnsQuery = queries.columns('elearning', connection);
 
         sinon.assert.calledOnce(connection.escape);
@@ -179,7 +179,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert many-to-many === template query
-    it('many-to-many returns expected query with good parameter', () => {
+    it('many-to-many returns expected query with good parameter', function () {
         const actualManyToManyQuery = queries.manyToMany('elearning', connection);
 
         sinon.assert.calledOnce(connection.escape);
@@ -189,7 +189,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert many-to-one === template query
-    it('many-to-one returns expected query with good parameter', () => {
+    it('many-to-one returns expected query with good parameter', function () {
         const actualManyToOneQuery = queries.manyToOne('elearning', connection);
 
         sinon.assert.calledOnce(connection.escape);
@@ -199,7 +199,7 @@ describe('./lib/mysql/queries.js', () => {
     });
 
     // -- assert one-to-one === template query
-    it('one-to-one returns expected query with good parameter', () => {
+    it('one-to-one returns expected query with good parameter', function () {
         const actualOneToOneQuery = queries.oneToOne('elearning', connection);
 
         sinon.assert.calledOnce(connection.escape);
