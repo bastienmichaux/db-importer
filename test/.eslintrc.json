@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    "mocha"
+  ],
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "prefer-arrow-callback": "off",
+    "mocha/no-mocha-arrows": "error"
+  }
+}
