@@ -18,6 +18,7 @@ env:
         - MYSQL=$TRAVIS/templates/mysql
 script:
     - $SCRIPTS/eslint.sh
+    - yarn test
 after_script:
     - rm -r test
     - $SCRIPTS/query-mysql.sh
