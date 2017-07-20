@@ -1,5 +1,5 @@
 // dbi library
-const cst = require('./lib/constants.js');
+const cst = require('./constants.js');
 const prompt = require('./lib/prompt.js');
 
 // database drivers

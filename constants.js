@@ -3,7 +3,7 @@
 const chalk = require('chalk');
 const lodash = require('lodash');
 
-const packageInfo = require('../package.json');
+const packageInfo = require('./package.json');
 
 
 const databaseTypes = {
