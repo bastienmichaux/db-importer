@@ -1,13 +1,12 @@
 /** Constants */
 
 const chalk = require('chalk');
-const lodash = require('lodash');
 
 const packageInfo = require('./package.json');
 
 
-const databaseTypes = {
-    mysql: 'mysql',
+const DBMSs = {
+    mysql: 'mysql'
 };
 
 const messages = {
@@ -15,11 +14,8 @@ const messages = {
     hello: `${chalk.bold(`Oh hai. I'm Node-db-importer v${packageInfo.version}.\nI need information before importing your db.`)}`
 };
 
-const databaseTypesToArray = () => lodash.values(databaseTypes);
-
 
 module.exports = {
-    databaseTypes,
-    databaseTypesToArray,
+    databaseTypes: DBMSs,
     messages
 };
