@@ -26,6 +26,7 @@ const inquiries = {
         type: 'input',
         name: 'host',
         message: 'Host address:',
+        // todo add validation (valid ip, see framework joi)
         default: '127.0.0.1'
     },
     user: {
@@ -48,6 +49,7 @@ const inquiries = {
         type: 'input',
         name: 'port',
         message: 'port:'
+        // todo add validation (valid port)
     }
 };
 
