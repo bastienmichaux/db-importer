@@ -14,9 +14,36 @@ const inquiries = {
     dbms: {
         type: 'list',
         name: 'dbms',
-        message: 'Database type?',
+        message: 'DBMS:',
         choices: toArray(dbmsList),
         default: dbmsList.mysql
+    },
+    host: {
+        type: 'input',
+        name: 'host',
+        message: 'Host address:',
+        default: '127.0.0.1'
+    },
+    user: {
+        type: 'input',
+        name: 'user',
+        message: 'User name:',
+        default: 'root'
+    },
+    schema: {
+        type: 'input',
+        name: 'database',
+        message: 'Database schema to import:'
+    },
+    password: {
+        type: 'password',
+        name: 'password',
+        message: 'Password'
+    },
+    port: {
+        type: 'input',
+        name: 'port',
+        message: 'port:'
     }
 };
 
