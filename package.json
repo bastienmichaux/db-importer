@@ -5,7 +5,7 @@
   "main": "index.js",
   "start": "node index.js",
   "scripts": {
-    "test": "istanbul cover node_modules/.bin/_mocha"
+    "test": "istanbul cover node_modules/.bin/_mocha; ./node_modules/.bin/eslint .;"
   },
   "repository": {
     "type": "git",
