@@ -10,6 +10,10 @@ const dbmsList = {
     mysql: 'mysql'
 };
 
+const dbmsDefaultPorts = {
+    mysql: 3306
+};
+
 const inquiries = {
     dbms: {
         type: 'list',
@@ -54,6 +58,7 @@ I need information before importing your db.`)}`
 
 module.exports = {
     dbmsList,
+    dbmsDefaultPorts,
     inquiries,
     messages
 };
