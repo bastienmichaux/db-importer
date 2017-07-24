@@ -12,7 +12,7 @@ const askCredentials = () => {
 
             inquiries.port.default = cst.dbmsList[credentials.dbms].defaultPort;
 
-            return ask([inquiries.host, inquiries.port, inquiries.user, inquiries.password, inquiries.schema]);
+            return ask([inquiries.host, inquiries.port, inquiries.user, inquiries.password]);
         })
         .then(onFulfilled => Object.assign(credentials, onFulfilled));
 };
