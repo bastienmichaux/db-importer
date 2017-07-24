@@ -1,17 +1,17 @@
 /** Constants */
 
 const chalk = require('chalk');
-const toArray = require('lodash').values;
+const toArray = require('lodash/object').values;
+const pickProperty = require('lodash/object').mapValues;
 
 const packageInfo = require('./package.json');
 
 
 const dbmsList = {
-    mysql: 'mysql'
-};
-
-const dbmsDefaultPorts = {
-    mysql: 3306
+    mysql: {
+        name: 'mysql',
+        defaultPort: 3306
+    }
 };
 
 const inquiries = {
@@ -19,8 +19,8 @@ const inquiries = {
         type: 'list',
         name: 'dbms',
         message: 'DBMS:',
-        choices: toArray(dbmsList),
-        default: dbmsList.mysql
+        choices: toArray(pickProperty(dbmsList, 'name')),
+        default: dbmsList.mysql.name
     },
     host: {
         type: 'input',
@@ -60,7 +60,6 @@ I need information before importing your db.`)}`
 
 module.exports = {
     dbmsList,
-    dbmsDefaultPorts,
     inquiries,
     messages
 };
