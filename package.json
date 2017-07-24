@@ -22,11 +22,8 @@
     "fs-extra": "^3.0.0",
     "inquirer": "^3.1.0",
     "jhipster-core": "^1.2.9",
-    "js-beautify": "^1.6.14",
-    "knex": "~0.13.0",
     "lodash": "^4.17.4",
-    "mysql": "^2.13.0",
-    "xml2js": "0.4.17"
+    "mysql": "^2.13.0"
   },
   "devDependencies": {
     "eslint": "^4.3.0",
