@@ -3,19 +3,14 @@ const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
-const askCredentials = () => {
-    const credentials = {};
-
-    return inquirer.prompt(inquiries.dbms)
-        .then((onFulfilled) => {
-            credentials.dbms = onFulfilled.dbms;
-
-            inquiries.port.default = cst.dbmsList[credentials.dbms].defaultPort;
-
-            return inquirer.prompt([inquiries.host, inquiries.port, inquiries.user, inquiries.password]);
-        })
-        .then(onFulfilled => Object.assign(credentials, onFulfilled));
-};
+const askCredentials = () => inquirer.prompt([
+    inquiries.dbms,
+    inquiries.host,
+    inquiries.port,
+    inquiries.user,
+    inquiries.password,
+    inquiries.schema
+]);
 
 module.exports = {
     askCredentials

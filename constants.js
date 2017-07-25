@@ -29,27 +29,28 @@ const inquiries = {
         // todo add validation (valid ip, see framework joi)
         default: '127.0.0.1'
     },
+    port: {
+        type: 'input',
+        name: 'port',
+        message: 'port:',
+        default: input => dbmsList[input.dbms].defaultPort
+        // todo add validation (valid port)
+    },
     user: {
         type: 'input',
         name: 'user',
         message: 'User name:',
         default: 'root'
     },
-    schema: {
-        type: 'input',
-        name: 'database',
-        message: 'Database schema to import:'
-    },
     password: {
         type: 'password',
         name: 'password',
         message: 'Password'
     },
-    port: {
+    schema: {
         type: 'input',
-        name: 'port',
-        message: 'port:'
-        // todo add validation (valid port)
+        name: 'database',
+        message: 'Database schema to import:'
     }
 };
 
