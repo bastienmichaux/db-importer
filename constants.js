@@ -14,7 +14,7 @@ const dbmsList = {
     mysql: {
         name: 'mysql',
         defaultPort: 3306,
-        handler: mysql
+        driver: mysql
     }
 };
 
