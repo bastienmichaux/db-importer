@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const toArray = require('lodash/object').values;
 const pickProperty = require('lodash/object').mapValues;
+const validation = require('./lib/validation');
 
 const packageInfo = require('./package.json');
 
@@ -26,15 +27,15 @@ const inquiries = {
         type: 'input',
         name: 'host',
         message: 'Host address:',
-        // todo add validation (valid ip, see framework joi)
-        default: '127.0.0.1'
+        validate: validation.validateHost,
+        default: 'localhost',
     },
     port: {
         type: 'input',
         name: 'port',
         message: 'port:',
+        validate: validation.validatePort,
         default: input => dbmsList[input.dbms].defaultPort
-        // todo add validation (valid port)
     },
     user: {
         type: 'input',
