@@ -1,19 +1,12 @@
 // dbi library
 const cst = require('./constants');
 const prompt = require('./prompt');
+const db = require('./lib/db-commons');
 
 const msg = cst.messages;
 
+console.log(msg.greeting);
 
-const askCredentials = () => {
-    console.log(msg.greeting);
-
-    prompt.askCredentials()
-        .then(connect); // eslint-disable-line  no-use-before-define
-};
-
-const connect = (onFulFilled) => {
-    console.log(onFulFilled);
-};
-
-askCredentials();
+prompt.askCredentials()
+    .then(db.connect)
+    .then(db.close);

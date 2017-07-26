@@ -5,13 +5,16 @@ const toArray = require('lodash/object').values;
 const pickProperty = require('lodash/object').mapValues;
 const validation = require('./lib/validation');
 
+const mysql = require('./lib/mysql/index');
+
 const packageInfo = require('./package.json');
 
 
 const dbmsList = {
     mysql: {
         name: 'mysql',
-        defaultPort: 3306
+        defaultPort: 3306,
+        handler: mysql
     }
 };
 
