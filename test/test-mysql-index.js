@@ -13,13 +13,13 @@ describe('lib/mysql/index', function () {
 
     describe('connect', function () {
         let createConnectionStub;
-        let errorMock;
+        let dummyError;
         let logStub;
 
         beforeEach(function () {
             createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
                 // This is the method actually doing the connection, we must mock it too
-                connect: (errorHandlingCallback) => { errorHandlingCallback(errorMock); }
+                connect: (errorHandlingCallback) => { errorHandlingCallback(dummyError); }
             });
             logStub = sandbox.stub(console, 'log');
         });
@@ -41,18 +41,18 @@ describe('lib/mysql/index', function () {
         });
 
         it('doesn\' log when there is no error', function () {
-            errorMock = null;
+            dummyError = null;
             index.connect({});
 
             assert.equal(logStub.callCount, 0, 'callCount');
         });
 
         it('logs the correct error message when there is one', function () {
-            errorMock = 'Helpful information about the error the just occured';
+            dummyError = 'Helpful information about the error the just occurred';
             index.connect({});
 
             assert.equal(logStub.callCount, 1, 'callCount');
-            assert.equal(logStub.firstCall.args[0], `error connecting : ${errorMock}`);
+            assert.equal(logStub.firstCall.args[0], `error connecting : ${dummyError}`);
         });
     });
 
@@ -101,6 +101,39 @@ describe('lib/mysql/index', function () {
 
         it('throws an error if a named parameter is not provided', function () {
             assert.throws(() => queryFormat(dummyQuery, {}));
+        });
+    });
+
+    describe('close', function () {
+        let dummyConnection;
+        let dummyError;
+        let logStub;
+
+        before(function () {
+            dummyConnection = {
+                end: (errorHandlingMethod) => { errorHandlingMethod(dummyError); }
+            };
+        });
+
+        beforeEach(function () {
+            logStub = sandbox.stub(console, 'log');
+        });
+
+        it('doesn\' log when there is no error', function () {
+            dummyError = undefined;
+
+            index.close(dummyConnection);
+
+            assert.equal(logStub.callCount, 0, 'callCount');
+        });
+
+        it('logs the correct error message when there is one', function () {
+            dummyError = 'Helpful information about the error the just occurred';
+
+            index.close(dummyConnection);
+
+            assert.equal(logStub.callCount, 1, 'callCount');
+            assert.equal(logStub.firstCall.args[0], `error ending connection :  ${dummyError}`);
         });
     });
 });
