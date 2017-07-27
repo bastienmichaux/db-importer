@@ -14,14 +14,23 @@ describe('lib/mysql/index', function () {
     describe('connect', function () {
         let createConnectionStub;
         let dummyError;
+        let connectSpy;
         let logStub;
 
         beforeEach(function () {
+            const dummyConnect = (errorHandlingCallback) => { errorHandlingCallback(dummyError); };
+            connectSpy = sandbox.spy(dummyConnect);
+
             createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
-                // This is the method actually doing the connection, we must mock it too
-                connect: (errorHandlingCallback) => { errorHandlingCallback(dummyError); }
+                // This is the method actually doing the connection, here it is replaced with a dummy
+                connect: connectSpy
             });
+
             logStub = sandbox.stub(console, 'log');
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(connectSpy);
         });
 
         it('uses provided parameters to create connection', function () {
