@@ -21,5 +21,7 @@ script:
 after_script:
     - rm -r test
     - $SCRIPTS/query-mysql.sh
+after_success:
+    - yarn coveralls
 notifications:
     email: false
