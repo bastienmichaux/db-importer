@@ -1,6 +1,7 @@
 # node-db-importer
 
 [![Build Status][travis-image]][travis-url]
+[![Coverage Status][coveralls-image]][coveralls-url]
 
 This module produces JSON files from a database. You can then use these files for other applications like [JHipster](www.jhipster.github.io).
 
@@ -75,3 +76,5 @@ For private messages : bmichaux@altissia.org
 
 [travis-image]: https://travis-ci.org/bastienmichaux/db-importer.svg?branch=master
 [travis-url]: https://travis-ci.org/bastienmichaux/db-importer
+[coveralls-image]: https://coveralls.io/repos/github/bastienmichaux/db-importer/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/bastienmichaux/db-importer?branch=master

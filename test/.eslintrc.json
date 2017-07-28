@@ -9,7 +9,7 @@
     "no-unused-vars": "off",
     "prefer-arrow-callback": "off",
     "mocha/max-top-level-suites": ["error", {"limit": 1}],
-    "mocha/no-nested-tests": 1,
+    "mocha/no-nested-tests": "error",
     "mocha/no-global-tests": "error",
     "mocha/no-exclusive-tests": "error",
     "mocha/no-mocha-arrows": "error",
