@@ -49,7 +49,7 @@ describe('lib/mysql/index', function () {
             assert.equal(createConnectionStub.firstCall.args[0].password, credentials.password);
         });
 
-        it('doesn\' log when there is no error', function () {
+        it('doesn\'t log when there is no error', function () {
             dummyError = null;
             index.connect({});
 
@@ -134,7 +134,7 @@ describe('lib/mysql/index', function () {
             sinon.assert.calledOnce(endSpy);
         });
 
-        it('doesn\' log when there is no error', function () {
+        it('doesn\'t log when there is no error', function () {
             dummyError = undefined;
 
             index.close(dummyConnection);
