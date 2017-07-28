@@ -116,6 +116,7 @@ describe('lib/mysql/index', function () {
     describe('close', function () {
         let dummyConnection;
         let dummyError;
+        let endSpy;
         let logStub;
 
         before(function () {
@@ -126,6 +127,11 @@ describe('lib/mysql/index', function () {
 
         beforeEach(function () {
             logStub = sandbox.stub(console, 'log');
+            endSpy = sandbox.spy(dummyConnection, 'end');
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(endSpy);
         });
 
         it('doesn\' log when there is no error', function () {
