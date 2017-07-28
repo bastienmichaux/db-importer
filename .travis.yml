@@ -1,0 +1,27 @@
+os:
+    - linux
+language:
+    - node_js
+services:
+    - mysql
+node_js:
+    - "node"
+cache:
+    yarn : true
+    directories:
+        - node_modules
+        - $HOME/.m2
+env:
+    global:
+        - TRAVIS=$TRAVIS_BUILD_DIR/travis
+        - SCRIPTS=$TRAVIS/scripts
+        - MYSQL=$TRAVIS/templates/mysql
+script:
+    - yarn test
+after_script:
+    - rm -r test
+    - $SCRIPTS/query-mysql.sh
+after_success:
+    - yarn coveralls
+notifications:
+    email: false

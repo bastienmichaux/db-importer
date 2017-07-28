@@ -1,5 +1,5 @@
-.doc/
+.idea/
 coverage/
 node_modules/
-.idea/
-privateTest.js
+npm-debug.log
+yarn-error.log

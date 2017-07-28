@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    "mocha"
+  ],
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "prefer-arrow-callback": "off",
+    "mocha/max-top-level-suites": ["error", {"limit": 1}],
+    "mocha/no-nested-tests": "error",
+    "mocha/no-global-tests": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/no-mocha-arrows": "error",
+    "mocha/no-identical-title": "error",
+    "mocha/no-pending-tests": 1,
+    "mocha/no-return-and-callback": "error",
+    "mocha/no-skipped-tests": "error",
+    "mocha/no-top-level-hooks": "error"
+  }
+}
