@@ -17,24 +17,23 @@ describe('lib/db-commons', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(cst.dbmsList, 'name'));
 
         dbmsNameList.forEach((dbmsName) => {
-            it(`returns an object containing the corresponding ${dbmsName} driver and an established connection`, function () {
-                const driver = cst.dbmsList[dbmsName].driver;
-                const dummyConnection = {};
+            it(`returns an object containing the corresponding ${dbmsName} driver`, function () {
+                const driver = cst.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
+
                 const driverMock = sandbox.mock(driver)
                     .expects('connect')
                     .once()
-                    .returns(dummyConnection);
+                    .resolves();
 
                 const credentials = {
                     dbms: dbmsName
                 };
 
-                const session = db.connect(credentials);
+                return db.connect(credentials).then((session) => {
+                    driverMock.verify();
 
-                driverMock.verify();
-
-                assert.equal(session.driver, driver);
-                assert.equal(session.connection, dummyConnection);
+                    assert.equal(session.driver, driver);
+                });
             });
         });
     });
