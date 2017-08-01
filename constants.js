@@ -1,13 +1,12 @@
-/** Constants */
-
 const chalk = require('chalk');
-const toArray = require('lodash/object').values;
-const pickProperty = require('lodash/object').mapValues;
+const lodash = require('lodash/object');
+
 const validation = require('./lib/validation');
-
 const mysql = require('./lib/mysql/index');
-
 const packageInfo = require('./package.json');
+
+const toArray = lodash.values;
+const pickProperty = lodash.mapValues;
 
 
 const dbmsList = {
