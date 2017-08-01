@@ -17,7 +17,7 @@ describe('lib/db-commons', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(cst.dbmsList, 'name'));
 
         dbmsNameList.forEach((dbmsName) => {
-            it('returns an object containing the driver and an established connection', function () {
+            it(`returns an object containing the corresponding ${dbmsName} driver and an established connection`, function () {
                 const driver = cst.dbmsList[dbmsName].driver;
                 const dummyConnection = {};
                 const driverMock = sandbox.mock(driver)
