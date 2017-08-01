@@ -58,8 +58,8 @@ const inquiries = {
 };
 
 const colors = {
-    success: chalk.hex('#06F90B'),
-    failure: chalk.hex('#F9060B')
+    success: chalk.green, // will use hex('#06F90B') after next chalk update
+    failure: chalk.red // will use hex('#F9060B') after next chalk update
 };
 
 const messages = {
