@@ -9,4 +9,4 @@ console.log(msg.greeting);
 
 prompt.askCredentials()
     .then(db.connect)
-    .then(db.close);
+    .then(db.close, () => prompt.askCredentials().then(db.connect).then(db.close));

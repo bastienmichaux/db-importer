@@ -1,13 +1,12 @@
-/** Constants */
-
 const chalk = require('chalk');
-const toArray = require('lodash/object').values;
-const pickProperty = require('lodash/object').mapValues;
+const lodash = require('lodash/object');
+
 const validation = require('./lib/validation');
-
 const mysql = require('./lib/mysql/index');
-
 const packageInfo = require('./package.json');
+
+const toArray = lodash.values;
+const pickProperty = lodash.mapValues;
 
 
 const dbmsList = {
@@ -58,9 +57,16 @@ const inquiries = {
     }
 };
 
+const colors = {
+    success: chalk.green, // will use hex('#06F90B') after next chalk update
+    failure: chalk.red // will use hex('#F9060B') after next chalk update
+};
+
 const messages = {
     greeting: `${chalk.bgCyan.black('/ᐠ｡ꞈ｡ᐟ\\')} ${chalk.bold(`Oh hai. I'm Node-db-importer v${packageInfo.version}.
-I need information before importing your db.`)}`
+I need information before importing your db.`)}`,
+    connectionSuccess: `${colors.success('connected to the database')}`,
+    connectionFailure: `${colors.failure('failed to connect to the database')}`
 };
 
 module.exports = {
