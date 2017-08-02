@@ -71,6 +71,29 @@ describe('lib/db-commons', function () {
                 assert.equal(session, dummySession);
             });
         });
+
+        it('logs an error message and throws an error', function () {
+            const driver = cst.dbmsList[anyDriverName].driver;
+            const driverMock = sandbox.mock(driver)
+                .expects('connect')
+                .once()
+                .rejects();
+
+            const errorStub = sandbox.stub(console, 'error');
+            errorStub.withArgs(cst.messages.connectionFailure).returns(null);
+            errorStub.callThrough();
+
+
+            return db.connect(dummySession).then((session) => {
+                assert.fail(session, null, 'This promise should have been rejected !');
+            }, (sessionError) => {
+                driverMock.verify();
+
+                sinon.assert.calledOnce(errorStub);
+                assert.equal(errorStub.firstCall.args[0], cst.messages.connectionFailure);
+                assert.equal(sessionError, cst.messages.connectionFailure);
+            });
+        });
     });
 
     describe('close', function () {
