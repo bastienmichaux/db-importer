@@ -101,7 +101,7 @@ describe('lib/db-commons', function () {
         let closeStub;
 
         beforeEach(function () {
-            closeStub = sandbox.stub();
+            closeStub = sandbox.stub().resolves();
             dummySession = {
                 connection: {},
                 driver: {
@@ -115,14 +115,16 @@ describe('lib/db-commons', function () {
         });
 
         it('calls the embedded driver close method on the embedded connection', function () {
-            db.close(dummySession);
-
-            assert.equal(closeStub.firstCall.args[0], dummySession.connection);
-            assert.equal(closeStub.firstCall.args[1], dummySession.driver);
+            return db.close(dummySession).then(() => {
+                assert.equal(closeStub.firstCall.args[0], dummySession.connection);
+                assert.equal(closeStub.firstCall.args[1], dummySession.driver);
+            });
         });
 
-        it('returns the provided session object', function () {
-            assert.equal(db.close(dummySession), dummySession);
+        it('resolves the provided session object', function () {
+            return db.close(dummySession).then((session) => {
+                assert.equal(session, dummySession);
+            });
         });
     });
 });
