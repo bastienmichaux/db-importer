@@ -11,60 +11,6 @@ describe('lib/mysql/index', function () {
         sandbox.restore();
     });
 
-    describe('connect', function () {
-        let createConnectionStub;
-        let dummyError;
-        let connectSpy;
-        let logStub;
-
-        beforeEach(function () {
-            const dummyConnect = (errorHandlingCallback) => { errorHandlingCallback(dummyError); };
-            connectSpy = sandbox.spy(dummyConnect);
-
-            createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
-                // This is the method actually doing the connection, here it is replaced with a dummy
-                connect: connectSpy
-            });
-
-            logStub = sandbox.stub(console, 'log');
-        });
-
-        afterEach(function () {
-            sinon.assert.calledOnce(connectSpy);
-        });
-
-        it('uses provided parameters to create connection', function () {
-            // These are not valid credentials but it enables me to check references
-            const credentials = {
-                host: {},
-                port: {},
-                user: {},
-                password: {}
-            };
-            index.connect(credentials);
-
-            assert.equal(createConnectionStub.firstCall.args[0].host, credentials.host);
-            assert.equal(createConnectionStub.firstCall.args[0].port, credentials.port);
-            assert.equal(createConnectionStub.firstCall.args[0].user, credentials.user);
-            assert.equal(createConnectionStub.firstCall.args[0].password, credentials.password);
-        });
-
-        it('doesn\'t log when there is no error', function () {
-            dummyError = null;
-            index.connect({});
-
-            assert.equal(logStub.callCount, 0, 'callCount');
-        });
-
-        it('logs the correct error message when there is one', function () {
-            dummyError = 'Helpful information about the error the just occurred';
-            index.connect({});
-
-            assert.equal(logStub.callCount, 1, 'callCount');
-            assert.equal(logStub.firstCall.args[0], `error connecting : ${dummyError}`);
-        });
-    });
-
     describe('queryFormat', function () {
         let queryFormat;
         let dummyQuery;
@@ -113,42 +59,81 @@ describe('lib/mysql/index', function () {
         });
     });
 
-    describe('close', function () {
-        let dummyConnection;
-        let dummyError;
-        let endSpy;
-        let logStub;
-
-        before(function () {
-            dummyConnection = {
-                end: (errorHandlingMethod) => { errorHandlingMethod(dummyError); }
-            };
-        });
-
-        beforeEach(function () {
-            logStub = sandbox.stub(console, 'log');
-            endSpy = sandbox.spy(dummyConnection, 'end');
-        });
+    describe('connect', function () {
+        let createConnectionStub;
+        let connectStub;
 
         afterEach(function () {
-            sinon.assert.calledOnce(endSpy);
+            sinon.assert.calledOnce(createConnectionStub);
+            sinon.assert.calledOnce(connectStub);
         });
 
-        it('doesn\'t log when there is no error', function () {
-            dummyError = undefined;
+        it('uses provided parameters to create connection', function () {
+            connectStub = sandbox.stub().callsArgWith(0, null);
+            createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
+                connect: connectStub,
+            });
 
-            index.close(dummyConnection);
+            const dummyCredentials = {
+                host: {},
+                port: {},
+                user: {},
+                password: {}
+            };
 
-            assert.equal(logStub.callCount, 0, 'callCount');
+            return index.connect(dummyCredentials).then(() => {
+                assert.equal(createConnectionStub.firstCall.args[0].host, dummyCredentials.host);
+                assert.equal(createConnectionStub.firstCall.args[0].port, dummyCredentials.port);
+                assert.equal(createConnectionStub.firstCall.args[0].user, dummyCredentials.user);
+                assert.equal(createConnectionStub.firstCall.args[0].password, dummyCredentials.password);
+            });
         });
 
-        it('logs the correct error message when there is one', function () {
-            dummyError = 'Helpful information about the error the just occurred';
+        it('rejects the error it receives from session.connection.connect', function () {
+            const dummyError = {};
+            connectStub = sandbox.stub().callsArgWith(0, dummyError);
+            createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
+                connect: connectStub,
+            });
 
-            index.close(dummyConnection);
+            return index.connect({}).then((session) => {
+                assert.fail(session, null, 'This promise should have been rejected !');
+            }, (error) => {
+                assert.equal(error, dummyError);
+            });
+        });
+    });
 
-            assert.equal(logStub.callCount, 1, 'callCount');
-            assert.equal(logStub.firstCall.args[0], `error ending connection :  ${dummyError}`);
+    describe('close', function () {
+        let endStub;
+
+        afterEach(function () {
+            sinon.assert.calledOnce(endStub);
+        });
+
+        it('resolves when session.connection.end returns an error of values null', function () {
+            endStub = sandbox.stub().callsArgWith(0, null);
+            const dummySession = {
+                end: endStub
+            };
+
+            return index.close(dummySession).then(() => {
+                assert.ok(true);
+            });
+        });
+
+        it('rejects the error it receives from session.connection.end', function () {
+            const dummyError = {};
+            endStub = sandbox.stub().callsArgWith(0, dummyError);
+            const dummySession = {
+                end: endStub
+            };
+
+            return index.close(dummySession).then((session) => {
+                assert.fail(session, null, 'This promise should have been rejected !');
+            }, (error) => {
+                assert.equal(error, dummyError);
+            });
         });
     });
 });
