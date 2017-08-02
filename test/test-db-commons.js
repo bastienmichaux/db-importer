@@ -9,6 +9,24 @@ const sandbox = sinon.sandbox.create();
 
 
 describe('lib/db-commons', function () {
+    let logStub;
+    let anyDriverName;
+    let dummySession;
+
+    beforeEach(function () {
+        // we don't want logs to pollute test output
+        logStub = sandbox.stub(console, 'log');
+        logStub.withArgs(cst.messages.connectionSuccess).returns(null);
+        // we still want mocha to be able to log
+        logStub.callThrough();
+
+        // we don't care which dbms, we're mocking it anyway
+        anyDriverName = 'mysql';
+        dummySession = {
+            dbms: anyDriverName
+        };
+    });
+
     afterEach(function () {
         sandbox.restore();
     });
@@ -31,9 +49,26 @@ describe('lib/db-commons', function () {
 
                 return db.connect(credentials).then((session) => {
                     driverMock.verify();
+                    sinon.assert.calledOnce(logStub);
 
                     assert.equal(session.driver, driver);
                 });
+            });
+        });
+
+        it('logs a success message and resolves his completed input', function () {
+            const driver = cst.dbmsList[anyDriverName].driver;
+            const driverMock = sandbox.mock(driver)
+                .expects('connect')
+                .once()
+                .resolves();
+
+            return db.connect(dummySession).then((session) => {
+                driverMock.verify();
+                sinon.assert.calledOnce(logStub);
+
+                assert.equal(logStub.firstCall.args[0], cst.messages.connectionSuccess);
+                assert.equal(session, dummySession);
             });
         });
     });
