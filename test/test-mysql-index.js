@@ -136,5 +136,9 @@ describe('lib/mysql/index', function () {
             });
         });
     });
+
+    describe('entityCandidates', function () {
+        it('provides connection.query with parameters')
+    });
 });
 

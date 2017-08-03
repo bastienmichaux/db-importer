@@ -130,10 +130,9 @@ describe('lib/db-commons', function () {
             sinon.assert.calledOnce(entityCandidatesStub);
         });
 
-        it('calls the embedded driver close method on the embedded connection', function () {
+        it('calls the embedded driver entityCandidates method on the provided session', function () {
             return db.entityCandidates(dummySession).then(() => {
-                assert.equal(entityCandidatesStub.firstCall.args[0], dummySession.connection);
-                assert.equal(entityCandidatesStub.firstCall.args[1], dummySession.driver);
+                assert.equal(entityCandidatesStub.firstCall.args[0], dummySession);
             });
         });
 

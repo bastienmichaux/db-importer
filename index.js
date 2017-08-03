@@ -14,4 +14,7 @@ prompt.init()
     )
     .then(db.connect)
     .then(db.entityCandidates)
-    .then(db.close, () => prompt.askCredentials().then(db.connect).then(db.close));
+    .then(db.close, (error) => {
+        console.log(error);
+        return prompt.askCredentials().then(db.connect).then(db.close);
+    });
