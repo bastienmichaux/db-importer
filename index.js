@@ -13,4 +13,5 @@ prompt.init()
         .then(answers => Object.assign(config, answers))
     )
     .then(db.connect)
+    .then(db.entityCandidates)
     .then(db.close, () => prompt.askCredentials().then(db.connect).then(db.close));

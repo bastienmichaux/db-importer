@@ -111,4 +111,36 @@ describe('lib/db-commons', function () {
             });
         });
     });
+
+    describe('entityCandidates', function () {
+        let dummySession;
+        let entityCandidatesStub;
+
+        beforeEach(function () {
+            entityCandidatesStub = sandbox.stub().resolves();
+            dummySession = {
+                connection: {},
+                driver: {
+                    entityCandidates: entityCandidatesStub
+                }
+            };
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(entityCandidatesStub);
+        });
+
+        it('calls the embedded driver close method on the embedded connection', function () {
+            return db.entityCandidates(dummySession).then(() => {
+                assert.equal(entityCandidatesStub.firstCall.args[0], dummySession.connection);
+                assert.equal(entityCandidatesStub.firstCall.args[1], dummySession.driver);
+            });
+        });
+
+        it('resolves the provided session object', function () {
+            return db.entityCandidates(dummySession).then((session) => {
+                assert.equal(session, dummySession);
+            });
+        });
+    });
 });
