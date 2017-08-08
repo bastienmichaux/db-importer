@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const lodash = require('lodash/object');
 
 const validation = require('./lib/validation');
@@ -60,17 +59,11 @@ const inquiries = {
     }
 };
 
-const colors = {
-    success: chalk.hex('#06F90B'),
-    failure: chalk.hex('#F9060B'),
-    warning: chalk.hex('#f7ff00')
-};
-
 const messages = {
-    greeting: `${chalk.bgCyan.black('/ᐠ｡ꞈ｡ᐟ\\')} ${chalk.bold(`Oh hai. I'm Node-db-importer v${packageInfo.version}.
-I need information before importing your db.`)}`,
-    connectionSuccess: `${colors.success('connected to the database')}`,
-    connectionFailure: `${colors.failure('failed to connect to the database')}`
+    greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
+I need information before importing your db.\n`,
+    connectionSuccess: 'connected to the database',
+    connectionFailure: 'failed to connect to the database'
 };
 
 const configFile = '.db-config.json';
@@ -78,7 +71,6 @@ const configFile = '.db-config.json';
 module.exports = {
     dbmsList,
     inquiries,
-    colors,
     messages,
     configFile
 };

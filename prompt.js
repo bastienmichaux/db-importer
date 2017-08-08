@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 const lodash = require('lodash');
@@ -6,6 +7,25 @@ const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
+const emphasize = (msg) => {
+    console.log(chalk.bold(msg));
+};
+
+const info = (msg) => {
+    console.log(chalk.hex('#00f2ff')(msg));
+};
+
+const success = (msg) => {
+    console.log(chalk.hex('#06F90B')(msg));
+};
+
+const failure = (msg) => {
+    console.error(chalk.hex('#F9060B')(msg));
+};
+
+const warning = (msg) => {
+    console.warn(chalk.hex('#f7ff00')(msg));
+};
 
 /**
  * create configuration with configuration file's values if present
@@ -23,15 +43,12 @@ const init = () => fse.readJson(cst.configFile)
                  * I am so sorry, I have no other choice than to compare to true
                  */
                 if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
-                    // better store all errors then log them all
-                    const warningString = `${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`;
-                    console.warn(`${cst.colors.warning(warningString)}`);
+                    warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
                 } else {
                     inquiries[key].when = false; // means the question is skipped
                 }
             } else {
-                const warningString = `${key} is defined in ${cst.configFile} but is not a valid configuration item`;
-                console.warn(`${cst.colors.warning(warningString)}`);
+                warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
             }
         });
         lodash.forEach(inquiries, (prompt) => {
@@ -42,10 +59,11 @@ const init = () => fse.readJson(cst.configFile)
                 if (prompt.default(config)) prompt.default = prompt.default(config);
             }
         });
+        info(`${cst.configFile} has been loaded`);
         return config;
     })
     .catch((error) => {
-        console.error(error);
+        failure(error);
         return {}; // if an error occurs, loads nothing.
     });
 
@@ -59,6 +77,11 @@ const askCredentials = () => inquirer.prompt([
 ]);
 
 module.exports = {
+    emphasize,
+    info,
+    success,
+    failure,
+    warning,
     init,
     askCredentials
 };

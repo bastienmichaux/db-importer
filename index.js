@@ -5,7 +5,7 @@ const db = require('./lib/db-commons');
 
 const msg = cst.messages;
 
-console.log(msg.greeting);
+prompt.emphasize(msg.greeting);
 
 prompt.init()
     .then(config => prompt.askCredentials()
