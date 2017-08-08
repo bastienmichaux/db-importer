@@ -11,13 +11,11 @@ const inquiries = cst.inquiries;
 
 describe('prompt', function () {
     afterEach(function () {
-        // I restore original functions after each test
-        // I must do so mocks from previous tests don't interfere with following tests
         sandbox.restore();
     });
 
     describe('askCredentials', function () {
-        it('was called with expected arguments', function () {
+        it('is called with expected arguments', function () {
             // This replaces the function inquirer.prompt with a stub.
             const stub = sandbox.stub(inquirer, 'prompt');
 
