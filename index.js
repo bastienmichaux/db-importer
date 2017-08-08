@@ -7,6 +7,9 @@ const msg = cst.messages;
 
 console.log(msg.greeting);
 
-prompt.askCredentials()
+prompt.init()
+    .then(config => prompt.askCredentials()
+        .then(answers => Object.assign(config, answers))
+    )
     .then(db.connect)
     .then(db.close, () => prompt.askCredentials().then(db.connect).then(db.close));

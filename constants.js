@@ -37,7 +37,10 @@ const inquiries = {
         name: 'port',
         message: 'port:',
         validate: validation.validatePort,
-        default: input => dbmsList[input.dbms].defaultPort
+        default: (input) => {
+            if (input.dbms) return dbmsList[input.dbms].defaultPort;
+            return null; // It means we offer no default
+        }
     },
     user: {
         type: 'input',
@@ -59,7 +62,8 @@ const inquiries = {
 
 const colors = {
     success: chalk.hex('#06F90B'),
-    failure: chalk.hex('#F9060B')
+    failure: chalk.hex('#F9060B'),
+    warning: chalk.hex('#f7ff00')
 };
 
 const messages = {
@@ -69,8 +73,12 @@ I need information before importing your db.`)}`,
     connectionFailure: `${colors.failure('failed to connect to the database')}`
 };
 
+const configFile = '.db-config.json';
+
 module.exports = {
     dbmsList,
     inquiries,
-    messages
+    colors,
+    messages,
+    configFile
 };
