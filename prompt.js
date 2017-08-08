@@ -62,7 +62,7 @@ const init = () => fse.readJson(cst.configFile)
                 /**
                  * inquirer won't have access to the configuration file, we must thus manually run the default functions
                  */
-                if (prompt.default(config)) prompt.default = prompt.default(config);
+                prompt.default = prompt.default(config) || prompt.default;
             }
         });
         info(`${cst.configFile} has been loaded`);
@@ -70,7 +70,7 @@ const init = () => fse.readJson(cst.configFile)
     })
     .catch((error) => {
         if (error.errno === -2) {
-            info('no configuration file found');
+            info(cst.messages.noConfig);
         } else {
             failure(error);
         }
