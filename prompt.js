@@ -14,7 +14,7 @@ const emphasize = (msg) => {
 
 const info = (msg) => {
     /* istanbul ignore next */
-    console.log(chalk.hex('#00f2ff')(msg));
+    console.info(chalk.hex('#00f2ff')(msg));
 };
 
 const success = (msg) => {
@@ -40,17 +40,18 @@ const warning = (msg) => {
  */
 const init = () => fse.readJson(cst.configFile)
     .then((config) => {
-        // disable prompts if for items specified by the configuration file
+        // disable prompts for items specified by the configuration file
         lodash.forEach(config, (value, key) => {
             if (inquiries[key]) {
                 /**
                  * validate returns true or the error message and a non empty string is considered truthy
                  * I am so sorry, I have no other choice than to compare to true
+                 * warn user if the item is invalid, disable prompt if it isn't
                  */
                 if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
                     warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
                 } else {
-                    inquiries[key].when = false; // means the question is skipped
+                    inquiries[key].when = false;
                 }
             } else {
                 warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
@@ -68,7 +69,11 @@ const init = () => fse.readJson(cst.configFile)
         return config;
     })
     .catch((error) => {
-        failure(error);
+        if (error.errno === -2) {
+            info('no configuration file found');
+        } else {
+            failure(error);
+        }
         return {}; // if an error occurs, loads nothing.
     });
 

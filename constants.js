@@ -63,7 +63,8 @@ const messages = {
     greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
 I need information before importing your db.\n`,
     connectionSuccess: 'connected to the database',
-    connectionFailure: 'failed to connect to the database'
+    connectionFailure: 'failed to connect to the database',
+    noConfig: 'no configuration file found'
 };
 
 const configFile = '.db-config.json';
