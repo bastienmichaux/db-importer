@@ -4,21 +4,18 @@ const lodash = require('lodash');
 
 const db = require('../lib/db-commons');
 const cst = require('../constants');
+const prompt = require('../prompt');
 
 const sandbox = sinon.sandbox.create();
 
 
 describe('lib/db-commons', function () {
-    let logStub;
+    let promptMock;
     let anyDriverName;
     let dummySession;
 
     beforeEach(function () {
-        // we don't want logs to pollute test output
-        logStub = sandbox.stub(console, 'log');
-        logStub.withArgs(cst.messages.connectionSuccess).returns(null);
-        // we still want mocha to be able to log
-        logStub.callThrough();
+        promptMock = sandbox.mock(prompt);
 
         // we don't care which dbms, we're mocking it anyway
         anyDriverName = 'mysql';
@@ -38,10 +35,8 @@ describe('lib/db-commons', function () {
             it(`returns an object containing the corresponding ${dbmsName} driver`, function () {
                 const driver = cst.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
-                const driverMock = sandbox.mock(driver)
-                    .expects('connect')
-                    .once()
-                    .resolves();
+                const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
+                promptMock.expects('success').once();
 
                 const credentials = {
                     dbms: dbmsName
@@ -49,7 +44,7 @@ describe('lib/db-commons', function () {
 
                 return db.connect(credentials).then((session) => {
                     driverMock.verify();
-                    sinon.assert.calledOnce(logStub);
+                    promptMock.verify();
 
                     assert.equal(session.driver, driver);
                 });
@@ -58,39 +53,28 @@ describe('lib/db-commons', function () {
 
         it('logs a success message and resolves his completed input', function () {
             const driver = cst.dbmsList[anyDriverName].driver;
-            const driverMock = sandbox.mock(driver)
-                .expects('connect')
-                .once()
-                .resolves();
+            const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
+            promptMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             return db.connect(dummySession).then((session) => {
                 driverMock.verify();
-                sinon.assert.calledOnce(logStub);
+                promptMock.verify();
 
-                assert.equal(logStub.firstCall.args[0], cst.messages.connectionSuccess);
                 assert.equal(session, dummySession);
             });
         });
 
-        it('logs an error message and throws an error', function () {
+        it('logs an error message and rejects it', function () {
             const driver = cst.dbmsList[anyDriverName].driver;
-            const driverMock = sandbox.mock(driver)
-                .expects('connect')
-                .once()
-                .rejects();
-
-            const errorStub = sandbox.stub(console, 'error');
-            errorStub.withArgs(cst.messages.connectionFailure).returns(null);
-            errorStub.callThrough();
-
+            const driverMock = sandbox.mock(driver).expects('connect').once().rejects();
+            promptMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
 
             return db.connect(dummySession).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (sessionError) => {
                 driverMock.verify();
+                promptMock.verify();
 
-                sinon.assert.calledOnce(errorStub);
-                assert.equal(errorStub.firstCall.args[0], cst.messages.connectionFailure);
                 assert.equal(sessionError, cst.messages.connectionFailure);
             });
         });
