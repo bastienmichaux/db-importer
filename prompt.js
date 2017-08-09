@@ -1,36 +1,12 @@
-const chalk = require('chalk');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 const lodash = require('lodash');
 
+const log = require('./lib/log');
 const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
-const emphasize = (msg) => {
-    /* istanbul ignore next */
-    console.log(chalk.bold(msg));
-};
-
-const info = (msg) => {
-    /* istanbul ignore next */
-    console.info(chalk.hex('#00f2ff')(msg));
-};
-
-const success = (msg) => {
-    /* istanbul ignore next */
-    console.log(chalk.hex('#06F90B')(msg));
-};
-
-const failure = (msg) => {
-    /* istanbul ignore next */
-    console.error(chalk.hex('#F9060B')(msg));
-};
-
-const warning = (msg) => {
-    /* istanbul ignore next */
-    console.warn(chalk.hex('#f7ff00')(msg));
-};
 
 /**
  * create configuration with configuration file's values if present
@@ -49,12 +25,12 @@ const init = () => fse.readJson(cst.configFile)
                  * warn user if the item is invalid, disable prompt if it isn't
                  */
                 if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
-                    warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
+                    log.warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
                 } else {
                     inquiries[key].when = false;
                 }
             } else {
-                warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
+                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
             }
         });
         lodash.forEach(inquiries, (prompt) => {
@@ -65,14 +41,14 @@ const init = () => fse.readJson(cst.configFile)
                 prompt.default = prompt.default(config) || prompt.default;
             }
         });
-        info(`${cst.configFile} has been loaded`);
+        log.info(`${cst.configFile} has been loaded`);
         return config;
     })
     .catch((error) => {
         if (error.errno === -2) {
-            info(cst.messages.noConfig);
+            log.info(cst.messages.noConfig);
         } else {
-            failure(error);
+            log.failure(error);
         }
         return {}; // if an error occurs, loads nothing.
     });
@@ -87,11 +63,6 @@ const askCredentials = () => inquirer.prompt([
 ]);
 
 module.exports = {
-    emphasize,
-    info,
-    success,
-    failure,
-    warning,
     init,
     askCredentials
 };

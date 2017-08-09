@@ -4,7 +4,7 @@ const lodash = require('lodash');
 
 const db = require('../lib/db-commons');
 const cst = require('../constants');
-const prompt = require('../prompt');
+const log = require('../lib/log');
 
 const sandbox = sinon.sandbox.create();
 
@@ -15,7 +15,7 @@ describe('lib/db-commons', function () {
     let dummySession;
 
     beforeEach(function () {
-        promptMock = sandbox.mock(prompt);
+        promptMock = sandbox.mock(log);
 
         // we don't care which dbms, we're mocking it anyway
         anyDriverName = 'mysql';

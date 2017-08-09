@@ -1,11 +1,12 @@
 // dbi library
 const cst = require('./constants');
 const prompt = require('./prompt');
+const log = require('./lib/log');
 const db = require('./lib/db-commons');
 
 const msg = cst.messages;
 
-prompt.emphasize(msg.greeting);
+log.emphasize(msg.greeting);
 
 prompt.init()
     .then(config => prompt.askCredentials()
