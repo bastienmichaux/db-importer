@@ -15,5 +15,9 @@ describe('constants', function () {
         it('throws an error with a bad parameter', function () {
             assert.throws(() => cst.inquiries.port.default({ dbms: 'definitelyNotADBMS' }), Error);
         });
+
+        it('returns null if input doesn\'t provide a dbms', function () {
+            assert.equal(cst.inquiries.port.default({}), null);
+        });
     });
 });
