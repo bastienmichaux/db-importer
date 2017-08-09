@@ -6,6 +6,7 @@ const lodash = require('lodash');
 const fse = require('fs-extra');
 
 const prompt = require('../prompt');
+const log = require('../lib/log');
 const cst = require('../constants');
 
 const sandbox = sinon.sandbox.create();
@@ -36,15 +37,21 @@ describe('prompt', function () {
 
     describe('init', function () {
         let fseMock;
+        let logMock;
 
         beforeEach(function () {
             fseMock = sandbox.mock(fse);
+            logMock = sandbox.mock(log);
+        });
+
+        afterEach(function () {
+            logMock.verify();
         });
 
         it('informs when there is no configuration file and resolves an empty object', function () {
             fseMock.expects('readJson').rejects({ errno: -2 });
 
-            // todo check calls to log
+            logMock.expects('info').once().withArgs(cst.messages.noConfig);
 
             return prompt.init().then((config) => {
                 assert.deepEqual(config, {});
@@ -54,15 +61,14 @@ describe('prompt', function () {
         it('prints the error message when there is one and resolves an empty object', function () {
             const dummyError = {};
             fseMock.expects('readJson').rejects(dummyError);
-
-            // todo check calls to log
+            logMock.expects('failure').once().withArgs(dummyError);
 
             return prompt.init().then((config) => {
                 assert.deepEqual(config, {});
             });
         });
 
-        it('disables prompts for specified items and resolves found configuration object', function () {
+        it('disables prompts for specified items, resolves found configuration object and inform user', function () {
             const dummyConfig = {
                 dbms: 'mysql',
                 host: '127.0.0.1',
@@ -72,8 +78,12 @@ describe('prompt', function () {
                 schema: 'schema'
             };
             fseMock.expects('readJson').resolves(dummyConfig);
+            logMock.expects('info').once().withArgs(cst.messages.foundConfig);
 
             return prompt.init().then((config) => {
+                lodash.forEach(dummyConfig, (value, key) => {
+                    assert.equal(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
+                });
                 assert.equal(config, dummyConfig);
             });
         });
@@ -83,10 +93,11 @@ describe('prompt', function () {
                 dbm: 'mysql'
             };
             fseMock.expects('readJson').resolves(dummyConfig);
+            const warningMessage = `dbm is defined in ${cst.configFile} but is not a valid configuration item`;
+            logMock.expects('warning').once().withArgs(warningMessage);
+            logMock.expects('info').once();
 
-            return prompt.init().then(() => {
-                assert.fail('must check if warning occurs');
-            });
+            return prompt.init();
         });
 
         it('warns user if provided item value doesn\'t pass validation', function () {
@@ -94,24 +105,29 @@ describe('prompt', function () {
                 port: '-'
             };
             fseMock.expects('readJson').resolves(dummyConfig);
+            const warningMessage = `${cst.configFile} "port": "-" ${inquiries.port.validate('-')}`;
+            logMock.expects('warning').once().withArgs(warningMessage);
+            logMock.expects('info').once();
 
-            return prompt.init().then(() => {
-                assert.fail('must check if warning occurs');
-            });
+            return prompt.init();
         });
 
         it('lets current default if it cannot deduce one from configuration', function () {
             const dummyConfig = {};
             fseMock.expects('readJson').resolves(dummyConfig);
+            logMock.expects('info').once();
 
-            // we force one enquiry to be una
+            // we force this enquiry to return null
             const backupDefault = cst.inquiries.port.default;
-            cst.inquiries.port.default = () => null;
+            const dummyDefault = () => null;
+            cst.inquiries.port.default = dummyDefault;
 
             return prompt.init().then(() => {
-                cst.inquiries.port.default = backupDefault;
-
-                assert.fail('must check if warning occurs');
+                try {
+                    assert.equal(cst.inquiries.port.default, dummyDefault);
+                } finally {
+                    cst.inquiries.port.default = backupDefault;
+                }
             });
         });
     });
