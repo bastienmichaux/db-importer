@@ -45,6 +45,10 @@
     "reporter": [
       "lcov",
       "text-summary"
+    ],
+    "exclude": [
+      "test/",
+      "lib/log.js"
     ]
   }
 }
