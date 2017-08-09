@@ -15,7 +15,7 @@ FROM TABLES tab
            AND col.`COLUMN_NAME` = ke.`COLUMN_NAME`
            AND ke.`TABLE_SCHEMA` = col.`TABLE_SCHEMA`
 
--- chosen database
+-- chosen schema
 WHERE tab.`TABLE_SCHEMA` = 'dev_life'
       -- exclude JHipster own tables
       AND tab.`TABLE_NAME` NOT LIKE 'jhi\_%'

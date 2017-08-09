@@ -54,7 +54,7 @@ const inquiries = {
     },
     schema: {
         type: 'input',
-        name: 'database',
+        name: 'schema',
         message: 'Database schema to import:'
     }
 };
