@@ -5,7 +5,7 @@
   "main": "index.js",
   "start": "node index.js",
   "scripts": {
-    "test": "istanbul cover node_modules/.bin/_mocha; ./node_modules/.bin/eslint .;",
+    "test": "nyc node_modules/.bin/_mocha; ./node_modules/.bin/eslint .;",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls;"
   },
   "repository": {
@@ -34,9 +34,17 @@
     "eslint-config-airbnb-base": "^11.3.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-mocha": "^4.11.0",
-    "istanbul": "^0.4.5",
     "mocha": "^3.4.2",
+    "nyc": "^11.1.0",
     "sinon": "^2.3.8",
     "sqlstring": "^2.2.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
   }
 }
