@@ -1,6 +1,6 @@
 {
   "name": "node-db-importer",
-  "version": "0.5.3",
+  "version": "0.7.3",
   "description": "A prototype for a database importer",
   "main": "index.js",
   "start": "node index.js",
