@@ -3,6 +3,7 @@ const sinon = require('sinon');
 const mysql = require('mysql');
 
 const index = require('../lib/mysql/index');
+const cst = require('../lib/mysql/constants');
 
 const sandbox = sinon.sandbox.create();
 
@@ -138,7 +139,70 @@ describe('lib/mysql/index', function () {
     });
 
     describe('entityCandidates', function () {
-        it('provides connection.query with parameters');
+        let dummySession;
+        let queryStub;
+
+        beforeEach(function () {
+            queryStub = sandbox.stub();
+            dummySession = {
+                connection: {
+                    query: queryStub.resolves()
+                },
+                results: {},
+                schema: {}
+            };
+        });
+
+        it('rejects with connection.query error', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(2, dummyError);
+
+            return index.entityCandidates(dummySession).then(() => {
+                assert.fail('promise should be rejected');
+            }, (error) => {
+                assert.equal(error, dummyError);
+            });
+        });
+
+        it('stores connection.query in session.results', function () {
+            // we want something like [ RawDataPacket{ TABLE_NAME: 'value' }]
+            const dummyJhipster = [{ [cst.fields.tableName]: {} }];
+            const dummyLiquibase = [{ [cst.fields.tableName]: {} }];
+            const dummyTwoTypeJunction = [{ [cst.fields.tableName]: {} }];
+            const dummyTables = [{ [cst.fields.tableName]: {} }];
+
+            /**
+             * we want something like :
+             * {
+             *     jhipster: [ 'value' ],
+             *     liquibase: [ 'value' ],
+             *     twoTypeJunction: [ 'value' ],
+             *     tables: [ 'value' ]
+             * }
+             */
+            const dummyResults = {
+                jhipster: [dummyJhipster[0][cst.fields.tableName]],
+                liquibase: [dummyLiquibase[0][cst.fields.tableName]],
+                twoTypeJunction: [dummyLiquibase[0][cst.fields.tableName]],
+                tables: [dummyLiquibase[0][cst.fields.tableName]]
+            };
+
+            queryStub.withArgs(cst.queries.jhipster).callsArgWith(2, null, dummyJhipster);
+            queryStub.withArgs(cst.queries.liquibase).callsArgWith(2, null, dummyLiquibase);
+            queryStub.withArgs(cst.queries.twoTypeJunction).callsArgWith(2, null, dummyTwoTypeJunction);
+            queryStub.withArgs(cst.queries.tables).callsArgWith(2, null, dummyTables);
+
+            return index.entityCandidates(dummySession).then(() => {
+                // checking the value
+                assert.deepEqual(dummySession.results, dummyResults);
+
+                // checking each reference, that is, it uses the exact 'value' it received
+                assert.equal(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
+                assert.equal(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
+                assert.equal(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
+                assert.equal(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+            });
+        });
     });
 });
 
