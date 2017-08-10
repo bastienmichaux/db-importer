@@ -4,43 +4,6 @@ const sqlstring = require('sqlstring');
 
 const queries = require('../lib/mysql/queries');
 
-const expectedTablesQuery = `
-SELECT tab.TABLE_NAME
-
-FROM TABLES tab
-
-WHERE TABLE_SCHEMA = 'elearning'
-      AND tab.TABLE_NAME NOT LIKE 'jhi\\_%'
-      -- exclude liquibase tables
-      AND tab.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-      -- exclude views and alike
-      AND TABLE_TYPE LIKE 'BASE TABLE'
-      -- exclude junction tables
-      AND tab.TABLE_NAME NOT IN (
-        SELECT ke.TABLE_NAME
-
-        FROM KEY_COLUMN_USAGE ke
-
-          LEFT JOIN COLUMNS col
-            ON col.TABLE_NAME = ke.TABLE_NAME
-               AND col.COLUMN_NAME = ke.COLUMN_NAME
-               AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
-
-        WHERE ke.REFERENCED_TABLE_SCHEMA = 'elearning'
-              AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
-              -- exclude liquibase tables
-              AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-              -- it's not a constraint if there are no referenced table
-              AND ke.REFERENCED_TABLE_NAME IS NOT NULL
-              -- only junction tables
-              AND col.COLUMN_KEY = 'PRI'
-
-        -- junction tables appear once per referenced table
-        GROUP BY ke.TABLE_NAME
-        -- only want junction between two tables
-        HAVING COUNT(ke.TABLE_NAME) = 2
-)
-;`;
 
 const expectedColumnsQuery = `
 SELECT
@@ -60,7 +23,7 @@ FROM TABLES tab
            AND col.COLUMN_NAME = ke.COLUMN_NAME
            AND ke.TABLE_SCHEMA = col.TABLE_SCHEMA
 
--- chosen database
+-- chosen schema
 WHERE tab.TABLE_SCHEMA = 'elearning'
       -- exclude JHipster own tables
       AND tab.TABLE_NAME NOT LIKE 'jhi\\_%'
@@ -156,16 +119,6 @@ describe('./lib/mysql/queries.js', function () {
 
     afterEach(function () {
         connection.escape.restore();
-    });
-
-    // -- assert tables === template query
-    it('tables returns expected query with good parameter', function () {
-        const actualTablesQuery = queries.tables('elearning', connection);
-
-        sinon.assert.calledTwice(connection.escape);
-        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
-
-        assert.equal(actualTablesQuery, expectedTablesQuery);
     });
 
     // -- assert columns === template query

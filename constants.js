@@ -1,28 +1,20 @@
 const lodash = require('lodash/object');
 
-const validation = require('./lib/validation');
-const mysql = require('./lib/mysql/index');
 const packageInfo = require('./package.json');
+const validation = require('./lib/validation');
+const db = require('./lib/db-commons');
 
 const toArray = lodash.values;
 const pickProperty = lodash.mapValues;
 
-
-const dbmsList = {
-    mysql: {
-        name: 'mysql',
-        defaultPort: 3306,
-        driver: mysql
-    }
-};
 
 const inquiries = {
     dbms: {
         type: 'list',
         name: 'dbms',
         message: 'DBMS:',
-        choices: toArray(pickProperty(dbmsList, 'name')),
-        default: dbmsList.mysql.name
+        choices: toArray(pickProperty(db.dbmsList, 'name')),
+        default: db.dbmsList.mysql.name
     },
     host: {
         type: 'input',
@@ -37,7 +29,7 @@ const inquiries = {
         message: 'port:',
         validate: validation.validatePort,
         default: (input) => {
-            if (input.dbms) return dbmsList[input.dbms].defaultPort;
+            if (input.dbms) return db.dbmsList[input.dbms].defaultPort;
             return null; // It means we offer no default
         }
     },
@@ -54,7 +46,7 @@ const inquiries = {
     },
     schema: {
         type: 'input',
-        name: 'database',
+        name: 'schema',
         message: 'Database schema to import:'
     }
 };
@@ -64,14 +56,11 @@ const configFile = '.db-config.json';
 const messages = {
     greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
 I need information before importing your db.\n`,
-    connectionSuccess: 'connected to the database',
-    connectionFailure: 'failed to connect to the database',
     noConfig: `${configFile} not found`,
     foundConfig: `${configFile} has been loaded`
 };
 
 module.exports = {
-    dbmsList,
     inquiries,
     messages,
     configFile
