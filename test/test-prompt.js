@@ -20,18 +20,34 @@ describe('prompt', function () {
     describe('askCredentials', function () {
         it('is called with expected arguments', function () {
             // This replaces the function inquirer.prompt with a stub.
-            const stub = sandbox.stub(inquirer, 'prompt');
+            const stub = sandbox.stub(inquirer, 'prompt').resolves({});
 
-            prompt.askCredentials();
+            return prompt.askCredentials({}).then(() => {
+                assert.deepEqual(stub.getCall(0).args[0], [
+                    inquiries.dbms,
+                    inquiries.host,
+                    inquiries.port,
+                    inquiries.user,
+                    inquiries.password,
+                    inquiries.schema
+                ]);
+            });
+        });
 
-            assert.deepEqual(stub.getCall(0).args[0], [
-                inquiries.dbms,
-                inquiries.host,
-                inquiries.port,
-                inquiries.user,
-                inquiries.password,
-                inquiries.schema
-            ]);
+        it('merges prompt answers with received configuration', function () {
+            const dummyAnswer = {
+                dbms: 'dummyDbms'
+            };
+            sandbox.stub(inquirer, 'prompt').resolves(dummyAnswer);
+
+            const dummyConf = {
+                dbms: 'mysql',
+                port: '5432'
+            };
+
+            return prompt.askCredentials(dummyConf).then((credentials) => {
+                assert.deepEqual(credentials, Object.assign(dummyConf, dummyAnswer));
+            });
         });
     });
 

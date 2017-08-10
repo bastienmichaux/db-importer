@@ -61,14 +61,14 @@ const init = () => fse.readJson(cst.configFile)
         return {}; // if an error occurs, loads nothing.
     });
 
-const askCredentials = () => inquirer.prompt([
+const askCredentials = configuration => inquirer.prompt([
     inquiries.dbms,
     inquiries.host,
     inquiries.port,
     inquiries.user,
     inquiries.password,
     inquiries.schema
-]);
+]).then(answers => Object.assign(configuration, answers));
 
 const selectEntities = (session) => {
     const results = session.results;
