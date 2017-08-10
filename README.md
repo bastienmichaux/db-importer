@@ -1,38 +1,69 @@
 # node-db-importer
-
+[![NPM version][npm-image]][npm-url]
+[![David][david-image]][david-url]
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coveralls-image]][coveralls-url]
 
-This module produces JSON files from a database. You can then use these files for other applications like [JHipster](www.jhipster.github.io).
+This module extracts the structure of a database, transforms it into JHipster entities and their dbh counterparts 
+and produces JSON files with it.
+
+These files are meant to be used with [JHipster](www.jhipster.github.io) and / or [db-helper](https://github.com/bastienmichaux/generator-jhipster-db-helper).
 
 **Note:** This module is a prototype, it doesn't do much at the moment. However it is easy to contribute to the project, just keep reading this document.
 
-When completed, this module will :
-
-* Connect to a SQL database
-* Get a description of the database (using `SHOW COLUMNS`, `DESCRIBE`, `EXPLAIN`, etc.)
-* Get a SQL dump of the table entries (if you need it)
-* Convert both to JSON, according to your preferences
+At the moment, this module :
+* supports mysql
+* can extract the table structure and let you select which table you want
 
 ## Install and start
 
-**Use it into your project:** Add this line to your `package.json` dependencies :
+It doesn't integrate with JHipster or DB-Helper yet, so you must use it as a standalone module :
 
-`"node-db-importer":"^0.0.1"`
+`yarn add node-db-importer`
 
-Then run `$ npm install`.
+And you can use it as any other module or run it alone :
 
-For a global installation :
+`$ node node_module/node-db-importer/index`
 
-`$ npm install -g node-db-importer`
+### Prerequisites
 
-Then start the tool with :
+- The database you want to import must be running :
+    - mysql : You need reading access to `information_schema` table
+- Node latest stable release (v6.8 at least). [Upgrade Node](https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version) if necessary.
 
-`$ node index`
+## Usage
 
-### Requisites
+The module will ask you needed information and output the files into two directories : `.jhipster` and `.dbh`.
 
-Node latest stable release (v6.8 at least). [Upgrade Node](https://stackoverflow.com/questions/10075990/upgrading-node-js-to-latest-version) if necessary.
+### credentials
+
+You may answer to the module prompts or provide a configuration file named **.db-config.json**.
+The configuration file must have the following format : 
+```json
+{
+    "dbms": "mysql",
+    "host": "10.10.10.10",
+    "user": "root",
+    "port": "3306",
+    "password": "password",
+    "schema": "databaseIWantToImport"
+}
+```
+All fields from the configuration file will be ran against validation, a warning will be printed if it doesn't pass
+and you'll be offered to give a new value.
+
+**No particular precaution has been taken concerning the password, store it at your own risk.**
+
+### entities
+
+It will classify found tables into four categories :
+1. tables : any table which doesn't fit the following categories, **checked by default**
+1. twoTypeJunction : tables used as a junction table between two other tables,
+you most probably want to let the module to create a many-to-many relationship with it.
+1. jhipster: jhipster own tables, depending the customisation of your project you want them or not.
+1. liquibase: liquibase tables, you most probably don't want anything to do with it.
+
+The tables you check will be used to create entities and won't be available to create many-to-many relationships. 
 
 ## Contributing
 
@@ -40,31 +71,18 @@ Check our [doc](doc) for more info.
 
 **Workflow**: Your contributions are welcome. Create a Github issue to discuss enhancements, new features, etc. Please make pull requests to the `dev` branch.
 
-**Testing**: All tests must pass. We use **Mocha** and **Istanbul** for unit testing, and **Travis** for integration testing.
+**Testing**: All tests must pass. We use **Mocha** and **Istanbul (nyc)** for unit testing, and **Travis** for integration testing.
 
 `$ npm test`
 
-**Linting**: Linting enforces code conventions. We use **eslint** with the AirBnB ruleset + custom rules. Before making a pull request, please lint your branch with :
-
-```bash
-# lint a file
-$ eslint myfile
-
-# lint all files (when you're in the module's root)
-$ eslint .
-```
-
-If you need it, you can tell eslint to [ignore some rules](http://eslint.org/docs/user-guide/configuring#disabling-rules-with-inline-comments).
-
-## Help
-
-**MySQL :** if you have trouble connecting to a local MySQL database, try leaving the 'Host address' field blank.
+**Linting**: Linting enforces code conventions. We use **eslint** with the AirBnB ruleset extended with custom rules.
+Travis tests linting and will fail the build with there is any linting error (warning are accepted).
 
 ## Contact
 
-Create a github issue to discuss the module.
+You are welcome to discuss the module in [db-helper's gitter](https://gitter.im/generator-jhipster-db-helper/Lobby).requiredrequiredrequired
 
-For private messages : bmichaux@altissia.org
+For private messages : bmichaux@altissia.com
 
 ## License
 
@@ -74,6 +92,10 @@ For private messages : bmichaux@altissia.org
 
 [fhemberger](https://github.com/fhemberger), [Joshua Austill](https://jlaustill.github.io), [Notso](https://gitter.im/notsonotso), [WORMSS](http://wormss.net)
 
+[npm-image]: https://img.shields.io/npm/v/node-db-importer.svg
+[npm-url]: https://www.npmjs.com/package/node-db-importer
+[david-image]: https://david-dm.org/bastienmichaux/db-importer.svg?theme=shields.io
+[david-url]: https://david-dm.org/bastienmichaux/db-importer
 [travis-image]: https://travis-ci.org/bastienmichaux/db-importer.svg?branch=master
 [travis-url]: https://travis-ci.org/bastienmichaux/db-importer
 [coveralls-image]: https://coveralls.io/repos/github/bastienmichaux/db-importer/badge.svg?branch=master
