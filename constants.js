@@ -48,6 +48,12 @@ const inquiries = {
         type: 'input',
         name: 'schema',
         message: 'Database schema to import:'
+    },
+    entities: {
+        type: 'checkbox',
+        name: 'entities',
+        message: 'What tables do you want to translate into entities:',
+        pageSize: 25
     }
 };
 
@@ -60,8 +66,16 @@ I need information before importing your db.\n`,
     foundConfig: `${configFile} has been loaded`
 };
 
+const headers = {
+    tables: '--- tables ---',
+    twoTypeJunction: '--- two tables junctions ---',
+    jhipster: '--- JHipster tables ---',
+    liquibase: '--- Liquibase tables ---'
+};
+
 module.exports = {
     inquiries,
+    configFile,
     messages,
-    configFile
+    headers
 };

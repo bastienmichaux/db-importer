@@ -7,6 +7,14 @@ const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
+const checkChoice = value => ({
+    value,
+    checked: true
+});
+const uncheckChoice = value => ({
+    value,
+    checked: false
+});
 
 /**
  * create configuration with configuration file's values if present
@@ -53,16 +61,45 @@ const init = () => fse.readJson(cst.configFile)
         return {}; // if an error occurs, loads nothing.
     });
 
-const askCredentials = () => inquirer.prompt([
+const askCredentials = configuration => inquirer.prompt([
     inquiries.dbms,
     inquiries.host,
     inquiries.port,
     inquiries.user,
     inquiries.password,
     inquiries.schema
-]);
+]).then(answers => Object.assign(configuration, answers));
+
+const selectEntities = (session) => {
+    const results = session.results;
+
+    const enquiry = lodash.clone(cst.inquiries.entities);
+    let choices = [];
+
+    const tables = results.tables.map(checkChoice);
+    const twoTypeJunction = results.twoTypeJunction.map(uncheckChoice);
+    const jhipster = results.jhipster.map(uncheckChoice);
+    const liquibase = results.liquibase.map(uncheckChoice);
+
+    choices.push(new inquirer.Separator(cst.headers.tables));
+    choices = choices.concat(tables);
+
+    choices.push(new inquirer.Separator(cst.headers.twoTypeJunction));
+    choices = choices.concat(twoTypeJunction);
+
+    choices.push(new inquirer.Separator(cst.headers.jhipster));
+    choices = choices.concat(jhipster);
+
+    choices.push(new inquirer.Separator(cst.headers.liquibase));
+    choices = choices.concat(liquibase);
+
+    enquiry.choices = choices;
+
+    return inquirer.prompt(enquiry).then(answers => Object.assign(session, answers));
+};
 
 module.exports = {
     init,
-    askCredentials
+    askCredentials,
+    selectEntities
 };

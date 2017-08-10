@@ -9,11 +9,10 @@ const msg = cst.messages;
 log.emphasize(msg.greeting);
 
 prompt.init()
-    .then(config => prompt.askCredentials()
-        .then(answers => Object.assign(config, answers))
-    )
+    .then(prompt.askCredentials)
     .then(db.connect)
     .then(db.entityCandidates)
+    .then(prompt.selectEntities)
     .then(db.close, (error) => {
         console.log(error);
         return prompt.askCredentials().then(db.connect).then(db.close);
