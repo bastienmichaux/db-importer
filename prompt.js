@@ -73,8 +73,8 @@ const askCredentials = () => inquirer.prompt([
 const selectEntities = (session) => {
     const results = session.results;
 
+    const enquiry = lodash.clone(cst.inquiries.entities);
     let choices = [];
-
 
     const tables = results.tables.map(checkChoice);
     const twoTypeJunction = results.twoTypeJunction.map(uncheckChoice);
@@ -93,9 +93,9 @@ const selectEntities = (session) => {
     choices.push(new inquirer.Separator(cst.headers.liquibase));
     choices = choices.concat(liquibase);
 
-    inquiries.entities.choices = choices;
+    enquiry.choices = choices;
 
-    return inquirer.prompt(inquiries.entities).then(answers => Object.assign(session, answers));
+    return inquirer.prompt(enquiry).then(answers => Object.assign(session, answers));
 };
 
 module.exports = {

@@ -131,4 +131,59 @@ describe('prompt', function () {
             });
         });
     });
+
+    describe('selectEntities', function () {
+        let promptStub;
+
+        beforeEach(function () {
+            promptStub = sandbox.stub(inquirer, 'prompt');
+        });
+
+        it('forms the enquiry according to the data it receives', function () {
+            const dummyTable = { tables: 'table' };
+            const dummyTwoTypeJunction = { twoType: 'twoType' };
+            const dummyJhipster = { jhi: 'jhi' };
+            const dummyLiquibase = { liqui: 'liqui' };
+
+            const dummySession = {
+                results: {
+                    tables: [dummyTable],
+                    twoTypeJunction: [dummyTwoTypeJunction],
+                    jhipster: [dummyJhipster],
+                    liquibase: [dummyLiquibase],
+                }
+            };
+
+            const dummySeparatorTable = { tables: 'separator-tables' };
+            const dummySeparatorTwoTypeJunction = { twoType: 'separator-twoType' };
+            const dummySeparatorJhipster = { jhi: 'separator-jhi' };
+            const dummySeparatorLiquibase = { liqui: 'separator-liqui' };
+
+            const dummyChoices = [
+                dummySeparatorTable,
+                { value: dummyTable, checked: true },
+                dummySeparatorTwoTypeJunction,
+                { value: dummyTwoTypeJunction, checked: false },
+                dummySeparatorJhipster,
+                { value: dummyJhipster, checked: false },
+                dummySeparatorLiquibase,
+                { value: dummyLiquibase, checked: false }
+            ];
+
+            const dummyEnquiry = lodash.clone(cst.inquiries.entities);
+            dummyEnquiry.choices = dummyChoices;
+
+            const separatorStub = sandbox.stub(inquirer, 'Separator');
+            separatorStub.withArgs(cst.headers.tables).returns(dummySeparatorTable);
+            separatorStub.withArgs(cst.headers.twoTypeJunction).returns(dummySeparatorTwoTypeJunction);
+            separatorStub.withArgs(cst.headers.jhipster).returns(dummySeparatorJhipster);
+            separatorStub.withArgs(cst.headers.liquibase).returns(dummySeparatorLiquibase);
+
+            promptStub.resolves();
+
+            return prompt.selectEntities(dummySession).then(() => {
+                assert.deepEqual(promptStub.firstCall.args[0], dummyEnquiry);
+            });
+        });
+    });
 });
