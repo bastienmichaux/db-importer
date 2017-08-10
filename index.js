@@ -14,6 +14,7 @@ prompt.init()
     )
     .then(db.connect)
     .then(db.entityCandidates)
+    .then(prompt.selectEntities)
     .then(db.close, (error) => {
         console.log(error);
         return prompt.askCredentials().then(db.connect).then(db.close);

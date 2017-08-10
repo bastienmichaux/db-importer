@@ -7,6 +7,14 @@ const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
+const checkChoice = value => ({
+    value,
+    checked: true
+});
+const uncheckChoice = value => ({
+    value,
+    checked: false
+});
 
 /**
  * create configuration with configuration file's values if present
@@ -62,7 +70,36 @@ const askCredentials = () => inquirer.prompt([
     inquiries.schema
 ]);
 
+const selectEntities = (session) => {
+    const results = session.results;
+
+    let choices = [];
+
+
+    const tables = results.tables.map(checkChoice);
+    const twoTypeJunction = results.twoTypeJunction.map(uncheckChoice);
+    const jhipster = results.jhipster.map(uncheckChoice);
+    const liquibase = results.liquibase.map(uncheckChoice);
+
+    choices.push(new inquirer.Separator(cst.headers.tables));
+    choices = choices.concat(tables);
+
+    choices.push(new inquirer.Separator(cst.headers.twoTypeJunction));
+    choices = choices.concat(twoTypeJunction);
+
+    choices.push(new inquirer.Separator(cst.headers.jhipster));
+    choices = choices.concat(jhipster);
+
+    choices.push(new inquirer.Separator(cst.headers.liquibase));
+    choices = choices.concat(liquibase);
+
+    inquiries.entities.choices = choices;
+
+    return inquirer.prompt(inquiries.entities).then(answers => Object.assign(session, answers));
+};
+
 module.exports = {
     init,
-    askCredentials
+    askCredentials,
+    selectEntities
 };
