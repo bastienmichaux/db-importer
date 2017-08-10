@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const lodash = require('lodash');
 
 const db = require('../lib/db-commons');
-const cst = require('../constants');
+const cst = require('../lib/db-constants');
 const log = require('../lib/log');
 
 const sandbox = sinon.sandbox.create();
@@ -29,11 +29,11 @@ describe('lib/db-commons', function () {
     });
 
     describe('connect', function () {
-        const dbmsNameList = lodash.values(lodash.mapValues(cst.dbmsList, 'name'));
+        const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
         dbmsNameList.forEach((dbmsName) => {
             it(`returns an object containing the corresponding ${dbmsName} driver`, function () {
-                const driver = cst.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
+                const driver = db.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
                 const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
                 promptMock.expects('success').once();
@@ -52,7 +52,7 @@ describe('lib/db-commons', function () {
         });
 
         it('logs a success message and resolves his completed input', function () {
-            const driver = cst.dbmsList[anyDriverName].driver;
+            const driver = db.dbmsList[anyDriverName].driver;
             const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
             promptMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
@@ -65,7 +65,7 @@ describe('lib/db-commons', function () {
         });
 
         it('logs an error message and rejects it', function () {
-            const driver = cst.dbmsList[anyDriverName].driver;
+            const driver = db.dbmsList[anyDriverName].driver;
             const driverMock = sandbox.mock(driver).expects('connect').once().rejects();
             promptMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
 
