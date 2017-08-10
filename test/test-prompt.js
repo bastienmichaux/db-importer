@@ -185,5 +185,23 @@ describe('prompt', function () {
                 assert.deepEqual(promptStub.firstCall.args[0], dummyEnquiry);
             });
         });
+
+        it('merges answers from inquirer and received input', function () {
+            const dummyInput = {
+                results: {
+                    tables: ['tables'],
+                    twoTypeJunction: ['twoTypeJunction'],
+                    jhipster: ['jhipster'],
+                    liquibase: ['liquibase']
+                }
+            };
+            const dummyAnswer = { answer: 'answer' };
+
+            promptStub.resolves(dummyAnswer);
+
+            return prompt.selectEntities(dummyInput).then((result) => {
+                assert.deepEqual(result, Object.assign(dummyInput, dummyAnswer));
+            });
+        });
     });
 });
