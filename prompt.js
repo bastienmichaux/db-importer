@@ -1,3 +1,7 @@
+/**
+ * @file Command-line interface functions
+ */
+
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 const lodash = require('lodash');
@@ -7,20 +11,31 @@ const cst = require('./constants');
 
 const inquiries = cst.inquiries;
 
+
+/**
+ * Make a value checked for display of the retrieved tables
+ */
 const checkChoice = value => ({
     value,
     checked: true
 });
+
+/**
+ * Make a value unchecked for display of the retrieved tables
+ */
 const uncheckChoice = value => ({
     value,
     checked: false
 });
 
+
 /**
- * create configuration with configuration file's values if present
- * make related prompts to be skipped
+ * Read the configuration file (.db-config.json) if it exists
+ * then extract a configuration from its values.
+ * The returned configuration is used to skip the specified questions.
  *
- * @resolves configuration object
+ * @returns {Object} Either the config object in case of success
+ * or a null object in case of error
  */
 const init = () => fse.readJson(cst.configFile)
     .then((config) => {
@@ -28,9 +43,9 @@ const init = () => fse.readJson(cst.configFile)
         lodash.forEach(config, (value, key) => {
             if (inquiries[key]) {
                 /**
-                 * validate returns true or the error message and a non empty string is considered truthy
-                 * I am so sorry, I have no other choice than to compare to true
-                 * warn user if the item is invalid, disable prompt if it isn't
+                 * .validate method returns either true or a string as error message.
+                 * A non empty string is considered truthy so we compare to true.
+                 * Warn user if the item is invalid, disable prompt if it isn't
                  */
                 if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
                     log.warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
@@ -52,15 +67,24 @@ const init = () => fse.readJson(cst.configFile)
         log.info(`${cst.configFile} has been loaded`);
         return config;
     })
+    // in case of error reading the JSON file
     .catch((error) => {
         if (error.errno === -2) {
             log.info(cst.messages.noConfig);
         } else {
             log.failure(error);
         }
-        return {}; // if an error occurs, loads nothing.
+        // if an error occurs, load nothing
+        return {};
     });
 
+
+/**
+ * Prompt steps when interacting with the user
+ * Returns the user answers
+ *
+ * @param {Object} configuration
+ */
 const askCredentials = configuration => inquirer.prompt([
     inquiries.dbms,
     inquiries.host,
@@ -70,6 +94,14 @@ const askCredentials = configuration => inquirer.prompt([
     inquiries.schema
 ]).then(answers => Object.assign(configuration, answers));
 
+
+/**
+ * Return the list of tables the user can select for conversion to JSON entities
+ *
+ * @param {object} session - data retrieved during a MySQL session
+ * @returns the list of tables, separated by categories
+ * (tables, twoTypeJunction, jhipster, liquibase)
+ */
 const selectEntities = (session) => {
     const results = session.results;
 
@@ -97,6 +129,7 @@ const selectEntities = (session) => {
 
     return inquirer.prompt(enquiry).then(answers => Object.assign(session, answers));
 };
+
 
 module.exports = {
     init,
