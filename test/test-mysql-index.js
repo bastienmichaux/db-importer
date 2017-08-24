@@ -1,3 +1,7 @@
+/**
+ * @file Unit test for lib/mysql/index.js
+ */
+
 const assert = require('assert');
 const sinon = require('sinon');
 const mysql = require('mysql');

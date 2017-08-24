@@ -1,3 +1,7 @@
+/**
+ * @file Unit test for lib/validation.js
+ */
+
 const assert = require('assert');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
