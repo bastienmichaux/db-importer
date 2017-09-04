@@ -1,3 +1,7 @@
+/**
+ * @file Unit test for constants.js
+ */
+
 const assert = require('assert');
 const toArray = require('lodash').values;
 

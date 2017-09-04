@@ -13,6 +13,9 @@
     "url": "git+https://github.com/bastienmichaux/node-db-importer.git"
   },
   "author": "Bastien Michaux <bastienmichaux@gmail.com>",
+  "contributors": [
+    "Adrien Horgnies <adrien.pierre.horgnies@gmail.com>"
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/bastienmichaux/node-db-importer/issues"

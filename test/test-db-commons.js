@@ -1,3 +1,7 @@
+/**
+ * @file Unit test for lib/db-commons.js
+ */
+
 const assert = require('assert');
 const sinon = require('sinon');
 const lodash = require('lodash');
