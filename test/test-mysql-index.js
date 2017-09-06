@@ -6,8 +6,9 @@ const assert = require('assert');
 const sinon = require('sinon');
 const mysql = require('mysql');
 
-const index = require('../lib/mysql/index');
 const cst = require('../lib/mysql/constants');
+const index = require('../lib/mysql/index');
+const queries = require('../lib/mysql/queries.json');
 
 const sandbox = sinon.sandbox.create();
 
@@ -191,10 +192,10 @@ describe('lib/mysql/index', function () {
                 tables: [dummyLiquibase[0][cst.fields.tableName]]
             };
 
-            queryStub.withArgs(cst.queries.jhipster).callsArgWith(2, null, dummyJhipster);
-            queryStub.withArgs(cst.queries.liquibase).callsArgWith(2, null, dummyLiquibase);
-            queryStub.withArgs(cst.queries.twoTypeJunction).callsArgWith(2, null, dummyTwoTypeJunction);
-            queryStub.withArgs(cst.queries.tables).callsArgWith(2, null, dummyTables);
+            queryStub.withArgs(queries.jhipster).callsArgWith(2, null, dummyJhipster);
+            queryStub.withArgs(queries.liquibase).callsArgWith(2, null, dummyLiquibase);
+            queryStub.withArgs(queries.twoTypeJunction).callsArgWith(2, null, dummyTwoTypeJunction);
+            queryStub.withArgs(queries.tables).callsArgWith(2, null, dummyTables);
 
             return index.entityCandidates(dummySession).then(() => {
                 // checking the value
