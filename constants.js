@@ -11,6 +11,19 @@ const db = require('./lib/db-commons');
 const toArray = lodash.values;
 const pickProperty = lodash.mapValues;
 
+/**
+ * Get the default port number of the DBMS selected by the user
+ *
+ * @param {object} input - The current user input
+ * @returns {number|null} Either the port number of the selected DBMS, or null if there is no DBMS
+ */
+const defaultPort = (input) => {
+    if (input.dbms) {
+        return db.dbmsList[input.dbms].defaultPort;
+    }
+    // If no DBMS is used, we offer no default port number
+    return null;
+};
 
 /**
  * Question objects required by the inquirer node module for user interaction.
@@ -32,22 +45,16 @@ const inquiries = {
         type: 'input',
         name: 'host',
         message: 'Host address:',
-        validate: validation.validateHost,
+        validate: input => validation.validateHost(input),
         default: 'localhost',
     },
     // ask the port and validate it
     port: {
         type: 'input',
         name: 'port',
-        message: 'port:',
-        validate: validation.validatePort,
-        default: (input) => {
-            if (input.dbms) {
-                return db.dbmsList[input.dbms].defaultPort;
-            }
-            // It means we offer no default
-            return null;
-        }
+        message: 'Port number:',
+        validate: input => validation.validatePort(input),
+        default: input => defaultPort(input)
     },
     // ask the username for the selected DBMS server
     user: {
