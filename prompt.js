@@ -30,7 +30,7 @@ const uncheckChoice = value => ({
 
 
 /**
- * Read the configuration file (.db-config.json) if it exists
+ * Read the configuration file if it exists
  * then extract a configuration from its values.
  * The returned configuration is used to skip the specified questions.
  *
