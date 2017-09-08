@@ -42,14 +42,13 @@ const init = () => fse.readJson(cst.configFile)
         // disable prompts for items specified by the configuration file
         lodash.forEach(config, (value, key) => {
             if (inquiries[key]) {
-                /**
-                 * .validate method returns either true or a string as error message.
-                 * A non empty string is considered truthy so we compare to true.
-                 * Warn user if the item is invalid, disable prompt if it isn't
-                 */
+                // .validate method returns either true or a string as error message
+                // a non empty string is considered truthy so we compare to true
                 if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
+                    // warn user if the item is invalid
                     log.warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
                 } else {
+                    // disable prompt if it isn't
                     inquiries[key].when = false;
                 }
             } else {
@@ -58,9 +57,7 @@ const init = () => fse.readJson(cst.configFile)
         });
         lodash.forEach(inquiries, (prompt) => {
             if (typeof (prompt.default) === 'function') {
-                /**
-                 * inquirer won't have access to the configuration file, we must thus manually run the default functions
-                 */
+                // inquirer won't have access to the configuration file, we must thus manually run the default functions
                 prompt.default = prompt.default(config) || prompt.default;
             }
         });
