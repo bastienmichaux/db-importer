@@ -35,7 +35,10 @@ prompt.init()
     .then(session => prompt.selectEntities(session))
     .catch(err => db.sessionErrorHandler(err, 'prompt.entityCandidates'))
 
-    // close the connection
-    .then(session => db.close(session))
-    .catch(err => db.sessionErrorHandler(err, 'prompt.selectEntities'));
+    // create JSON files for the selected entities
+    .then(session => db.createEntities(session))
+    .catch(err => db.sessionErrorHandler(err, 'prompt.selectEntities'))
 
+    // close the connection, in case of error try again
+    .then(session => db.close(session))
+    .catch(err => db.sessionErrorHandler(err, 'prompt.createEntities'));
