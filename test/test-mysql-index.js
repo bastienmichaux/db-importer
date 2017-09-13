@@ -8,7 +8,7 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
-const queries = require('../lib/mysql/queries.json');
+const queries = require('../lib/mysql/queries.js');
 
 const sandbox = sinon.sandbox.create();
 

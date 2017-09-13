@@ -3,44 +3,23 @@
  */
 
 const assert = require('assert');
-const sinon = require('sinon');
-const sqlstring = require('sqlstring');
+const mysql = require('mysql');
 
 const queries = require('../lib/mysql/queries');
 
+const liquibaseQuery = `SELECT tab.TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES tab
+WHERE TABLE_SCHEMA = 'dummy_schema'
+AND tab.TABLE_NAME IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK');`;
 
-const expectedColumnsQuery = `
-SELECT
-    tab.TABLE_NAME,
-    col.COLUMN_NAME,
-    col.DATA_TYPE
 
-FROM TABLES tab
+const jhipsterQuery = `SELECT tab.TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES tab
+WHERE TABLE_SCHEMA = 'dummy_schema'
+AND tab.TABLE_NAME LIKE 'jhi\\_%';`;
 
-    LEFT JOIN COLUMNS col
-        ON col.TABLE_NAME = tab.TABLE_NAME
-           AND col.TABLE_SCHEMA = tab.TABLE_SCHEMA
 
-    -- help to know which column correspond to a constraint (and exclude it)
-    LEFT JOIN KEY_COLUMN_USAGE ke
-        ON col.TABLE_NAME = ke.TABLE_NAME
-           AND col.COLUMN_NAME = ke.COLUMN_NAME
-           AND ke.TABLE_SCHEMA = col.TABLE_SCHEMA
-
--- chosen schema
-WHERE tab.TABLE_SCHEMA = 'elearning'
-      -- exclude JHipster own tables
-      AND tab.TABLE_NAME NOT LIKE 'jhi\\_%'
-      -- exclude liquibase tables
-      AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-      -- exclude views and alike
-      AND TABLE_TYPE LIKE 'BASE TABLE'
-      -- exclude foreign keys, this automatically exclude junction tables
-      AND ke.REFERENCED_TABLE_NAME IS NULL
-;`;
-
-const expectedManyToManyQuery = `
-SELECT
+const manyToManyQuery = `SELECT
     ke.TABLE_NAME AS 'JUNCTION_TABLE',
     GROUP_CONCAT(ke.COLUMN_NAME ORDER BY ke.REFERENCED_TABLE_NAME ASC) AS 'FOREIGN_KEYS',
     GROUP_CONCAT(ke.REFERENCED_TABLE_NAME ORDER BY ke.REFERENCED_TABLE_NAME ASC) AS 'REFERENCED_TABLES'
@@ -51,23 +30,22 @@ FROM KEY_COLUMN_USAGE ke
            AND col.COLUMN_NAME = ke.COLUMN_NAME
            AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
 
-WHERE ke.REFERENCED_TABLE_SCHEMA = 'elearning'
-      -- exclude JHipster Tables
-      AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
-      -- exclude liquibase tables
-      AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-      -- only relationship constraints, this excludes indexes and alike
-      AND ke.REFERENCED_TABLE_NAME IS NOT NULL
-      -- only many-to-many relationships
-      AND col.COLUMN_KEY = 'PRI'
+WHERE ke.REFERENCED_TABLE_SCHEMA = 'dummy_schema'
+    /* exclude JHipster Tables */
+    AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
+    /* exclude liquibase tables */
+    AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
+    /* only relationship constraints, this excludes indexes and alike */
+    AND ke.REFERENCED_TABLE_NAME IS NOT NULL
+    /* only many-to-many relationships */
+    AND col.COLUMN_KEY = 'PRI'
 
--- ensure we only get junction tables between two tables.
+/* ensure we only get junction tables between two tables. */
 GROUP BY ke.TABLE_NAME
-HAVING COUNT(ke.TABLE_NAME) = 2
-;`;
+HAVING COUNT(ke.TABLE_NAME) = 2;`;
 
-const expectedManyToOneQuery = `
-SELECT
+
+const manyToOneQuery = `SELECT
     ke.TABLE_NAME as 'TABLE_FROM',
     ke.COLUMN_NAME as 'COL_FROM',
     ke.REFERENCED_TABLE_NAME as 'TABLE_TO'
@@ -79,18 +57,17 @@ FROM KEY_COLUMN_USAGE ke
            AND col.COLUMN_NAME = ke.COLUMN_NAME
            AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
 
-WHERE ke.REFERENCED_TABLE_SCHEMA = 'elearning'
-      AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
-      -- exclude liquibase tables
-      AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-      -- only relationship constraints, this excludes indexes and alikes
-      AND ke.REFERENCED_TABLE_NAME IS NOT NULL
-      -- only many-to-many relationships
-      AND col.COLUMN_KEY = 'MUL'
-;`;
+WHERE ke.REFERENCED_TABLE_SCHEMA = 'dummy_schema'
+    AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
+    /* exclude liquibase tables */
+    AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
+    /* only relationship constraints, this excludes indexes and alikes */
+    AND ke.REFERENCED_TABLE_NAME IS NOT NULL
+    /* only many-to-many relationships */
+    AND col.COLUMN_KEY = 'MUL';`;
 
-const expectedOneToOneQuery = `
-SELECT
+
+const oneToOneQuery = `SELECT
   ke.TABLE_NAME as 'TABLE_FROM',
   ke.COLUMN_NAME as 'COL_FROM',
   ke.REFERENCED_TABLE_NAME as 'TABLE_TO'
@@ -102,66 +79,134 @@ FROM KEY_COLUMN_USAGE ke
        AND col.COLUMN_NAME = ke.COLUMN_NAME
        AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
 
-WHERE ke.REFERENCED_TABLE_SCHEMA = 'elearning'
-      AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
-      -- exclude liquibase tables
-      AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
-      -- only relationship constraints, this excludes indexes and alikes
-      AND ke.REFERENCED_TABLE_NAME IS NOT NULL
-      -- only many-to-many relationships
-      AND col.COLUMN_KEY = 'UNI'
+WHERE ke.REFERENCED_TABLE_SCHEMA = 'dummy_schema'
+    AND ke.TABLE_NAME NOT LIKE 'jhi\\_%'
+    /* exclude liquibase tables */
+    AND ke.TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK')
+    /* only relationship constraints, this excludes indexes and alikes */
+    AND ke.REFERENCED_TABLE_NAME IS NOT NULL
+    /* only many-to-many relationships */
+    AND col.COLUMN_KEY = 'UNI';`;
+
+
+const columnsQuery = `SELECT table_schema, table_name, column_name, ordinal_position, column_default, is_nullable, data_type, character_maximum_length, character_octet_length, numeric_precision, numeric_scale, datetime_precision
+FROM information_schema.columns
+WHERE table_schema LIKE 'dummy_schema'
+AND table_name IN ('table_1', 'table_2', 'last_table');`;
+
+const columnsQueryWhenNoTables = `SELECT table_schema, table_name, column_name, ordinal_position, column_default, is_nullable, data_type, character_maximum_length, character_octet_length, numeric_precision, numeric_scale, datetime_precision
+FROM information_schema.columns
+WHERE table_schema LIKE 'dummy_schema'
 ;`;
 
+
+const twoTypeJunctionQueryWithoutFilter = `SELECT ke.TABLE_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE ke
+LEFT JOIN COLUMNS col ON col.TABLE_NAME = ke.TABLE_NAME AND col.COLUMN_NAME = ke.COLUMN_NAME AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
+WHERE ke.REFERENCED_TABLE_SCHEMA = 'dummy_schema'
+/* it's not a constraint if there are no referenced table */
+AND ke.REFERENCED_TABLE_NAME IS NOT NULL
+/* only junction tables */
+AND col.COLUMN_KEY = 'PRI'
+
+/* junction tables appear once per referenced table */
+GROUP BY ke.TABLE_NAME
+/* only want junction between two tables */
+HAVING COUNT(ke.TABLE_NAME) = 2;`;
+
+const twoTypeJunctionQueryWithFilter = `SELECT ke.TABLE_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE ke
+LEFT JOIN COLUMNS col ON col.TABLE_NAME = ke.TABLE_NAME AND col.COLUMN_NAME = ke.COLUMN_NAME AND col.TABLE_SCHEMA = ke.TABLE_SCHEMA
+WHERE ke.REFERENCED_TABLE_SCHEMA = 'dummy_schema'
+/* it's not a constraint if there are no referenced table */
+AND ke.REFERENCED_TABLE_NAME IS NOT NULL
+/* only junction tables */
+AND col.COLUMN_KEY = 'PRI'
+AND tab.TABLE_NAME NOT IN ('filtered_table_1', 'filtered_table_2', 'last_filtered_table')
+/* junction tables appear once per referenced table */
+GROUP BY ke.TABLE_NAME
+/* only want junction between two tables */
+HAVING COUNT(ke.TABLE_NAME) = 2;`;
+
+
+const tablesQueryWithFilter = `SELECT tab.TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES tab
+WHERE TABLE_SCHEMA = 'dummy_schema'
+/* exclude views and alike */
+AND TABLE_TYPE LIKE 'BASE TABLE'
+AND tab.TABLE_NAME NOT IN ('filtered_table_1', 'filtered_table_2', 'last_filtered_table');`;
+
+const tablesQueryWithoutFilter = `SELECT tab.TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES tab
+WHERE TABLE_SCHEMA = 'dummy_schema'
+/* exclude views and alike */
+AND TABLE_TYPE LIKE 'BASE TABLE'
+;`;
+
+const dummySchema = mysql.escape('dummy_schema');
+const dummyFilter = mysql.escape(['filtered_table_1', 'filtered_table_2', 'last_filtered_table']);
+const dummyTables = mysql.escape(['table_1', 'table_2', 'last_table']);
+
 describe('./lib/mysql/queries.js', function () {
-    const connection = {
-        escape: sqlstring.escape
-    };
-
-    beforeEach(function () {
-        sinon.spy(connection, 'escape');
+    describe('liquibase query', function () {
+        it('works as intended', function () {
+            assert.strictEqual(liquibaseQuery, queries.liquibase(dummySchema));
+        });
     });
-
-    afterEach(function () {
-        connection.escape.restore();
+    describe('jhipster query', function () {
+        it('works as intended', function () {
+            assert.strictEqual(jhipsterQuery, queries.jhipster(dummySchema));
+        });
     });
-
-    // -- assert columns === template query
-    it('columns returns expected query with good parameter', function () {
-        const actualColumnsQuery = queries.columns('elearning', connection);
-
-        sinon.assert.calledOnce(connection.escape);
-        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
-
-        assert.equal(actualColumnsQuery, expectedColumnsQuery);
+    describe('manyToMany query', function () {
+        it('works as intended', function () {
+            assert.strictEqual(manyToManyQuery, queries.manyToMany(dummySchema));
+        });
     });
-
-    // -- assert many-to-many === template query
-    it('many-to-many returns expected query with good parameter', function () {
-        const actualManyToManyQuery = queries.manyToMany('elearning', connection);
-
-        sinon.assert.calledOnce(connection.escape);
-        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
-
-        assert.equal(actualManyToManyQuery, expectedManyToManyQuery);
+    describe('manyToOne query', function () {
+        it('works as intended', function () {
+            assert.strictEqual(manyToOneQuery, queries.manyToOne(dummySchema));
+        });
     });
-
-    // -- assert many-to-one === template query
-    it('many-to-one returns expected query with good parameter', function () {
-        const actualManyToOneQuery = queries.manyToOne('elearning', connection);
-
-        sinon.assert.calledOnce(connection.escape);
-        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
-
-        assert.equal(actualManyToOneQuery, expectedManyToOneQuery);
+    describe('oneToOne query', function () {
+        it('works as intended', function () {
+            assert.strictEqual(oneToOneQuery, queries.oneToOne(dummySchema));
+        });
     });
-
-    // -- assert one-to-one === template query
-    it('one-to-one returns expected query with good parameter', function () {
-        const actualOneToOneQuery = queries.oneToOne('elearning', connection);
-
-        sinon.assert.calledOnce(connection.escape);
-        sinon.assert.alwaysCalledWith(connection.escape, 'elearning');
-
-        assert.equal(actualOneToOneQuery, expectedOneToOneQuery);
+    describe('columns query', function () {
+        it('works as intended with tables to filter', function () {
+            assert.strictEqual(columnsQuery, queries.columns(dummySchema, dummyTables));
+        });
+        it('works as intended with no tables to filter', function () {
+            assert.strictEqual(columnsQueryWhenNoTables, queries.columns(dummySchema, ''));
+        });
+        it('throws with parameters that aren\'t strings', function () {
+            assert.throws(() => queries.columns(['dummy_schema'], null), TypeError);
+            assert.throws(() => queries.columns(dummySchema, null), TypeError);
+        });
+    });
+    describe('twoTypeJunction query', function () {
+        it('works as intended with tables to filter', function () {
+            assert.strictEqual(twoTypeJunctionQueryWithFilter, queries.twoTypeJunction(dummySchema, dummyFilter));
+        });
+        it('works as intended with no tables to filter', function () {
+            assert.strictEqual(twoTypeJunctionQueryWithoutFilter, queries.twoTypeJunction(dummySchema, ''));
+        });
+        it('throws with parameters that aren\'t strings', function () {
+            assert.throws(() => queries.twoTypeJunction(['dummy_schema'], null), TypeError);
+            assert.throws(() => queries.twoTypeJunction(dummySchema, null), TypeError);
+        });
+    });
+    describe('tables query', function () {
+        it('works as intended with tables to filter', function () {
+            assert.strictEqual(tablesQueryWithFilter, queries.tables(dummySchema, dummyFilter));
+        });
+        it('works as intended with no tables to filter', function () {
+            assert.strictEqual(tablesQueryWithoutFilter, queries.tables(dummySchema, ''));
+        });
+        it('throws with parameters that aren\'t strings', function () {
+            assert.throws(() => queries.tables(['dummy_schema'], null), TypeError);
+            assert.throws(() => queries.tables(dummySchema, null), TypeError);
+        });
     });
 });
