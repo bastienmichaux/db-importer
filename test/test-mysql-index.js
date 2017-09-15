@@ -154,13 +154,13 @@ describe('lib/mysql/index', function () {
                     query: queryStub.resolves()
                 },
                 results: {},
-                schema: {}
+                schema: 'dummySchema'
             };
         });
 
         it('rejects with connection.query error', function () {
             const dummyError = {};
-            queryStub.callsArgWith(2, dummyError);
+            queryStub.callsArgWith(1, dummyError);
 
             return index.entityCandidates(dummySession).then(() => {
                 assert.fail('promise should be rejected');
@@ -192,10 +192,10 @@ describe('lib/mysql/index', function () {
                 tables: [dummyLiquibase[0][cst.fields.tableName]]
             };
 
-            queryStub.withArgs(queries.jhipster).callsArgWith(2, null, dummyJhipster);
-            queryStub.withArgs(queries.liquibase).callsArgWith(2, null, dummyLiquibase);
-            queryStub.withArgs(queries.twoTypeJunction).callsArgWith(2, null, dummyTwoTypeJunction);
-            queryStub.withArgs(queries.tables).callsArgWith(2, null, dummyTables);
+            queryStub.onCall(0).callsArgWith(1, null, dummyJhipster);
+            queryStub.onCall(1).callsArgWith(1, null, dummyLiquibase);
+            queryStub.onCall(2).callsArgWith(1, null, dummyTwoTypeJunction);
+            queryStub.onCall(3).callsArgWith(1, null, dummyTables);
 
             return index.entityCandidates(dummySession).then(() => {
                 // checking the value
