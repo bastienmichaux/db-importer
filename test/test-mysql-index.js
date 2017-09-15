@@ -209,5 +209,41 @@ describe('lib/mysql/index', function () {
             });
         });
     });
+
+    describe('createEntities', function () {
+        let dummySession;
+        let queryStub;
+
+        beforeEach(function () {
+            queryStub = sandbox.stub();
+            dummySession = {
+                connection: {
+                    query: queryStub.resolves()
+                },
+                results: {},
+                schema: 'dummySchema',
+                entities: ['foo', 'bar']
+            };
+        });
+
+        it('works as intended', function () {
+            queryStub.onCall(0).callsArgWith(1, null, '');
+            return index.createEntities(dummySession)
+                .then((resolvedValue) => {
+                    assert.deepStrictEqual(dummySession, resolvedValue);
+                });
+        });
+
+        it('rejects an error when it should reject an error (kind of)', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(1, dummyError);
+
+            return index.createEntities(dummySession).then(() => {
+                assert.fail('promise should be rejected');
+            }, (error) => {
+                assert.equal(error, dummyError);
+            });
+        });
+    });
 });
 
