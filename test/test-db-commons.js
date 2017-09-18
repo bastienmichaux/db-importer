@@ -32,6 +32,56 @@ describe('lib/db-commons', function () {
         sandbox.restore();
     });
 
+    describe('sessionErrorHandler', function () {
+        let logMock = null;
+
+        beforeEach(function () {
+            logMock = sandbox.mock(log);
+        });
+
+        afterEach(function () {
+            logMock.verify();
+            logMock.restore();
+        });
+
+        it('works', function () {
+            logMock.expects('failure').once();
+            logMock.expects('info').once();
+            return db.sessionErrorHandler(Error);
+        });
+
+        it('works with a given cause', function () {
+            logMock.expects('failure').once();
+            return db.sessionErrorHandler(Error, 'dummy cause');
+        });
+    });
+
+    describe('createEntities', function () {
+        let dummySession;
+        let createEntitiesStub;
+
+        beforeEach(function () {
+            createEntitiesStub = sandbox.stub().resolves();
+            dummySession = {
+                connection: {},
+                driver: {
+                    createEntities: createEntitiesStub
+                }
+            };
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(createEntitiesStub);
+        });
+
+        it('ends the session with an undefined value', function () {
+            assert(typeof db.createEntities === 'function');
+            return db.createEntities(dummySession).then((resolvedValue) => {
+                assert.strictEqual(resolvedValue, undefined);
+            });
+        });
+    });
+
     describe('connect', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
@@ -50,7 +100,7 @@ describe('lib/db-commons', function () {
                     driverMock.verify();
                     promptMock.verify();
 
-                    assert.equal(session.driver, driver);
+                    assert.strictEqual(session.driver, driver);
                 });
             });
         });
@@ -64,7 +114,7 @@ describe('lib/db-commons', function () {
                 driverMock.verify();
                 promptMock.verify();
 
-                assert.equal(session, dummySession);
+                assert.strictEqual(session, dummySession);
             });
         });
 
@@ -79,7 +129,7 @@ describe('lib/db-commons', function () {
                 driverMock.verify();
                 promptMock.verify();
 
-                assert.equal(sessionError, cst.messages.connectionFailure);
+                assert.strictEqual(sessionError, cst.messages.connectionFailure);
             });
         });
 
@@ -115,14 +165,14 @@ describe('lib/db-commons', function () {
 
         it('calls the embedded driver close method on the embedded connection', function () {
             return db.close(dummySession).then(() => {
-                assert.equal(closeStub.firstCall.args[0], dummySession.connection);
-                assert.equal(closeStub.firstCall.args[1], dummySession.driver);
+                assert.strictEqual(closeStub.firstCall.args[0], dummySession.connection);
+                assert.strictEqual(closeStub.firstCall.args[1], dummySession.driver);
             });
         });
 
         it('resolves the provided session object', function () {
             return db.close(dummySession).then((session) => {
-                assert.equal(session, dummySession);
+                assert.strictEqual(session, dummySession);
             });
         });
     });
@@ -147,13 +197,13 @@ describe('lib/db-commons', function () {
 
         it('calls the embedded driver entityCandidates method on the provided session', function () {
             return db.entityCandidates(dummySession).then(() => {
-                assert.equal(entityCandidatesStub.firstCall.args[0], dummySession);
+                assert.strictEqual(entityCandidatesStub.firstCall.args[0], dummySession);
             });
         });
 
         it('resolves the provided session object', function () {
             return db.entityCandidates(dummySession).then((session) => {
-                assert.equal(session, dummySession);
+                assert.strictEqual(session, dummySession);
             });
         });
     });
