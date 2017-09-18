@@ -15,7 +15,7 @@
         "indent": [2, 4],
         "linebreak-style": 0,
         "max-len": "off",
-        "no-console": [0],
+        "no-console": 2,
         "no-multi-str": 2,
         "no-irregular-whitespace": 2,
         "no-plusplus": "off",
