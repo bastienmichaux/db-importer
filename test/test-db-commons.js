@@ -41,6 +41,7 @@ describe('lib/db-commons', function () {
 
         afterEach(function () {
             logMock.verify();
+            logMock.restore();
         });
 
         it('works', function () {
@@ -51,10 +52,36 @@ describe('lib/db-commons', function () {
 
         it('works with a given cause', function () {
             logMock.expects('failure').once();
-            return db.sessionErrorHandler(Error, 'dummy cause'); // not to be confused with 'the mycose' hahahaha
+            return db.sessionErrorHandler(Error, 'dummy cause');
         });
     });
 
+    describe('createEntities', function () {
+        let dummySession;
+        let createEntitiesStub;
+
+        beforeEach(function () {
+            createEntitiesStub = sandbox.stub().resolves();
+            dummySession = {
+                connection: {},
+                driver: {
+                    createEntities: createEntitiesStub
+                }
+            };
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(createEntitiesStub);
+        });
+
+        it('ends the session with an undefined value', function () {
+            assert(typeof db.createEntities === 'function');
+            return db.createEntities(dummySession).then((resolvedValue) => {
+                assert.strictEqual(resolvedValue, undefined);
+            });
+        });
+    });
+    
     describe('connect', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
