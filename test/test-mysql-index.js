@@ -35,7 +35,7 @@ describe('lib/mysql/index', function () {
         it('returns query as is if there are no provided parameters', function () {
             const escapedQuery = queryFormat(dummyQuery);
 
-            assert.equal(escapedQuery, dummyQuery);
+            assert.strictEqual(escapedQuery, dummyQuery);
         });
 
         it('tries only to escape named parameters', function () {
@@ -57,7 +57,7 @@ describe('lib/mysql/index', function () {
                 password: 5
             });
 
-            assert.equal(escapedQuery, 'SELECT uid FROM Users WHERE name = \'Dupont; \\\'--\' AND password = 5');
+            assert.strictEqual(escapedQuery, 'SELECT uid FROM Users WHERE name = \'Dupont; \\\'--\' AND password = 5');
         });
 
         it('throws an error if a named parameter is not provided', function () {
@@ -88,10 +88,10 @@ describe('lib/mysql/index', function () {
             };
 
             return index.connect(dummyCredentials).then(() => {
-                assert.equal(createConnectionStub.firstCall.args[0].host, dummyCredentials.host);
-                assert.equal(createConnectionStub.firstCall.args[0].port, dummyCredentials.port);
-                assert.equal(createConnectionStub.firstCall.args[0].user, dummyCredentials.user);
-                assert.equal(createConnectionStub.firstCall.args[0].password, dummyCredentials.password);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].host, dummyCredentials.host);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].port, dummyCredentials.port);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].user, dummyCredentials.user);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].password, dummyCredentials.password);
             });
         });
 
@@ -105,7 +105,7 @@ describe('lib/mysql/index', function () {
             return index.connect({}).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
     });
@@ -138,7 +138,7 @@ describe('lib/mysql/index', function () {
             return index.close(dummySession).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
     });
@@ -165,7 +165,7 @@ describe('lib/mysql/index', function () {
             return index.entityCandidates(dummySession).then(() => {
                 assert.fail('promise should be rejected');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
 
@@ -202,10 +202,10 @@ describe('lib/mysql/index', function () {
                 assert.deepEqual(dummySession.results, dummyResults);
 
                 // checking each reference, that is, it uses the exact 'value' it received
-                assert.equal(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
             });
         });
     });
@@ -241,7 +241,7 @@ describe('lib/mysql/index', function () {
             return index.createEntities(dummySession).then(() => {
                 assert.fail('promise should be rejected');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
     });

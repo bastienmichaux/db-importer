@@ -13,7 +13,7 @@ describe('constants', function () {
     describe('inquiries.port.default', function () {
         toArray(db.dbmsList).forEach((dbms) => {
             it(`handles ${dbms.name} correctly`, function () {
-                assert.equal(cst.inquiries.port.default({ dbms: dbms.name }), dbms.defaultPort, 'hint: dbms key inside dbmsList and dbmsList.dbms.name must be the same value');
+                assert.strictEqual(cst.inquiries.port.default({ dbms: dbms.name }), dbms.defaultPort, 'hint: dbms key inside dbmsList and dbmsList.dbms.name must be the same value');
             });
         });
 
@@ -22,7 +22,7 @@ describe('constants', function () {
         });
 
         it('returns null if input doesn\'t provide a dbms', function () {
-            assert.equal(cst.inquiries.port.default({}), null);
+            assert.strictEqual(cst.inquiries.port.default({}), null);
         });
     });
 });
