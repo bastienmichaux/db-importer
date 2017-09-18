@@ -32,6 +32,29 @@ describe('lib/db-commons', function () {
         sandbox.restore();
     });
 
+    describe('sessionErrorHandler', function () {
+        let logMock = null;
+
+        beforeEach(function () {
+            logMock = sandbox.mock(log);
+        });
+
+        afterEach(function () {
+            logMock.verify();
+        });
+
+        it('works', function () {
+            logMock.expects('failure').once();
+            logMock.expects('info').once();
+            return db.sessionErrorHandler(Error);
+        });
+
+        it('works with a given cause', function () {
+            logMock.expects('failure').once();
+            return db.sessionErrorHandler(Error, 'dummy cause'); // not to be confused with 'the mycose' hahahaha
+        });
+    });
+
     describe('connect', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
