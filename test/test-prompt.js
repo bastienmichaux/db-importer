@@ -102,9 +102,9 @@ describe('prompt', function () {
 
             return prompt.init().then((config) => {
                 lodash.forEach(dummyConfig, (value, key) => {
-                    assert.equal(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
+                    assert.strictEqual(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
                 });
-                assert.equal(config, dummyConfig);
+                assert.strictEqual(config, dummyConfig);
             });
         });
 
@@ -144,7 +144,7 @@ describe('prompt', function () {
 
             return prompt.init().then(() => {
                 try {
-                    assert.equal(cst.inquiries.port.default, dummyDefault);
+                    assert.strictEqual(cst.inquiries.port.default, dummyDefault);
                 } finally {
                     cst.inquiries.port.default = backupDefault;
                 }

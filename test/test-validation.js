@@ -38,8 +38,8 @@ describe('validation', function () {
         const emptyInput = '';
         const invalidInput = '256.0.0.1';
 
-        assert.deepEqual(validationMethod(emptyInput), joi.validate(emptyInput, rule).error);
-        assert.deepEqual(validationMethod(invalidInput), joi.validate(invalidInput, rule).error);
+        assert.deepStrictEqual(validationMethod(emptyInput), joi.validate(emptyInput, rule).error);
+        assert.deepStrictEqual(validationMethod(invalidInput), joi.validate(invalidInput, rule).error);
     });
 
     it('calls joi.validate with the provided joi schema and input', function () {
@@ -49,7 +49,7 @@ describe('validation', function () {
 
         validationMethod(anyInput);
 
-        assert.equal(validateSpy.getCall(0).args[0], anyInput);
-        assert.equal(validateSpy.getCall(0).args[1], rule);
+        assert.strictEqual(validateSpy.getCall(0).args[0], anyInput);
+        assert.strictEqual(validateSpy.getCall(0).args[1], rule);
     });
 });
