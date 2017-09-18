@@ -8,7 +8,7 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
-const queries = require('../lib/mysql/queries.json');
+const queries = require('../lib/mysql/queries.js');
 
 const sandbox = sinon.sandbox.create();
 
@@ -35,7 +35,7 @@ describe('lib/mysql/index', function () {
         it('returns query as is if there are no provided parameters', function () {
             const escapedQuery = queryFormat(dummyQuery);
 
-            assert.equal(escapedQuery, dummyQuery);
+            assert.strictEqual(escapedQuery, dummyQuery);
         });
 
         it('tries only to escape named parameters', function () {
@@ -57,7 +57,7 @@ describe('lib/mysql/index', function () {
                 password: 5
             });
 
-            assert.equal(escapedQuery, 'SELECT uid FROM Users WHERE name = \'Dupont; \\\'--\' AND password = 5');
+            assert.strictEqual(escapedQuery, 'SELECT uid FROM Users WHERE name = \'Dupont; \\\'--\' AND password = 5');
         });
 
         it('throws an error if a named parameter is not provided', function () {
@@ -88,10 +88,10 @@ describe('lib/mysql/index', function () {
             };
 
             return index.connect(dummyCredentials).then(() => {
-                assert.equal(createConnectionStub.firstCall.args[0].host, dummyCredentials.host);
-                assert.equal(createConnectionStub.firstCall.args[0].port, dummyCredentials.port);
-                assert.equal(createConnectionStub.firstCall.args[0].user, dummyCredentials.user);
-                assert.equal(createConnectionStub.firstCall.args[0].password, dummyCredentials.password);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].host, dummyCredentials.host);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].port, dummyCredentials.port);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].user, dummyCredentials.user);
+                assert.strictEqual(createConnectionStub.firstCall.args[0].password, dummyCredentials.password);
             });
         });
 
@@ -105,7 +105,7 @@ describe('lib/mysql/index', function () {
             return index.connect({}).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
     });
@@ -138,7 +138,7 @@ describe('lib/mysql/index', function () {
             return index.close(dummySession).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
     });
@@ -154,18 +154,18 @@ describe('lib/mysql/index', function () {
                     query: queryStub.resolves()
                 },
                 results: {},
-                schema: {}
+                schema: 'dummySchema'
             };
         });
 
         it('rejects with connection.query error', function () {
             const dummyError = {};
-            queryStub.callsArgWith(2, dummyError);
+            queryStub.callsArgWith(1, dummyError);
 
             return index.entityCandidates(dummySession).then(() => {
                 assert.fail('promise should be rejected');
             }, (error) => {
-                assert.equal(error, dummyError);
+                assert.strictEqual(error, dummyError);
             });
         });
 
@@ -192,20 +192,56 @@ describe('lib/mysql/index', function () {
                 tables: [dummyLiquibase[0][cst.fields.tableName]]
             };
 
-            queryStub.withArgs(queries.jhipster).callsArgWith(2, null, dummyJhipster);
-            queryStub.withArgs(queries.liquibase).callsArgWith(2, null, dummyLiquibase);
-            queryStub.withArgs(queries.twoTypeJunction).callsArgWith(2, null, dummyTwoTypeJunction);
-            queryStub.withArgs(queries.tables).callsArgWith(2, null, dummyTables);
+            queryStub.onCall(0).callsArgWith(1, null, dummyJhipster);
+            queryStub.onCall(1).callsArgWith(1, null, dummyLiquibase);
+            queryStub.onCall(2).callsArgWith(1, null, dummyTwoTypeJunction);
+            queryStub.onCall(3).callsArgWith(1, null, dummyTables);
 
             return index.entityCandidates(dummySession).then(() => {
                 // checking the value
                 assert.deepEqual(dummySession.results, dummyResults);
 
                 // checking each reference, that is, it uses the exact 'value' it received
-                assert.equal(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
-                assert.equal(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+            });
+        });
+    });
+
+    describe('createEntities', function () {
+        let dummySession;
+        let queryStub;
+
+        beforeEach(function () {
+            queryStub = sandbox.stub();
+            dummySession = {
+                connection: {
+                    query: queryStub.resolves()
+                },
+                results: {},
+                schema: 'dummySchema',
+                entities: ['foo', 'bar']
+            };
+        });
+
+        it('works as intended', function () {
+            queryStub.onCall(0).callsArgWith(1, null, '');
+            return index.createEntities(dummySession)
+                .then((resolvedValue) => {
+                    assert.deepStrictEqual(dummySession, resolvedValue);
+                });
+        });
+
+        it('rejects an error when it should reject an error (kind of)', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(1, dummyError);
+
+            return index.createEntities(dummySession).then(() => {
+                assert.fail('promise should be rejected');
+            }, (error) => {
+                assert.strictEqual(error, dummyError);
             });
         });
     });
