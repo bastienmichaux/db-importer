@@ -29,6 +29,6 @@ prompt.init()
     // @todo convert tables to JSON entities
     // close the connection, in case of error try again
     .then(db.close, (error) => {
-        console.log(error);
+        log.failure(error);
         return prompt.askCredentials().then(db.connect).then(db.close);
     });
