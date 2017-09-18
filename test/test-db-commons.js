@@ -82,6 +82,17 @@ describe('lib/db-commons', function () {
                 assert.equal(sessionError, cst.messages.connectionFailure);
             });
         });
+
+        it('removes the password from the session object', function () {
+            const driver = db.dbmsList[anyDriverName].driver;
+            sandbox.mock(driver).expects('connect').once().resolves();
+
+            dummySession.password = 'verystrongpassword';
+
+            return db.connect(dummySession).then((session) => {
+                assert.strictEqual(session.password, undefined);
+            });
+        });
     });
 
     describe('close', function () {
