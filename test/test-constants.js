@@ -13,12 +13,12 @@ describe('constants', function () {
     describe('inquiries.port.default', function () {
         toArray(db.dbmsList).forEach((dbms) => {
             it(`handles ${dbms.name} correctly`, function () {
-                assert.strictEqual(cst.inquiries.port.default({ dbms: dbms.name }), dbms.defaultPort, 'hint: dbms key inside dbmsList and dbmsList.dbms.name must be the same value');
+                assert.strictEqual(cst.inquiries.port.default({ dbms: dbms.name }), dbms.defaultPort, 'dbmsList property name and the value dbmsList.dbms.name must be equals');
             });
         });
 
         it('throws an error with a bad parameter', function () {
-            assert.throws(() => cst.inquiries.port.default({ dbms: 'definitelyNotADBMS' }), Error);
+            assert.throws(() => cst.inquiries.port.default({ dbms: 'definitelyNotADBMS' }));
         });
 
         it('returns null if input doesn\'t provide a dbms', function () {

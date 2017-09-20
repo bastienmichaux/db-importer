@@ -14,12 +14,13 @@ const sandbox = sinon.sandbox.create();
 
 
 describe('lib/db-commons', function () {
-    let promptMock;
+    let logMock;
     let anyDriverName;
     let dummySession;
+    const dummyError = new Error('Dummy error');
 
     beforeEach(function () {
-        promptMock = sandbox.mock(log);
+        logMock = sandbox.mock(log);
 
         // we don't care which dbms, we're mocking it anyway
         anyDriverName = 'mysql';
@@ -29,30 +30,22 @@ describe('lib/db-commons', function () {
     });
 
     afterEach(function () {
-        sandbox.restore();
+        sandbox.verifyAndRestore();
     });
 
     describe('sessionErrorHandler', function () {
-        let logMock = null;
-
-        beforeEach(function () {
-            logMock = sandbox.mock(log);
-        });
-
-        afterEach(function () {
-            logMock.verify();
-            logMock.restore();
-        });
-
         it('works', function () {
             logMock.expects('failure').once();
             logMock.expects('info').once();
-            return db.sessionErrorHandler(Error);
+
+            return db.sessionErrorHandler(dummyError);
         });
 
         it('works with a given cause', function () {
             logMock.expects('failure').once();
-            return db.sessionErrorHandler(Error, 'dummy cause');
+            logMock.expects('info').twice();
+
+            return db.sessionErrorHandler(dummyError, 'Dummy cause');
         });
     });
 
@@ -90,16 +83,13 @@ describe('lib/db-commons', function () {
                 const driver = db.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
                 const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
-                promptMock.expects('success').once();
+                logMock.expects('success').once();
 
                 const credentials = {
                     dbms: dbmsName
                 };
 
                 return db.connect(credentials).then((session) => {
-                    driverMock.verify();
-                    promptMock.verify();
-
                     assert.strictEqual(session.driver, driver);
                 });
             });
@@ -108,27 +98,21 @@ describe('lib/db-commons', function () {
         it('logs a success message and resolves his completed input', function () {
             const driver = db.dbmsList[anyDriverName].driver;
             const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
-            promptMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
+            logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             return db.connect(dummySession).then((session) => {
-                driverMock.verify();
-                promptMock.verify();
-
                 assert.strictEqual(session, dummySession);
             });
         });
 
         it('logs an error message and rejects it', function () {
             const driver = db.dbmsList[anyDriverName].driver;
-            const driverMock = sandbox.mock(driver).expects('connect').once().rejects();
-            promptMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
+            sandbox.mock(driver).expects('connect').once().rejects();
+            logMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
 
             return db.connect(dummySession).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (sessionError) => {
-                driverMock.verify();
-                promptMock.verify();
-
                 assert.strictEqual(sessionError, cst.messages.connectionFailure);
             });
         });
@@ -136,6 +120,7 @@ describe('lib/db-commons', function () {
         it('removes the password from the session object', function () {
             const driver = db.dbmsList[anyDriverName].driver;
             sandbox.mock(driver).expects('connect').once().resolves();
+            logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             dummySession.password = 'verystrongpassword';
 

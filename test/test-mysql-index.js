@@ -14,55 +14,7 @@ const sandbox = sinon.sandbox.create();
 
 describe('lib/mysql/index', function () {
     afterEach(function () {
-        sandbox.restore();
-    });
-
-    describe('queryFormat', function () {
-        let queryFormat;
-        let dummyQuery;
-
-        before(function () {
-            const createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
-                //
-                connect: (errorHandlingCallback) => {}
-            });
-            index.connect({});
-            queryFormat = createConnectionStub.firstCall.args[0].queryFormat;
-
-            dummyQuery = 'SELECT uid FROM Users WHERE name = :name AND password = :password';
-        });
-
-        it('returns query as is if there are no provided parameters', function () {
-            const escapedQuery = queryFormat(dummyQuery);
-
-            assert.strictEqual(escapedQuery, dummyQuery);
-        });
-
-        it('tries only to escape named parameters', function () {
-            const escapeSpy = sandbox.spy(mysql, 'escape');
-
-            queryFormat(dummyQuery, {
-                name: '0',
-                password: '1'
-            });
-
-            assert.equal(escapeSpy.callCount, 2, 'callCount');
-            assert.equal(escapeSpy.args[0], 0);
-            assert.equal(escapeSpy.args[1], 1);
-        });
-
-        it('replaces parameters by their escaped value', function () {
-            const escapedQuery = queryFormat(dummyQuery, {
-                name: 'Dupont; \'--',
-                password: 5
-            });
-
-            assert.strictEqual(escapedQuery, 'SELECT uid FROM Users WHERE name = \'Dupont; \\\'--\' AND password = 5');
-        });
-
-        it('throws an error if a named parameter is not provided', function () {
-            assert.throws(() => queryFormat(dummyQuery, {}));
-        });
+        sandbox.verifyAndRestore();
     });
 
     describe('connect', function () {

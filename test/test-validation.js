@@ -16,7 +16,7 @@ describe('validation', function () {
     afterEach(function () {
         // I restore original functions after each test
         // I must do so mocks from previous tests don't interfere with following tests
-        sandbox.restore();
+        sandbox.verifyAndRestore();
     });
 
     const rule = joi
