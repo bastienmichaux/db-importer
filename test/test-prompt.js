@@ -93,7 +93,7 @@ describe('prompt', function () {
                 schema: 'schema'
             };
             fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once().withArgs(cst.messages.foundConfig);
+            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
 
             return prompt.loadConfigurationFile().then((config) => {
                 lodash.forEach(dummyConfig, (value, key) => {

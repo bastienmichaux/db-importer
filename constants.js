@@ -96,7 +96,7 @@ const messages = {
     greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
 I need information before importing your db.\n`,
     noConfig: `${configFile} not found`,
-    foundConfig: `${configFile} has been loaded`
+    loadingConfig: `loading ${configFile}`
 };
 
 

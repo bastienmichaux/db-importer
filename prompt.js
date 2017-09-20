@@ -4,7 +4,6 @@
 
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
-const lodash = require('lodash');
 
 const log = require('./lib/log');
 const cst = require('./constants');
@@ -39,33 +38,47 @@ const uncheckChoice = value => ({
  */
 const loadConfigurationFile = () => fse.readJson(cst.configFile)
     .then((config) => {
-        // disable prompts for items specified by the configuration file
-        lodash.forEach(config, (value, key) => {
-            if (inquiries[key]) {
-                // .validate method returns either true or a string as error message
-                // a non empty string is considered truthy so we compare to true
-                if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]) !== true) {
-                    // warn user if the item is invalid
-                    log.warning(`${cst.configFile} "${key}": "${value}" ${inquiries[key].validate(config[key])}`);
-                } else {
-                    // disable prompt if it isn't
-                    inquiries[key].when = false;
-                }
-            } else {
+        log.info(cst.messages.loadingConfig);
+
+        // test existence of each config key
+        Object.keys(config).forEach((key) => {
+            if (!inquiries[key]) {
                 log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
+                delete config[key];
             }
         });
-        lodash.forEach(inquiries, (prompt) => {
-            if (typeof (prompt.default) === 'function') {
-                // inquirer won't have access to the configuration file, we must thus manually run the default functions
-                prompt.default = prompt.default(config) || prompt.default;
+
+        // validate value of each config value
+        Object.keys(config).forEach((key) => {
+            // not all inquiries have a validation method, we must thus safely access it
+            if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]).constructor.name === 'Error') {
+                // warn user if the item is invalid
+                log.warning(`${cst.configFile} "${key}": "${config[key]}" ${inquiries[key].validate(config[key])}`);
+                delete config[key];
             }
         });
-        log.info(`${cst.configFile} has been loaded`);
+
+        // disable prompts for items specified by the configuration file
+        Object.keys(config).forEach((key) => {
+            inquiries[key].when = false;
+        });
+
+        /**
+         * as inquirer won't have access to items loaded from configuration file,
+         * we must handle default values relying on them here.
+         */
+        Object.keys(inquiries).forEach((key) => {
+            if (typeof (inquiries[key].default) === 'function') {
+                // if possible, deduce default from configuration, otherwise let it alone
+                inquiries[key].default = inquiries[key].default(config) || inquiries[key].default;
+            }
+        });
+
         return config;
     })
     // in case of error reading the JSON file
     .catch((error) => {
+        // this is the error number when fse.readJson tries to open an non existent file
         if (error.errno === -2) {
             log.info(cst.messages.noConfig);
         } else {
@@ -102,7 +115,6 @@ const askCredentials = configuration => inquirer.prompt([
 const selectEntities = (session) => {
     const results = session.results;
 
-    const enquiry = lodash.clone(cst.inquiries.entities);
     let choices = [];
 
     const tables = results.tables.map(checkChoice);
@@ -122,9 +134,9 @@ const selectEntities = (session) => {
     choices.push(new inquirer.Separator(cst.headers.liquibase));
     choices = choices.concat(liquibase);
 
-    enquiry.choices = choices;
+    cst.inquiries.entities.choices = choices;
 
-    return inquirer.prompt(enquiry).then(answers => Object.assign(session, answers));
+    return inquirer.prompt(cst.inquiries.entities).then(answers => Object.assign(session, answers));
 };
 
 
