@@ -5,7 +5,7 @@
   "main": "index.js",
   "start": "node index.js",
   "scripts": {
-    "test": "nyc node_modules/.bin/_mocha; ./node_modules/.bin/eslint .;",
+    "test": "nyc node_modules/.bin/_mocha && ./node_modules/.bin/eslint .",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls;"
   },
   "repository": {
