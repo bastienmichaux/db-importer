@@ -89,9 +89,6 @@ describe('lib/db-commons', function () {
                 };
 
                 return db.connect(credentials).then((session) => {
-                    driverMock.verify();
-                    logMock.verify();
-
                     assert.strictEqual(session.driver, driver);
                 });
             });
@@ -103,24 +100,18 @@ describe('lib/db-commons', function () {
             logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             return db.connect(dummySession).then((session) => {
-                driverMock.verify();
-                logMock.verify();
-
                 assert.strictEqual(session, dummySession);
             });
         });
 
         it('logs an error message and rejects it', function () {
             const driver = db.dbmsList[anyDriverName].driver;
-            const driverMock = sandbox.mock(driver).expects('connect').once().rejects();
+            sandbox.mock(driver).expects('connect').once().rejects();
             logMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
 
             return db.connect(dummySession).then((session) => {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (sessionError) => {
-                driverMock.verify();
-                logMock.verify();
-
                 assert.strictEqual(sessionError, cst.messages.connectionFailure);
             });
         });

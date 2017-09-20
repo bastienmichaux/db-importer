@@ -14,7 +14,7 @@ const sandbox = sinon.sandbox.create();
 
 describe('lib/mysql/index', function () {
     afterEach(function () {
-        sandbox.restore();
+        sandbox.verifyAndRestore();
     });
 
     describe('connect', function () {

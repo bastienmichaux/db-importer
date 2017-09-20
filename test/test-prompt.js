@@ -18,7 +18,7 @@ const inquiries = cst.inquiries;
 
 describe('prompt', function () {
     afterEach(function () {
-        sandbox.restore();
+        sandbox.verifyAndRestore();
     });
 
     describe('askCredentials', function () {
@@ -62,10 +62,6 @@ describe('prompt', function () {
         beforeEach(function () {
             fseMock = sandbox.mock(fse);
             logMock = sandbox.mock(log);
-        });
-
-        afterEach(function () {
-            logMock.verify();
         });
 
         it('informs when there is no configuration file and resolves an empty object', function () {
