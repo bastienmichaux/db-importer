@@ -129,6 +129,18 @@ GROUP BY ke.TABLE_NAME
 HAVING COUNT(ke.TABLE_NAME) = 2;`;
 
 
+const allColumnsQueryWithFilter = `SELECT col.table_name, col.column_name
+FROM information_schema.columns col
+WHERE col.table_schema LIKE 'dummy_schema'
+AND col.table_name IN ('table_1', 'table_2', 'last_table');`;
+
+
+const allColumnsQueryWithoutFilter = `SELECT col.table_name, col.column_name
+FROM information_schema.columns col
+WHERE col.table_schema LIKE 'dummy_schema'
+;`;
+
+
 const tablesQueryWithFilter = `SELECT tab.TABLE_NAME
 FROM INFORMATION_SCHEMA.TABLES tab
 WHERE TABLE_SCHEMA = 'dummy_schema'
@@ -136,12 +148,14 @@ WHERE TABLE_SCHEMA = 'dummy_schema'
 AND TABLE_TYPE LIKE 'BASE TABLE'
 AND tab.TABLE_NAME NOT IN ('filtered_table_1', 'filtered_table_2', 'last_filtered_table');`;
 
+
 const tablesQueryWithoutFilter = `SELECT tab.TABLE_NAME
 FROM INFORMATION_SCHEMA.TABLES tab
 WHERE TABLE_SCHEMA = 'dummy_schema'
 /* exclude views and alike */
 AND TABLE_TYPE LIKE 'BASE TABLE'
 ;`;
+
 
 const dummySchema = mysql.escape('dummy_schema');
 const dummyFilter = mysql.escape(['filtered_table_1', 'filtered_table_2', 'last_filtered_table']);
@@ -192,6 +206,22 @@ describe('lib/mysql/queries', function () {
             assert.throws(() => queries.columns(dummySchema, null), TypeError);
         });
     });
+
+    describe('allColumns', function () {
+        it('returns query retrieving all the columns for the given tables', function () {
+            assert.strictEqual(queries.allColumns(dummySchema, dummyTables), allColumnsQueryWithFilter);
+        });
+
+        it('returns query retrieving all columns without excluding tables', function () {
+            assert.strictEqual(queries.allColumns(dummySchema, ''), allColumnsQueryWithoutFilter);
+        });
+
+        it('throws with parameters that aren\'t strings', function () {
+            assert.throws(() => queries.allColumns(['dummy_schema'], null), TypeError);
+            assert.throws(() => queries.allColumns(dummySchema, null), TypeError);
+        });
+    });
+
 
     describe('twoTypeJunction', function () {
         it('returns query that excludes tables according to their TABLE_NAME', function () {
