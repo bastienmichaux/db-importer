@@ -25,6 +25,7 @@ const inquiries = {
         name: 'dbms',
         message: 'DBMS:',
         choices: toArray(pickProperty(db.dbmsList, 'name')),
+        validate: validation.validateDbms,
         default: db.dbmsList.mysql.name
     },
     // ask the host name and validate it
