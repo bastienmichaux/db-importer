@@ -17,7 +17,7 @@ log.emphasize(msg.greeting);
  * Ask the user for credentials,
  * then what database should be imported
  */
-prompt.init()
+prompt.loadConfigurationFile()
     // get connection credentials from the user & validate them
     // returns session credentials
     .then(configuration => prompt.askCredentials(configuration))

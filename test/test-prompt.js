@@ -5,7 +5,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
-const joi = require('joi');
 const lodash = require('lodash');
 const fse = require('fs-extra');
 
@@ -55,7 +54,7 @@ describe('prompt', function () {
         });
     });
 
-    describe('init', function () {
+    describe('loadConfigurationFile', function () {
         let fseMock;
         let logMock;
 
@@ -69,7 +68,7 @@ describe('prompt', function () {
 
             logMock.expects('info').once().withArgs(cst.messages.noConfig);
 
-            return prompt.init().then((config) => {
+            return prompt.loadConfigurationFile().then((config) => {
                 assert.deepEqual(config, {});
             });
         });
@@ -79,7 +78,7 @@ describe('prompt', function () {
             fseMock.expects('readJson').rejects(dummyError);
             logMock.expects('failure').once().withArgs(dummyError);
 
-            return prompt.init().then((config) => {
+            return prompt.loadConfigurationFile().then((config) => {
                 assert.deepEqual(config, {});
             });
         });
@@ -96,7 +95,7 @@ describe('prompt', function () {
             fseMock.expects('readJson').resolves(dummyConfig);
             logMock.expects('info').once().withArgs(cst.messages.foundConfig);
 
-            return prompt.init().then((config) => {
+            return prompt.loadConfigurationFile().then((config) => {
                 lodash.forEach(dummyConfig, (value, key) => {
                     assert.strictEqual(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
                 });
@@ -113,7 +112,7 @@ describe('prompt', function () {
             logMock.expects('warning').once().withArgs(warningMessage);
             logMock.expects('info').once();
 
-            return prompt.init();
+            return prompt.loadConfigurationFile();
         });
 
         it('warns user if provided item value doesn\'t pass validation', function () {
@@ -125,7 +124,7 @@ describe('prompt', function () {
             logMock.expects('warning').once().withArgs(warningMessage);
             logMock.expects('info').once();
 
-            return prompt.init();
+            return prompt.loadConfigurationFile();
         });
 
         it('lets current default if it cannot deduce one from configuration', function () {
@@ -138,7 +137,7 @@ describe('prompt', function () {
             const dummyDefault = () => null;
             cst.inquiries.port.default = dummyDefault;
 
-            return prompt.init().then(() => {
+            return prompt.loadConfigurationFile().then(() => {
                 try {
                     assert.strictEqual(cst.inquiries.port.default, dummyDefault);
                 } finally {

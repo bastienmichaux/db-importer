@@ -37,7 +37,7 @@ const uncheckChoice = value => ({
  * @returns {Object} Either the config object in case of success
  * or a null object in case of error
  */
-const init = () => fse.readJson(cst.configFile)
+const loadConfigurationFile = () => fse.readJson(cst.configFile)
     .then((config) => {
         // disable prompts for items specified by the configuration file
         lodash.forEach(config, (value, key) => {
@@ -129,7 +129,7 @@ const selectEntities = (session) => {
 
 
 module.exports = {
-    init,
+    loadConfigurationFile,
     askCredentials,
     selectEntities
 };
