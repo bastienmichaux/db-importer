@@ -162,8 +162,8 @@ describe('lib/mysql/index', function () {
     });
 
     describe('createEntities', function () {
-        let dummySession;
-        let queryStub;
+        let dummySession = null;
+        let queryStub = null;
 
         beforeEach(function () {
             queryStub = sandbox.stub();
@@ -185,11 +185,11 @@ describe('lib/mysql/index', function () {
                 });
         });
 
-        it('rejects an error when it should reject an error (kind of)', function () {
+        it('rejects an error when it should reject an error', function () {
             const dummyError = {};
             queryStub.callsArgWith(1, dummyError);
 
-            return index.createEntities(dummySession).then(() => {
+            return index.createEntities(dummySession).then((onResolved) => {
                 assert.fail('promise should be rejected');
             }, (error) => {
                 assert.strictEqual(error, dummyError);
@@ -197,4 +197,3 @@ describe('lib/mysql/index', function () {
         });
     });
 });
-
