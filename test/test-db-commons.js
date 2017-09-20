@@ -17,6 +17,7 @@ describe('lib/db-commons', function () {
     let logMock;
     let anyDriverName;
     let dummySession;
+    const dummyError = new Error('Dummy error');
 
     beforeEach(function () {
         logMock = sandbox.mock(log);
@@ -37,14 +38,14 @@ describe('lib/db-commons', function () {
             logMock.expects('failure').once();
             logMock.expects('info').once();
 
-            return db.sessionErrorHandler(new Error('dummy Error'));
+            return db.sessionErrorHandler(dummyError);
         });
 
         it('works with a given cause', function () {
             logMock.expects('failure').once();
             logMock.expects('info').twice();
 
-            return db.sessionErrorHandler(new Error('dummy Error'), 'dummy cause');
+            return db.sessionErrorHandler(dummyError, 'Dummy cause');
         });
     });
 
