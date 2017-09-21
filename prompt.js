@@ -143,7 +143,7 @@ const selectEntities = (session) => {
 const selectColumns = (session) => {
     // gets the 'choices' property for the inquirer question
     const getChoices = (pColumns) => {
-        let choices = [];
+        const choices = [];
         const tables = Object.keys(pColumns);
 
         // for each table, add the table name as separator
@@ -153,14 +153,14 @@ const selectColumns = (session) => {
             choices.push(new inquirer.Separator(elem));
             // push each column of the current table into the choices
             pColumns[elem].forEach((column) => {
-                choices.push({value: column, checked: true});
+                choices.push({ value: column, checked: true });
             });
         });
         return choices;
     };
 
     // get the inquirer question
-    const getQuestion = (pColumns) => ({
+    const getQuestion = pColumns => ({
         type: 'checkbox',
         name: 'columns',
         message: 'Select the columns you want to import:',
@@ -171,8 +171,9 @@ const selectColumns = (session) => {
     const question = getQuestion(session.columns);
 
     return inquirer.prompt(question)
-    .then((answers) => Object.assign(session, answers));
+        .then(answers => Object.assign(session, answers));
 };
+
 
 module.exports = {
     loadConfigurationFile,

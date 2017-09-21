@@ -27,6 +27,7 @@ const msg = cst.messages;
 const getConfiguration = () => prompt.loadConfigurationFile()
     .then(configuration => askCredentials(configuration));
 
+
 /**
  * ask user any missing credential item and merge them with existing ones
  *
@@ -36,6 +37,7 @@ const getConfiguration = () => prompt.loadConfigurationFile()
 const askCredentials = configuration => prompt.askCredentials(configuration)
     .then(credentials => Object.assign(configuration, credentials))
     .then(credentials => openSession(credentials));
+
 
 /**
  * use credentials to open a session on the database
@@ -53,6 +55,7 @@ const openSession = credentials => db.connect(credentials)
         return askCredentials(err.handleConnectionError(error));
     });
 
+
 /**
  * query all tables defined by the schema; this excludes views and the likes
  * structure them depending their probable usage
@@ -61,7 +64,8 @@ const openSession = credentials => db.connect(credentials)
  * @resolves {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
  */
 const getEntityCandidates = session => db.entityCandidates(session)
-    .then(session => selectEntities(session));
+    .then(session => selectEntities(session)); // store all the tables of the database we're connected to into the session
+
 
 /**
  * ask user which table should be used to create entities
@@ -70,12 +74,18 @@ const getEntityCandidates = session => db.entityCandidates(session)
  * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
  */
 const selectEntities = session => prompt.selectEntities(session)
+    .then(session => getEntityCandidatesColumns(session)); // retrieve the columns of the selected tables
+
+
+// retrieve the columns of the selected tables
+const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
     .then(session => selectColumns(session)); // ask the user which columns should be selected
 
 
-// ask the user which columns should be selected
+// ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
-    .then(session => closeSession(session));
+    .then(session => closeSession(session)); // close the connection
+
 
 /**
  * close session and forward results
@@ -85,6 +95,7 @@ const selectColumns = session => prompt.selectColumns(session)
  */
 const closeSession = session => db.close(session)
     .then(session => createEntities(session.results));
+
 
 /**
  * @todo WIP function, used for integration testing purpose at the moment
