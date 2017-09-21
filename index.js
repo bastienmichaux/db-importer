@@ -43,7 +43,10 @@ const askCredentials = configuration => prompt.askCredentials()
  * @resolve {getEntityCandidates({driver, connection, schema})} session
  */
 const openSession = credentials => db.connect(credentials)
-    .then(session => getEntityCandidates(session));
+    .then((session) => {
+        log.success(msg.connectionSuccess);
+        return getEntityCandidates(session);
+    });
 
 /**
  * query all tables defined by the schema; this excludes views and the likes
@@ -89,7 +92,11 @@ const main = () => {
     // greet the user
     log.emphasize(msg.greeting);
 
-    getConfiguration();
+    getConfiguration()
+        .catch((error) => {
+            log.failure(error.stack);
+            process.exit(1);
+        });
 };
 
 main();

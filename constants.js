@@ -93,10 +93,12 @@ const configFile = '.db-config.json';
  * @enum {string}
  */
 const messages = {
+    connectionSuccess: 'connected to the database',
+    connectionFailure: 'failed to connect to the database',
     greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
 I need information before importing your db.\n`,
+    loadingConfig: `loading ${configFile}`,
     noConfig: `${configFile} not found`,
-    loadingConfig: `loading ${configFile}`
 };
 
 
