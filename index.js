@@ -13,16 +13,17 @@ const msg = cst.messages;
 log.emphasize(msg.greeting);
 
 
+const getCredentials = () => prompt.loadConfigurationFile()
+    .then(configuration => prompt.askCredentials()
+        .then(credentials => Object.assign(configuration, credentials))
+    );
+
 /**
  * Ask the user for credentials,
  * then what database should be imported
  */
-prompt.loadConfigurationFile()
-    // get connection credentials from the user & validate them
-    // returns session credentials
-    .then(configuration => prompt.askCredentials(configuration))
-
-    // attempt connection to the database using the session credentials
+getCredentials()
+// attempt connection to the database using the session credentials
     .then(credentials => db.connect(credentials))
 
     // display retrieved tables

@@ -102,7 +102,7 @@ const askCredentials = configuration => inquirer.prompt([
     inquiries.user,
     inquiries.password,
     inquiries.schema
-]).then(answers => Object.assign(configuration, answers));
+]);
 
 
 /**
