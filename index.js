@@ -70,6 +70,11 @@ const getEntityCandidates = session => db.entityCandidates(session)
  * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
  */
 const selectEntities = session => prompt.selectEntities(session)
+    .then(session => selectColumns(session)); // ask the user which columns should be selected
+
+
+// ask the user which columns should be selected
+const selectColumns = session => prompt.selectColumns(session)
     .then(session => closeSession(session));
 
 /**

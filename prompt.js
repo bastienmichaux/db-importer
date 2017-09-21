@@ -139,8 +139,44 @@ const selectEntities = (session) => {
 };
 
 
+// ask which columns should be imported as a list of checkboxes
+const selectColumns = (session) => {
+    // gets the 'choices' property for the inquirer question
+    const getChoices = (pColumns) => {
+        let choices = [];
+        const tables = Object.keys(pColumns);
+
+        // for each table, add the table name as separator
+        // and the column name as selected checkboxes
+        tables.forEach((elem) => {
+            // visual separator, one separator for each table
+            choices.push(new inquirer.Separator(elem));
+            // push each column of the current table into the choices
+            pColumns[elem].forEach((column) => {
+                choices.push({value: column, checked: true});
+            });
+        });
+        return choices;
+    };
+
+    // get the inquirer question
+    const getQuestion = (pColumns) => ({
+        type: 'checkbox',
+        name: 'columns',
+        message: 'Select the columns you want to import:',
+        pageSize: 25,
+        choices: getChoices(pColumns)
+    });
+
+    const question = getQuestion(session.columns);
+
+    return inquirer.prompt(question)
+    .then((answers) => Object.assign(session, answers));
+};
+
 module.exports = {
     loadConfigurationFile,
     askCredentials,
-    selectEntities
+    selectEntities,
+    selectColumns,
 };
