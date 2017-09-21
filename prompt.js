@@ -92,10 +92,8 @@ const loadConfigurationFile = () => fse.readJson(cst.configFile)
 /**
  * Prompt steps when interacting with the user
  * Returns the user answers
- *
- * @param {Object} configuration
  */
-const askCredentials = configuration => inquirer.prompt([
+const askCredentials = () => inquirer.prompt([
     inquiries.dbms,
     inquiries.host,
     inquiries.port,
