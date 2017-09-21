@@ -82,7 +82,7 @@ describe('lib/db-commons', function () {
             it(`returns an object containing the corresponding ${dbmsName} driver`, function () {
                 const driver = db.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
-                const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
+                sandbox.mock(driver).expects('connect').once().resolves();
                 logMock.expects('success').once();
 
                 const credentials = {
@@ -97,7 +97,8 @@ describe('lib/db-commons', function () {
 
         it('logs a success message and resolves his completed input', function () {
             const driver = db.dbmsList[anyDriverName].driver;
-            const driverMock = sandbox.mock(driver).expects('connect').once().resolves();
+
+            sandbox.mock(driver).expects('connect').once().resolves();
             logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             return db.connect(dummySession).then((session) => {
