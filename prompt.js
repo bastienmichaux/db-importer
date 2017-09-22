@@ -139,39 +139,65 @@ const selectEntities = (session) => {
 };
 
 
-// ask which columns should be imported as a list of checkboxes
-const selectColumns = (session) => {
-    // gets the 'choices' property for the inquirer question
-    const getChoices = (pColumns) => {
-        const choices = [];
-        const tables = Object.keys(pColumns);
+// get the 'choices' property for the inquirer question for the column selection
+const selectColumnsQuestionChoices = (entities) => {
+    const choices = [];
+    const tables = Object.keys(entities);
 
-        // for each table, add the table name as separator
-        // and the column name as selected checkboxes
-        tables.forEach((elem) => {
-            // visual separator, one separator for each table
-            choices.push(new inquirer.Separator(elem));
-            // push each column of the current table into the choices
-            pColumns[elem].forEach((column) => {
-                choices.push({ value: column, checked: true });
+    if (tables.length === 0) {
+        throw new Error('selectColumns.getChoices: no entities');
+    }
+
+    // create the choices as a list of checked boxes, one box per column
+    tables.forEach((tableName) => {
+        let columns = entities[tableName];
+        let choiceValue = null;
+        let choiceName = null;
+
+        // boxes are separated with the name of the table they belong to
+        choices.push(new inquirer.Separator(tableName));
+
+        columns.forEach((column) => {
+            columnName = Object.keys(column)[0];
+            // append the column type, this gives us choice values like 'id - int(11)'
+            // @todo: append hint if the column is part of a relationship - deselecting such columns would break the mapping
+            choiceName = `${columnName} - ${column[columnName].columnType}`;
+
+            // the value of the choice is formatted as tableName.columnName
+            // so we can use a simple regex to get them back after inquirer merges these two variables
+            choiceValue = `${tableName}.${columnName}`;
+
+            choices.push({
+                name: choiceName,
+                value: choiceValue,
+                checked: true
             });
         });
-        return choices;
-    };
-
-    // get the inquirer question
-    const getQuestion = pColumns => ({
-        type: 'checkbox',
-        name: 'columns',
-        message: 'Select the columns you want to import:',
-        pageSize: 25,
-        choices: getChoices(pColumns)
     });
 
-    const question = getQuestion(session.columns);
+    return choices;
+};
 
+
+// get the inquirer question for the selectColumns method
+const selectColumnsQuestion = entities => ({
+    type: 'checkbox',
+    name: 'columns',
+    message: 'Select the columns you want to import:',
+    pageSize: 25,
+    choices: selectColumnsQuestionChoices(entities)
+});
+
+
+// ask which columns should be imported as a list of checkboxes
+const selectColumns = (session) => {
+    const question = selectColumnsQuestion(session.entities);
     return inquirer.prompt(question)
-        .then(answers => Object.assign(session, answers));
+        .then((answers) => {
+            log.inspect(answers);
+            session = Object.assign(answers, session);
+            return session;
+        });
 };
 
 
@@ -179,5 +205,7 @@ module.exports = {
     loadConfigurationFile,
     askCredentials,
     selectEntities,
+    selectColumnsQuestionChoices,
+    selectColumnsQuestion,
     selectColumns,
 };
