@@ -95,8 +95,8 @@ const askCredentials = (configuration) => {
             missingItems.push(enquiryCopy);
 
             // if possible, deduce default from configuration, otherwise let it alone
-            if (typeof missingItems.default === 'function') {
-                inquiries[item].default = inquiries[item].default(configuration) || inquiries[item].default;
+            if (typeof enquiryCopy.default === 'function') {
+                enquiryCopy.default = enquiryCopy.default(configuration) || enquiryCopy.default;
             }
         }
     });
