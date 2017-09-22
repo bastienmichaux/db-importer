@@ -43,7 +43,7 @@ const loadConfigurationFile = () => fse.readJson(cst.configFile)
         // test existence of each config key
         Object.keys(config).forEach((key) => {
             if (!inquiries[key]) {
-                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
+                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration property`);
                 delete config[key];
             }
         });
