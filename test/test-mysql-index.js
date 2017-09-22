@@ -8,7 +8,6 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
-const queries = require('../lib/mysql/queries.js');
 
 const sandbox = sinon.sandbox.create();
 
@@ -151,7 +150,7 @@ describe('lib/mysql/index', function () {
 
             return index.entityCandidates(dummySession).then(() => {
                 // checking the value
-                assert.deepEqual(dummySession.results, dummyResults);
+                assert.deepStrictEqual(dummySession.results, dummyResults);
 
                 // checking each reference, that is, it uses the exact 'value' it received
                 assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
