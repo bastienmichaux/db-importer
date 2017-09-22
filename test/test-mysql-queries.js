@@ -129,13 +129,21 @@ GROUP BY ke.TABLE_NAME
 HAVING COUNT(ke.TABLE_NAME) = 2;`;
 
 
-const allColumnsQueryWithFilter = `SELECT col.table_name, col.column_name
+const allColumnsQueryWithFilter = `SELECT
+col.table_name,
+col.column_name,
+col.ordinal_position,
+col.column_type
 FROM information_schema.columns col
 WHERE col.table_schema LIKE 'dummy_schema'
 AND col.table_name IN ('table_1', 'table_2', 'last_table');`;
 
 
-const allColumnsQueryWithoutFilter = `SELECT col.table_name, col.column_name
+const allColumnsQueryWithoutFilter = `SELECT
+col.table_name,
+col.column_name,
+col.ordinal_position,
+col.column_type
 FROM information_schema.columns col
 WHERE col.table_schema LIKE 'dummy_schema'
 ;`;
