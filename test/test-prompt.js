@@ -11,6 +11,7 @@ const fse = require('fs-extra');
 const prompt = require('../prompt');
 const log = require('../lib/log');
 const cst = require('../constants');
+const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
 const inquiries = cst.inquiries;
@@ -21,10 +22,13 @@ describe('prompt', function () {
     });
 
     describe('askCredentials', function () {
-        it('is called with expected arguments', function () {
-            // This replaces the function inquirer.prompt with a stub.
-            const stub = sandbox.stub(inquirer, 'prompt').resolves({});
+        let stub;
 
+        beforeEach(function () {
+            stub = sandbox.stub(inquirer, 'prompt').resolves({});
+        });
+
+        it('asks all items if provided configuration is empty', function () {
             return prompt.askCredentials({}).then(() => {
                 assert.deepEqual(stub.getCall(0).args[0], [
                     inquiries.dbms,
@@ -37,19 +41,24 @@ describe('prompt', function () {
             });
         });
 
-        it('merges prompt answers with received configuration', function () {
-            const dummyAnswer = {
-                dbms: 'dummyDbms'
-            };
-            sandbox.stub(inquirer, 'prompt').resolves(dummyAnswer);
+        it('doesn\'t ask items provided by the configuration', function () {
+            const partialConfiguration = { dbms: 'mysql', host: '192.168.32.2', password: 'nope' };
 
-            const dummyConf = {
-                dbms: 'mysql',
-                port: '5432'
-            };
+            return prompt.askCredentials(partialConfiguration).then(() => {
+                const args = stub.getCall(0).args[0];
+                // filter args to only keep unexpected enquiries, which answers are already provided by configuration
+                const wronglyInquired = args.filter(inquiry => Object.keys(partialConfiguration).includes(inquiry.name));
+                assert.deepStrictEqual(wronglyInquired, []);
+            });
+        });
 
-            return prompt.askCredentials(dummyConf).then((credentials) => {
-                assert.deepEqual(credentials, Object.assign(dummyConf, dummyAnswer));
+        it('deduces default port from configured dbms', function () {
+            const configurationWithDbms = { dbms: db.dbmsList.mysql.name };
+
+            return prompt.askCredentials(configurationWithDbms).then(() => {
+                const inquiries = stub.getCall(0).args[0];
+                const portInquiry = inquiries.find(inquiry => inquiry.name === 'port');
+                assert.strictEqual(portInquiry.default, cst.inquiries.port.default(configurationWithDbms));
             });
         });
     });
