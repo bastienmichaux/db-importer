@@ -9,6 +9,7 @@
 
 const cst = require('./constants');
 const prompt = require('./prompt');
+const err = require('./error-handler');
 const log = require('./lib/log');
 const db = require('./lib/db-commons');
 
@@ -21,7 +22,7 @@ const msg = cst.messages;
 /**
  * load configuration file, validate and clean it
  *
- * @resolve {askCredentials({dbms, host, port, user, password, schema})} configuration with any property possibly missing
+ * @resolves {askCredentials({dbms, host, port, user, password, schema})} configuration with any property possibly missing
  */
 const getConfiguration = () => prompt.loadConfigurationFile()
     .then(configuration => askCredentials(configuration));
@@ -30,9 +31,9 @@ const getConfiguration = () => prompt.loadConfigurationFile()
  * ask user any missing credential item and merge them with existing ones
  *
  * @param {{dbms, host, port, user, password, schema}} configuration any property of this item can be missing
- * @resolve {openSession({dbms, host, port, user, password, schema})} complete credentials plus schema to extract
+ * @resolves {openSession({dbms, host, port, user, password, schema})} complete credentials plus schema to extract
  */
-const askCredentials = configuration => prompt.askCredentials()
+const askCredentials = configuration => prompt.askCredentials(configuration)
     .then(credentials => Object.assign(configuration, credentials))
     .then(credentials => openSession(credentials));
 
@@ -40,12 +41,18 @@ const askCredentials = configuration => prompt.askCredentials()
  * use credentials to open a session on the database
  *
  * @param {{dbms, host, port, user, password, schema}} credentials
- * @resolve {getEntityCandidates({driver, connection, schema})} session
+ * @resolves {getEntityCandidates({driver, connection, schema})} session
+ * @throws {Error} Whatever error we don't handle ourselves
  */
 const openSession = credentials => db.connect(credentials)
     .then((session) => {
         log.success(msg.connectionSuccess);
         return getEntityCandidates(session);
+    })
+    .catch((error) => {
+        log.failure(msg.connectionFailure);
+        log.failure(error.commonCode);
+        return askCredentials(err.handleConnectionError(error));
     });
 
 /**
@@ -53,7 +60,7 @@ const openSession = credentials => db.connect(credentials)
  * structure them depending their probable usage
  *
  * @param {{driver, connection, schema}} session
- * @resolve {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
+ * @resolves {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
  */
 const getEntityCandidates = session => db.entityCandidates(session)
     .then(session => selectEntities(session));
@@ -62,7 +69,7 @@ const getEntityCandidates = session => db.entityCandidates(session)
  * ask user which table should be used to create entities
  *
  * @param {{driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}}} session
- * @resolve {closeSession({driver, connection, schema, results: {entities}})} session
+ * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
  */
 const selectEntities = session => prompt.selectEntities(session)
     .then(session => closeSession(session));
@@ -71,7 +78,7 @@ const selectEntities = session => prompt.selectEntities(session)
  * close session and forward results
  *
  * @param {{driver, connection, schema, results: {entities}}} session
- * @resolve {createEntities(results)}
+ * @resolves {createEntities(results)}
  */
 const closeSession = session => db.close(session)
     .then(session => createEntities(session.results));
@@ -95,6 +102,7 @@ const main = () => {
     getConfiguration()
         .catch((error) => {
             log.failure(error.stack);
+            log.emphasize(msg.contributeOnFailure);
             process.exit(1);
         });
 };

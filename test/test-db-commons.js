@@ -17,7 +17,6 @@ describe('lib/db-commons', function () {
     let logMock;
     let anyDriverName;
     let dummySession;
-    const dummyError = new Error('Dummy error');
 
     beforeEach(function () {
         logMock = sandbox.mock(log);
@@ -31,22 +30,6 @@ describe('lib/db-commons', function () {
 
     afterEach(function () {
         sandbox.verifyAndRestore();
-    });
-
-    describe('sessionErrorHandler', function () {
-        it('works', function () {
-            logMock.expects('failure').once();
-            logMock.expects('info').once();
-
-            return db.sessionErrorHandler(dummyError);
-        });
-
-        it('works with a given cause', function () {
-            logMock.expects('failure').once();
-            logMock.expects('info').twice();
-
-            return db.sessionErrorHandler(dummyError, 'Dummy cause');
-        });
     });
 
     describe('createEntities', function () {
