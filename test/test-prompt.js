@@ -83,26 +83,6 @@ describe('prompt', function () {
             });
         });
 
-        it('disables prompts for specified items, resolves found configuration object and inform user', function () {
-            const dummyConfig = {
-                dbms: 'mysql',
-                host: '127.0.0.1',
-                port: '3306',
-                user: 'dev',
-                password: 'password',
-                schema: 'schema'
-            };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                lodash.forEach(dummyConfig, (value, key) => {
-                    assert.strictEqual(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
-                });
-                assert.strictEqual(config, dummyConfig);
-            });
-        });
-
         it('warns user if provided item isn\'t valid', function () {
             const dummyConfig = {
                 dbm: 'mysql'
