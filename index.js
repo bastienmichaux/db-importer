@@ -48,10 +48,8 @@ const openSession = credentials => db.connect(credentials)
     .then((session) => {
         log.success(msg.connectionSuccess);
         return getEntityCandidates(session);
-    })
-    .catch((error) => {
+    }, (error) => {
         log.failure(msg.connectionFailure);
-        log.failure(error.commonCode);
         return askCredentials(err.handleConnectionError(error));
     });
 

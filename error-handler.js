@@ -1,4 +1,5 @@
 const db = require('./lib/db-constants');
+const log = require('./lib/log');
 
 /**
  * Deduce which information provoked the error and set questions to replace such information
@@ -8,19 +9,24 @@ const db = require('./lib/db-constants');
  * @throws {Error} if not able to handle the error itself
  */
 const handleConnectionError = (error) => {
-    switch (error.commonCode) {
+    const brokenSession = error.brokenSession;
+    const dbms = brokenSession.dbms;
+
+    log.failure(`${dbms}: ${error.errno} - ${error.code}`);
+
+    switch (db.ERROR_DICTIONARIES[dbms][error.code]) {
     case db.DB_ERRORS.ACCESS_DENIED:
-        delete error.brokenSession.user;
-        delete error.brokenSession.password;
+        delete brokenSession.user;
+        delete brokenSession.password;
         break;
     case db.DB_ERRORS.HOST_UNREACH:
-        delete error.brokenSession.host;
+        delete brokenSession.host;
         break;
     default:
         throw error;
     }
 
-    return error.brokenSession;
+    return brokenSession;
 };
 
 module.exports = {

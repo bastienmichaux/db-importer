@@ -7,7 +7,6 @@ const sinon = require('sinon');
 const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
-const db = require('../lib/db-constants');
 const index = require('../lib/mysql/index');
 
 const sandbox = sinon.sandbox.create();
@@ -58,23 +57,6 @@ describe('lib/mysql/index', function () {
                 assert.fail(session, null, 'This promise should have been rejected !');
             }, (error) => {
                 assert.strictEqual(error, dummyError);
-            });
-        });
-
-        Object.keys(db.DB_ERRORS).forEach((key) => {
-            it(`maps mysql error ${cst.DB_ERRORS[key]} to db-common error ${db.DB_ERRORS[key]}`, function () {
-                connectStub = sandbox.stub().callsArgWith(0, {
-                    code: cst.DB_ERRORS[key]
-                });
-                createConnectionStub = sandbox.stub(mysql, 'createConnection').returns({
-                    connect: connectStub
-                });
-
-                return index.connect({}).then((session) => {
-                    assert.fail(session, null, 'This promise should have been rejected !');
-                }, (error) => {
-                    assert.strictEqual(error.commonCode, db.DB_ERRORS[key]);
-                });
             });
         });
     });
