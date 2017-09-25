@@ -149,27 +149,22 @@ const selectColumnsQuestionChoices = (entities) => {
     }
 
     // create the choices as a list of checked boxes, one box per column
-    tables.forEach((tableName) => {
-        let columns = entities[tableName];
-        let choiceValue = null;
-        let choiceName = null;
+    tables.forEach((table) => {
+        const tableColumns = Object.keys(entities[table]);
 
-        // boxes are separated with the name of the table they belong to
-        choices.push(new inquirer.Separator(tableName));
+        // separate columns belonging to the same table with an inquirer separator
+        choices.push(new inquirer.Separator(table));
 
-        columns.forEach((column) => {
-            columnName = Object.keys(column)[0];
-            // append the column type, this gives us choice values like 'id - int(11)'
-            // @todo: append hint if the column is part of a relationship - deselecting such columns would break the mapping
-            choiceName = `${columnName} - ${column[columnName].columnType}`;
-
-            // the value of the choice is formatted as tableName.columnName
-            // so we can use a simple regex to get them back after inquirer merges these two variables
-            choiceValue = `${tableName}.${columnName}`;
+        tableColumns.forEach((tableColumn) => {
+            // the column object, with its data
+            const column = entities[table][tableColumn];
+            const columnType = column.columnType;
 
             choices.push({
-                name: choiceName,
-                value: choiceValue,
+                // the displayed choice gives us the column's name and its type
+                // @todo: add relationship hint
+                name: `${tableColumn} (${columnType})`, // @todo: color column type
+                value: `${table}.${tableColumn}`,
                 checked: true
             });
         });
@@ -182,7 +177,7 @@ const selectColumnsQuestionChoices = (entities) => {
 // get the inquirer question for the selectColumns method
 const selectColumnsQuestion = entities => ({
     type: 'checkbox',
-    name: 'columns',
+    name: 'selectedColumns',
     message: 'Select the columns you want to import:',
     pageSize: 25,
     choices: selectColumnsQuestionChoices(entities)
@@ -194,8 +189,7 @@ const selectColumns = (session) => {
     const question = selectColumnsQuestion(session.entities);
     return inquirer.prompt(question)
         .then((answers) => {
-            log.inspect(answers);
-            session = Object.assign(answers, session);
+            session.selectedColumns = answers;
             return session;
         });
 };
