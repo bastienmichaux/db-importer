@@ -11,6 +11,7 @@ const fse = require('fs-extra');
 const prompt = require('../prompt');
 const log = require('../lib/log');
 const cst = require('../constants');
+const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
 const inquiries = cst.inquiries;
@@ -21,12 +22,15 @@ describe('prompt', function () {
     });
 
     describe('askCredentials', function () {
-        it('is called with expected arguments', function () {
-            // This replaces the function inquirer.prompt with a stub.
-            const stub = sandbox.stub(inquirer, 'prompt').resolves({});
+        let stub;
 
+        beforeEach(function () {
+            stub = sandbox.stub(inquirer, 'prompt').resolves({});
+        });
+
+        it('asks all items if provided configuration is empty', function () {
             return prompt.askCredentials({}).then(() => {
-                assert.deepEqual(stub.getCall(0).args[0], [
+                assert.deepStrictEqual(stub.getCall(0).args[0], [
                     inquiries.dbms,
                     inquiries.host,
                     inquiries.port,
@@ -37,19 +41,24 @@ describe('prompt', function () {
             });
         });
 
-        it('merges prompt answers with received configuration', function () {
-            const dummyAnswer = {
-                dbms: 'dummyDbms'
-            };
-            sandbox.stub(inquirer, 'prompt').resolves(dummyAnswer);
+        it('doesn\'t ask items provided by the configuration', function () {
+            const partialConfiguration = { dbms: 'mysql', host: '192.168.32.2', password: 'nope' };
 
-            const dummyConf = {
-                dbms: 'mysql',
-                port: '5432'
-            };
+            return prompt.askCredentials(partialConfiguration).then(() => {
+                const args = stub.getCall(0).args[0];
+                // filter args to only keep unexpected enquiries, which answers are already provided by configuration
+                const wronglyInquired = args.filter(inquiry => Object.keys(partialConfiguration).includes(inquiry.name));
+                assert.deepStrictEqual(wronglyInquired, []);
+            });
+        });
 
-            return prompt.askCredentials(dummyConf).then((credentials) => {
-                assert.deepEqual(credentials, Object.assign(dummyConf, dummyAnswer));
+        it('deduces default port from configured dbms', function () {
+            const configurationWithDbms = { dbms: db.dbmsList.mysql.name };
+
+            return prompt.askCredentials(configurationWithDbms).then(() => {
+                const inquiries = stub.getCall(0).args[0];
+                const portInquiry = inquiries.find(inquiry => inquiry.name === 'port');
+                assert.strictEqual(portInquiry.default, cst.inquiries.port.default(configurationWithDbms));
             });
         });
     });
@@ -69,80 +78,58 @@ describe('prompt', function () {
             logMock.expects('info').once().withArgs(cst.messages.noConfig);
 
             return prompt.loadConfigurationFile().then((config) => {
-                assert.deepEqual(config, {});
+                assert.deepStrictEqual(config, {});
             });
         });
 
-        it('prints the error message when there is one and resolves an empty object', function () {
-            const dummyError = {};
+        it('logs file reading errors and resolves empty object (except for file absence)', function () {
+            const dummyError = new Error('dummy fse.readJson error');
             fseMock.expects('readJson').rejects(dummyError);
+
             logMock.expects('failure').once().withArgs(dummyError);
 
             return prompt.loadConfigurationFile().then((config) => {
-                assert.deepEqual(config, {});
+                assert.deepStrictEqual(config, {});
             });
         });
 
-        it('disables prompts for specified items, resolves found configuration object and inform user', function () {
+        it('warns user about invalid configuration properties and deletes them', function () {
             const dummyConfig = {
+                dbm: 'mysql',
                 dbms: 'mysql',
-                host: '127.0.0.1',
-                port: '3306',
-                user: 'dev',
-                password: 'password',
-                schema: 'schema'
+                hast: '192.65.32.65',
+                port: 3306,
             };
             fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
+            logMock.expects('info').once(); // suppressing unwanted output
+            const dbmIsInvalid = `dbm is defined in ${cst.configFile} but is not a valid configuration property`;
+            const hastIsInvalid = `hast is defined in ${cst.configFile} but is not a valid configuration property`;
+
+            logMock.expects('warning').once().withArgs(dbmIsInvalid);
+            logMock.expects('warning').once().withArgs(hastIsInvalid);
 
             return prompt.loadConfigurationFile().then((config) => {
-                lodash.forEach(dummyConfig, (value, key) => {
-                    assert.strictEqual(cst.inquiries[key].when, false, `expects cst.inquiries[${key}].when to be false`);
-                });
-                assert.strictEqual(config, dummyConfig);
+                assert.deepStrictEqual(config, { dbms: 'mysql', port: 3306 });
             });
         });
 
-        it('warns user if provided item isn\'t valid', function () {
+        it('warns user about invalid configuration item and deletes them', function () {
             const dummyConfig = {
-                dbm: 'mysql'
+                host: '19.168.32.',
+                port: '-',
+                user: 'root',
+                password: 'very-good'
             };
             fseMock.expects('readJson').resolves(dummyConfig);
-            const warningMessage = `dbm is defined in ${cst.configFile} but is not a valid configuration item`;
-            logMock.expects('warning').once().withArgs(warningMessage);
-            logMock.expects('info').once();
+            logMock.expects('info').once(); // suppressing unwanted output
+            const invalidHost = `${cst.configFile} "host": "19.168.32." ${inquiries.host.validate(dummyConfig.host)}`;
+            const invalidPort = `${cst.configFile} "port": "-" ${inquiries.port.validate(dummyConfig.port)}`;
 
-            return prompt.loadConfigurationFile();
-        });
+            logMock.expects('warning').once().withArgs(invalidHost);
+            logMock.expects('warning').once().withArgs(invalidPort);
 
-        it('warns user if provided item value doesn\'t pass validation', function () {
-            const dummyConfig = {
-                port: '-'
-            };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            const warningMessage = `${cst.configFile} "port": "-" ${inquiries.port.validate('-')}`;
-            logMock.expects('warning').once().withArgs(warningMessage);
-            logMock.expects('info').once();
-
-            return prompt.loadConfigurationFile();
-        });
-
-        it('lets current default if it cannot deduce one from configuration', function () {
-            const dummyConfig = {};
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once();
-
-            // we force this enquiry to return null
-            const backupDefault = cst.inquiries.port.default;
-            const dummyDefault = () => null;
-            cst.inquiries.port.default = dummyDefault;
-
-            return prompt.loadConfigurationFile().then(() => {
-                try {
-                    assert.strictEqual(cst.inquiries.port.default, dummyDefault);
-                } finally {
-                    cst.inquiries.port.default = backupDefault;
-                }
+            return prompt.loadConfigurationFile().then((config) => {
+                assert.deepStrictEqual(config, { user: 'root', password: 'very-good' });
             });
         });
     });
@@ -197,7 +184,7 @@ describe('prompt', function () {
             promptStub.resolves();
 
             return prompt.selectEntities(dummySession).then(() => {
-                assert.deepEqual(promptStub.firstCall.args[0], dummyEnquiry);
+                assert.deepStrictEqual(promptStub.firstCall.args[0], dummyEnquiry);
             });
         });
 
@@ -215,7 +202,7 @@ describe('prompt', function () {
             promptStub.resolves(dummyAnswer);
 
             return prompt.selectEntities(dummyInput).then((result) => {
-                assert.deepEqual(result, Object.assign(dummyInput, dummyAnswer));
+                assert.deepStrictEqual(result, Object.assign(dummyInput, dummyAnswer));
             });
         });
     });

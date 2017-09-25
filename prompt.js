@@ -43,7 +43,7 @@ const loadConfigurationFile = () => fse.readJson(cst.configFile)
         // test existence of each config key
         Object.keys(config).forEach((key) => {
             if (!inquiries[key]) {
-                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration item`);
+                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration property`);
                 delete config[key];
             }
         });
@@ -58,20 +58,11 @@ const loadConfigurationFile = () => fse.readJson(cst.configFile)
             }
         });
 
-        // disable prompts for items specified by the configuration file
-        Object.keys(config).forEach((key) => {
-            inquiries[key].when = false;
-        });
-
         /**
          * as inquirer won't have access to items loaded from configuration file,
          * we must handle default values relying on them here.
          */
         Object.keys(inquiries).forEach((key) => {
-            if (typeof (inquiries[key].default) === 'function') {
-                // if possible, deduce default from configuration, otherwise let it alone
-                inquiries[key].default = inquiries[key].default(config) || inquiries[key].default;
-            }
         });
 
         return config;
@@ -90,19 +81,27 @@ const loadConfigurationFile = () => fse.readJson(cst.configFile)
 
 
 /**
- * Prompt steps when interacting with the user
- * Returns the user answers
+ * Ask any information not provided by the configuration
  *
- * @param {Object} configuration
+ * @param {{dbms, host, port, user, password, schema}} configuration empty, partial or full
+ * @return {{dbms, host, port, user, password, schema}} items missing from the configuration
  */
-const askCredentials = configuration => inquirer.prompt([
-    inquiries.dbms,
-    inquiries.host,
-    inquiries.port,
-    inquiries.user,
-    inquiries.password,
-    inquiries.schema
-]).then(answers => Object.assign(configuration, answers));
+const askCredentials = (configuration) => {
+    const missingItems = [];
+    // ask only questions for items not provided by the configuration
+    ['dbms', 'host', 'port', 'user', 'password', 'schema'].forEach((item) => {
+        if (!configuration[item]) {
+            const enquiryCopy = Object.assign({}, inquiries[item]);
+            missingItems.push(enquiryCopy);
+
+            // if possible, deduce default from configuration, otherwise let it alone
+            if (typeof enquiryCopy.default === 'function') {
+                enquiryCopy.default = enquiryCopy.default(configuration) || enquiryCopy.default;
+            }
+        }
+    });
+    return inquirer.prompt(missingItems);
+};
 
 
 /**

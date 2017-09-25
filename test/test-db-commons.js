@@ -8,20 +8,15 @@ const lodash = require('lodash');
 
 const db = require('../lib/db-commons');
 const cst = require('../lib/db-constants');
-const log = require('../lib/log');
 
 const sandbox = sinon.sandbox.create();
 
 
 describe('lib/db-commons', function () {
-    let logMock;
     let anyDriverName;
     let dummySession;
-    const dummyError = new Error('Dummy error');
 
     beforeEach(function () {
-        logMock = sandbox.mock(log);
-
         // we don't care which dbms, we're mocking it anyway
         anyDriverName = 'mysql';
         dummySession = {
@@ -31,22 +26,6 @@ describe('lib/db-commons', function () {
 
     afterEach(function () {
         sandbox.verifyAndRestore();
-    });
-
-    describe('sessionErrorHandler', function () {
-        it('works', function () {
-            logMock.expects('failure').once();
-            logMock.expects('info').once();
-
-            return db.sessionErrorHandler(dummyError);
-        });
-
-        it('works with a given cause', function () {
-            logMock.expects('failure').once();
-            logMock.expects('info').twice();
-
-            return db.sessionErrorHandler(dummyError, 'Dummy cause');
-        });
     });
 
     describe('createEntities', function () {
@@ -83,7 +62,6 @@ describe('lib/db-commons', function () {
                 const driver = db.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
                 sandbox.mock(driver).expects('connect').once().resolves();
-                logMock.expects('success').once();
 
                 const credentials = {
                     dbms: dbmsName
@@ -95,33 +73,19 @@ describe('lib/db-commons', function () {
             });
         });
 
-        it('logs a success message and resolves his completed input', function () {
+        it('resolves his completed input', function () {
             const driver = db.dbmsList[anyDriverName].driver;
 
             sandbox.mock(driver).expects('connect').once().resolves();
-            logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             return db.connect(dummySession).then((session) => {
                 assert.strictEqual(session, dummySession);
             });
         });
 
-        it('logs an error message and rejects it', function () {
-            const driver = db.dbmsList[anyDriverName].driver;
-            sandbox.mock(driver).expects('connect').once().rejects();
-            logMock.expects('failure').once().withArgs(cst.messages.connectionFailure);
-
-            return db.connect(dummySession).then((session) => {
-                assert.fail(session, null, 'This promise should have been rejected !');
-            }, (sessionError) => {
-                assert.strictEqual(sessionError, cst.messages.connectionFailure);
-            });
-        });
-
         it('removes the password from the session object', function () {
             const driver = db.dbmsList[anyDriverName].driver;
             sandbox.mock(driver).expects('connect').once().resolves();
-            logMock.expects('success').once().withArgs(cst.messages.connectionSuccess);
 
             dummySession.password = 'verystrongpassword';
 
