@@ -16,6 +16,46 @@ const db = require('../lib/db-commons');
 const sandbox = sinon.sandbox.create();
 const inquiries = cst.inquiries;
 
+// template entities for selectColumns and related functions' unit tests
+// generated with dbi_book_author
+const dummyEntities = {
+    authors: [
+        { id: { ordinalPosition: 1, columnType: 'int(11)' } },
+        { name: { ordinalPosition: 2, columnType: 'varchar(255)' } },
+        { birth_date: { ordinalPosition: 3, columnType: 'date' } }
+    ],
+    books: [
+        {id: { ordinalPosition: 1, columnType: 'int(11)' } },
+        { title: { ordinalPosition: 2, columnType: 'varchar(255)' } },
+        { price: { ordinalPosition: 3, columnType: 'bigint(20)' } },
+        { author: { ordinalPosition: 4, columnType: 'int(11)' } }
+    ]
+};
+
+
+// template choices for selectColumns' and related functions' unit tests
+const expectedChoices = [
+    { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
+    { name: 'id - int(11)', value: 'authors.id', checked: true },
+    { name: 'name - varchar(255)', value: 'authors.name', checked: true },
+    { name: 'birth_date - date', value: 'authors.birth_date', checked: true },
+    { type: 'separator', line: '\u001b[2mbooks\u001b[22m' },
+    { name: 'id - int(11)', value: 'books.id', checked: true },
+    { name: 'title - varchar(255)', value: 'books.title', checked: true },
+    { name: 'price - bigint(20)', value: 'books.price', checked: true },
+    { name: 'author - int(11)', value: 'books.author', checked: true }
+];
+
+
+// template question for selectColumns' and related functions' unit tests
+const expectedQuestion = {
+    type: 'checkbox',
+    name: 'columns',
+    message: 'Select the columns you want to import:',
+    pageSize: 25,
+    choices: expectedChoices,
+};
+
 describe('prompt', function () {
     afterEach(function () {
         sandbox.verifyAndRestore();
@@ -204,6 +244,37 @@ describe('prompt', function () {
             return prompt.selectEntities(dummyInput).then((result) => {
                 assert.deepStrictEqual(result, Object.assign(dummyInput, dummyAnswer));
             });
+        });
+    });
+
+    describe('selectColumnsQuestionChoices', function () {
+        it('returns the expected choices', function () {
+            const actualChoices = prompt.selectColumnsQuestionChoices(dummyEntities);
+
+            let keys = null;
+
+            actualChoices.forEach((actualChoice, index) => {
+                keys = Object.keys(actualChoice);
+                keys.forEach((key) => {
+                    assert.strictEqual(actualChoice[key], expectedChoices[index][key]);
+                });
+            });
+        });
+
+        it('throws an error with an empty parameter', function () {
+            assert.throws(() => (prompt.selectColumnsQuestionChoices({})), Error);
+        });
+    });
+
+    describe('selectColumns', function () {
+        const dummySession = {
+            entities: dummyEntities
+        };
+
+        it('returns the updated column selection', function () {
+            let spy = sinon.spy(prompt, 'selectColumns');
+            prompt.selectColumns(dummySession);
+            assert(spy.withArgs(dummySession).calledOnce);
         });
     });
 });
