@@ -264,16 +264,4 @@ describe('prompt', function () {
             assert.throws(() => (prompt.selectColumnsQuestionChoices({})), Error);
         });
     });
-
-    describe('selectColumns', function () {
-        const dummySession = {
-            entities: dummyEntities
-        };
-
-        it('returns the updated column selection', function () {
-            const spy = sinon.spy(prompt, 'selectColumns');
-            prompt.selectColumns(dummySession);
-            assert(spy.withArgs(dummySession).calledOnce);
-        });
-    });
 });
