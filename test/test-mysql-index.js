@@ -8,6 +8,8 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
+const log = require('../lib/log');
+const queries = require('../lib/mysql/queries');
 
 const sandbox = sinon.sandbox.create();
 
@@ -195,5 +197,158 @@ describe('lib/mysql/index', function () {
                 assert.strictEqual(error, dummyError);
             });
         });
+    });
+
+    describe('organizeColumns', function () {
+        const dummyQueryResults = [
+            {
+                table_name: 'authors',
+                column_name: 'id',
+                ordinal_position: 1,
+                column_type: 'int(11)'
+            }, {
+                table_name: 'authors',
+                column_name: 'name',
+                ordinal_position: 2,
+                column_type: 'varchar(255)'
+            }, {
+                table_name: 'authors',
+                column_name: 'birth_date',
+                ordinal_position: 3,
+                column_type: 'date'
+            }, {
+                table_name: 'books',
+                column_name: 'id',
+                ordinal_position: 1,
+                column_type: 'int(11)'
+            }, {
+                table_name: 'books',
+                column_name: 'title',
+                ordinal_position: 2,
+                column_type: 'varchar(255)'
+            }, {
+                table_name: 'books',
+                column_name: 'price',
+                ordinal_position: 3,
+                column_type: 'bigint(20)'
+            }, {
+                table_name: 'books',
+                column_name: 'author',
+                ordinal_position: 4,
+                column_type: 'int(11)'
+            }
+        ];
+
+        const dummyTables = ['authors', 'books'];
+
+        const expectedResult = {
+            authors: [
+                { id: { ordinalPosition: 1, columnType: 'int(11)' } },
+                { name: { ordinalPosition: 2, columnType: 'varchar(255)' } },
+                { birth_date: { ordinalPosition: 3, columnType: 'date' } }
+            ],
+            books: [
+                { id: { ordinalPosition: 1, columnType: 'int(11)' } },
+                { title: { ordinalPosition: 2, columnType: 'varchar(255)' } },
+                { price: { ordinalPosition: 3, columnType: 'bigint(20)' } },
+                { author: { ordinalPosition: 4, columnType: 'int(11)' } }
+            ]
+        };
+
+        it('returns an organized object representing the database structure', function () {
+            const actualResult = index.organizeColumns(dummyQueryResults, dummyTables);
+
+            const actualTables = Object.keys(actualResult);
+            const expectedTables = Object.keys(expectedResult);
+
+            actualTables.forEach((actualTable, index) => {
+                const expectedTable = expectedTables[index];
+                // check we have the same tables
+                assert.strictEqual(actualTable, expectedTable);
+                // @todo: deepen test
+            });
+        });
+    });
+
+    // note : most of this uses the same code as createEntities does
+    // since the promised query is pretty similar
+    describe('entityCandidatesColumns', function () {
+        let dummySession = null;
+        let queryStub = null;
+
+        beforeEach(function () {
+            queryStub = sandbox.stub();
+            dummySession = {
+                connection: {
+                    query: queryStub.resolves()
+                },
+                results: {},
+                schema: 'dummySchema',
+                entities: {
+                    authors: {
+                        id: { ordinalPosition: 1, columnType: 'int(11)' },
+                        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                        birth_date: { ordinalPosition: 3, columnType: 'date' }
+                    },
+                    books: {
+                        id: { ordinalPosition: 1, columnType: 'int(11)' },
+                        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                        author: { ordinalPosition: 4, columnType: 'int(11)' }
+                    }
+                }
+            };
+        });
+
+        it('rejects with connection.query error', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(1, dummyError);
+
+            return index.entityCandidatesColumns(dummySession).then(() => {
+                assert.fail('promise should be rejected');
+            }, (error) => {
+                assert.strictEqual(error, dummyError);
+            });
+        });
+
+        // it('stores connection.query in session.results', function () {
+        //     // we want something like [ RawDataPacket{ TABLE_NAME: 'value' }]
+        //     const dummyJhipster = [{ [cst.fields.tableName]: {} }];
+        //     const dummyLiquibase = [{ [cst.fields.tableName]: {} }];
+        //     const dummyTwoTypeJunction = [{ [cst.fields.tableName]: {} }];
+        //     const dummyTables = [{ [cst.fields.tableName]: {} }];
+        //
+        //     /**
+        //      * we want something like :
+        //      * {
+        //      *     jhipster: [ 'value' ],
+        //      *     liquibase: [ 'value' ],
+        //      *     twoTypeJunction: [ 'value' ],
+        //      *     tables: [ 'value' ]
+        //      * }
+        //      */
+        //     const dummyResults = {
+        //         jhipster: [dummyJhipster[0][cst.fields.tableName]],
+        //         liquibase: [dummyLiquibase[0][cst.fields.tableName]],
+        //         twoTypeJunction: [dummyLiquibase[0][cst.fields.tableName]],
+        //         tables: [dummyLiquibase[0][cst.fields.tableName]]
+        //     };
+        //
+        //     queryStub.onCall(0).callsArgWith(1, null, dummyJhipster);
+        //     queryStub.onCall(1).callsArgWith(1, null, dummyLiquibase);
+        //     queryStub.onCall(2).callsArgWith(1, null, dummyTwoTypeJunction);
+        //     queryStub.onCall(3).callsArgWith(1, null, dummyTables);
+        //
+        //     return index.entityCandidates(dummySession).then(() => {
+        //         // checking the value
+        //         assert.deepEqual(dummySession.results, dummyResults);
+        //
+        //         // checking each reference, that is, it uses the exact 'value' it received
+        //         assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
+        //         assert.strictEqual(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
+        //         assert.strictEqual(dummySession.results.twoTypeJunction[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
+        //         assert.strictEqual(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+        //     });
+        // });
     });
 });
