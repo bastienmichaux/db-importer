@@ -37,6 +37,94 @@ describe('prompt', function () {
         sandbox.verifyAndRestore();
     });
 
+    describe('removeColumns', function () {
+        const beforeEntities = {
+            authors: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
+        // this array + the dummy entities produces the expected entities
+        const dummySelectedColumns = [
+            'authors.name',
+            'authors.birth_date',
+            'books.title',
+            'books.price',
+            'books.author'
+        ];
+
+        const dummyUnselectedColumns = [
+            'authors.id',
+            'books.id'
+        ];
+
+        // expected entities after removal
+        // 'id' columns aren't selected
+        const afterEntities = {
+            authors: {
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
+        it('keeps the initial entities unchanged', function () {
+            // check that after using this function, the removed properties are still in the initial entities
+            prompt.removeColumns(beforeEntities, dummySelectedColumns);
+            assert(beforeEntities.authors.id !== undefined);
+            assert(beforeEntities.books.id !== undefined);
+        });
+
+        it('removes the columns that are not part of the source entities', function () {
+            const actualEntities = prompt.removeColumns(beforeEntities, dummySelectedColumns);
+
+            // check that both entities object (before & after removal) have the exact same number of tables
+            const beforeTables = Object.keys(beforeEntities);
+            const afterTables = Object.keys(afterEntities);
+            const actualTables = Object.keys(actualEntities);
+
+            assert((beforeTables.length === afterTables.length) && (beforeTables.length === actualTables.length));
+
+            beforeTables.forEach((beforeTable, index) => {
+                assert.strictEqual(beforeTables[index], afterTables[index]);
+                assert.strictEqual(beforeTables[index], actualTables[index]);
+            });
+
+            // check that the expected and actual entities with removed columns are identical
+            // and that the columns not selected are part of the dummy unselected columns
+            // and that the selected columns are part of the dummy selected columns
+            beforeTables.forEach((table) => {
+                const beforeColumns = Object.keys(beforeEntities[table]);
+                const afterColumns = Object.keys(afterEntities[table]);
+                const actualColumns = Object.keys(actualEntities[table]);
+                beforeColumns.forEach((column) => {
+                    // check a removed column is also removed from the actual entities & still exists in the initial object
+                    if (afterEntities[table][column] === undefined) {
+                        assert.strictEqual(actualEntities[table][column], undefined);
+                        assert(typeof beforeEntities[table][column] === 'object');
+                        // assert the removed column isn't part of the selected columns
+                        assert(!dummySelectedColumns.includes(`${table}.${column}`));
+                    } else {
+                        const afterProperties = Object.keys(afterEntities[table][column]);
+                        afterProperties.forEach((prop) => {
+                            assert.strictEqual(afterEntities[table][column][prop], actualEntities[table][column][prop]);
+                        });
+                    }
+                });
+            });
+        });
+    });
+
     describe('askCredentials', function () {
         let stub;
 
@@ -267,26 +355,10 @@ describe('prompt', function () {
     });
 
     describe('selectColumns', function () {
+        const expectedEntities = dummyEntities;
+
         const dummySession = {
             entities: dummyEntities
-        };
-
-        const expectedQuestion = {
-            type: 'checkbox',
-            name: 'selectedColumns',
-            message: 'Select the columns you want to import:',
-            pageSize: 25,
-            choices: [
-                { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
-                { name: 'id (int(11))', value: 'authors.id', checked: true },
-                { name: 'name (varchar(255))', value: 'authors.name', checked: true },
-                { name: 'birth_date (date)', value: 'authors.birth_date', checked: true },
-                { type: 'separator', line: '\u001b[2mbooks\u001b[22m' },
-                { name: 'id (int(11))', value: 'books.id', checked: true },
-                { name: 'title (varchar(255))', value: 'books.title', checked: true },
-                { name: 'price (bigint(20))', value: 'books.price', checked: true },
-                { name: 'author (int(11))', value: 'books.author', checked: true }
-            ]
         };
 
         // user selects all questions
@@ -300,11 +372,6 @@ describe('prompt', function () {
             'books.author'
         ] };
 
-        const expectedSession = {
-            entities: dummyEntities,
-            selectedColumns: expectedAnswer
-        };
-
         let promptStub = null;
 
         beforeEach(function () {
@@ -316,9 +383,16 @@ describe('prompt', function () {
 
             return prompt.selectColumns(dummySession)
                 .then((answer) => {
-                    // we only need to check session.selectedColumns since it's the only session object modified
-                    answer.selectedColumns.forEach((selectedColumn, index) => {
-                        assert.strictEqual(answer.selectedColumns[index], expectedAnswer.selectedColumns[index]);
+                    // the answer holds only entities
+                    const tables = Object.keys(answer.entities);
+                    tables.forEach((table) => {
+                        const columns = Object.keys(answer.entities[table]);
+                        columns.forEach((column) => {
+                            const properties = Object.keys(answer.entities[table][column]);
+                            properties.forEach((prop) => {
+                                assert.strictEqual(expectedEntities[table][column][prop], answer.entities[table][column][prop]);
+                            });
+                        });
                     });
                 });
         });

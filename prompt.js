@@ -4,6 +4,7 @@
 
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
+const lodash = require('lodash');
 
 const log = require('./lib/log');
 const cst = require('./constants');
@@ -184,12 +185,41 @@ const selectColumnsQuestion = entities => ({
 });
 
 
+/**
+ * if there are no columns in the entities object that match a selectedColumn,
+ * delete it from the entities object
+ *
+ * @param { string[] } selectedColumns - array of strings like "tableName.columnName" returned by an inquirer prompt
+ * @param { object } entities - an object having the structure
+ * { tableName { columnName { columnProperty: columnValue } } }
+ * @returns { object } the entities object after the removal of 0 or more columns
+ */
+const removeColumns = (entities, selectedColumns) => {
+    const tables = Object.keys(entities);
+    const updatedEntities = lodash.cloneDeep(entities);
+    let columns = null;
+    let soughtColumn = null;
+
+    tables.forEach((table) => {
+        columns = Object.keys(entities[table]);
+        columns.forEach((column) => {
+            soughtColumn = `${table}.${column}`;
+            if (!selectedColumns.includes(soughtColumn)) {
+                delete updatedEntities[table][column];
+            }
+        });
+    });
+
+    return updatedEntities;
+};
+
+
 // ask which columns should be imported as a list of checkboxes
 const selectColumns = (session) => {
     const question = selectColumnsQuestion(session.entities);
     return inquirer.prompt(question)
-        .then((answers) => {
-            session.selectedColumns = answers.selectedColumns;
+        .then((answer) => {
+            session.entities = removeColumns(session.entities, answer.selectedColumns);
             return session;
         });
 };
@@ -202,4 +232,5 @@ module.exports = {
     selectColumnsQuestionChoices,
     selectColumnsQuestion,
     selectColumns,
+    removeColumns,
 };
