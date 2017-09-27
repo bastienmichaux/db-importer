@@ -84,7 +84,7 @@ const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
-    .then(session => closeSession(session)); // close the connection
+    .then(session => createEntities(session));
 
 
 /**
@@ -93,8 +93,7 @@ const selectColumns = session => prompt.selectColumns(session)
  * @param {{driver, connection, schema, results: {entities}}} session
  * @resolves {createEntities(results)}
  */
-const closeSession = session => db.close(session)
-    .then(session => createEntities(session.results));
+const closeSession = session => db.close(session);
 
 
 /**
@@ -102,7 +101,8 @@ const closeSession = session => db.close(session)
  *
  * @param {results} results the results of all previous steps
  */
-const createEntities = results => db.createEntities(results);
+const createEntities = results => db.createEntities(results)
+    .then(session => closeSession(session)); // close the connection
 
 
 /**

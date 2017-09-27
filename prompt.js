@@ -189,7 +189,7 @@ const selectColumns = (session) => {
     const question = selectColumnsQuestion(session.entities);
     return inquirer.prompt(question)
         .then((answers) => {
-            session.selectedColumns = answers;
+            session.selectedColumns = answers.selectedColumns;
             return session;
         });
 };
