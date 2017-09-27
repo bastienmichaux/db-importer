@@ -8,6 +8,7 @@ const lodash = require('lodash');
 
 const log = require('./lib/log');
 const cst = require('./constants');
+const validation = require('./lib/validation');
 
 const inquiries = cst.inquiries;
 
@@ -34,50 +35,23 @@ const uncheckChoice = value => ({
  * then extract a configuration from its values.
  * The returned configuration is used to skip the specified questions.
  *
- * @returns {Object} Either the config object in case of success
- * or a null object in case of error
+ * @returns {Object} The config object, possibly empty.
  */
-const loadConfigurationFile = () => fse.readJson(cst.configFile)
-    .then((config) => {
-        log.info(cst.messages.loadingConfig);
-
-        // test existence of each config key
-        Object.keys(config).forEach((key) => {
-            if (!inquiries[key]) {
-                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration property`);
-                delete config[key];
-            }
-        });
-
-        // validate value of each config value
-        Object.keys(config).forEach((key) => {
-            // not all inquiries have a validation method, we must thus safely access it
-            if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]).constructor.name === 'Error') {
-                // warn user if the item is invalid
-                log.warning(`${cst.configFile} "${key}": "${config[key]}" ${inquiries[key].validate(config[key])}`);
-                delete config[key];
-            }
-        });
-
-        /**
-         * as inquirer won't have access to items loaded from configuration file,
-         * we must handle default values relying on them here.
-         */
-        Object.keys(inquiries).forEach((key) => {
-        });
-
-        return config;
-    })
-    // in case of error reading the JSON file
-    .catch((error) => {
-        // this is the error number when fse.readJson tries to open an non existent file
-        if (error.errno === -2) {
-            log.info(cst.messages.noConfig);
-        } else {
-            log.failure(error);
+const loadConfigurationFile = () => fse.pathExists(cst.configFile)
+    .then((exist) => {
+        if (exist) {
+            log.info(cst.messages.loadingConfig);
+            return fse.readJson(cst.configFile);
         }
-        // if an error occurs, load nothing
+        log.info(cst.messages.noConfig);
         return {};
+    })
+    .then((config) => {
+        const { error, value } = validation.configuration.validate(config, { abortEarly: false });
+        if (error) {
+            throw error;
+        }
+        return value;
     });
 
 
