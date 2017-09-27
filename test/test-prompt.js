@@ -31,6 +31,7 @@ const dummyEntities = {
     }
 };
 
+
 describe('prompt', function () {
     afterEach(function () {
         sandbox.verifyAndRestore();
@@ -110,9 +111,9 @@ describe('prompt', function () {
 
         it('warns user about invalid configuration properties and deletes them', function () {
             const dummyConfig = {
-                dbm: 'mysql',
+                dbm: 'mysql', // typo made on purpose
                 dbms: 'mysql',
-                hast: '192.65.32.65',
+                hast: '192.65.32.65', // typo made on purpose
                 port: 3306,
             };
             fseMock.expects('readJson').resolves(dummyConfig);
@@ -262,6 +263,64 @@ describe('prompt', function () {
 
         it('throws an error with an empty parameter', function () {
             assert.throws(() => (prompt.selectColumnsQuestionChoices({})), Error);
+        });
+    });
+
+    describe('selectColumns', function () {
+        const dummySession = {
+            entities: dummyEntities
+        };
+
+        const expectedQuestion = {
+            type: 'checkbox',
+            name: 'selectedColumns',
+            message: 'Select the columns you want to import:',
+            pageSize: 25,
+            choices: [
+                { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
+                { name: 'id (int(11))', value: 'authors.id', checked: true },
+                { name: 'name (varchar(255))', value: 'authors.name', checked: true },
+                { name: 'birth_date (date)', value: 'authors.birth_date', checked: true },
+                { type: 'separator', line: '\u001b[2mbooks\u001b[22m' },
+                { name: 'id (int(11))', value: 'books.id', checked: true },
+                { name: 'title (varchar(255))', value: 'books.title', checked: true },
+                { name: 'price (bigint(20))', value: 'books.price', checked: true },
+                { name: 'author (int(11))', value: 'books.author', checked: true }
+            ]
+        };
+
+        // user selects all questions
+        const expectedAnswer = { selectedColumns: [
+            'authors.id',
+            'authors.name',
+            'authors.birth_date',
+            'books.id',
+            'books.title',
+            'books.price',
+            'books.author'
+        ] };
+
+        const expectedSession = {
+            entities: dummyEntities,
+            selectedColumns: expectedAnswer
+        };
+
+        let promptStub = null;
+
+        beforeEach(function () {
+            promptStub = sandbox.stub(inquirer, 'prompt');
+        });
+
+        it('returns the expected columns when user select all of them', function () {
+            promptStub.resolves(expectedAnswer);
+
+            return prompt.selectColumns(dummySession)
+                .then((answer) => {
+                    // we only need to check session.selectedColumns since it's the only session object modified
+                    answer.selectedColumns.forEach((selectedColumn, index) => {
+                        assert.strictEqual(answer.selectedColumns[index], expectedAnswer.selectedColumns[index]);
+                    });
+                });
         });
     });
 });
