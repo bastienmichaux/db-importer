@@ -263,14 +263,14 @@ describe('lib/mysql/index', function () {
             const actualResultTables = Object.keys(actualResult);
             const expectedResultTables = Object.keys(expectedResult);
 
-            actualResultTables.forEach((actualResultTable, index) => {
-                assert.strictEqual(actualResultTables[index], expectedResultTables[index]);
+            actualResultTables.forEach((actualResultTable, tableIndex) => {
+                assert.strictEqual(actualResultTables[tableIndex], expectedResultTables[tableIndex]);
                 const actualColumns = Object.keys(actualResult[actualResultTable]);
                 const expectedColumns = Object.keys(expectedResult[actualResultTable]);
 
                 // then do the same with the number of columns and their names
-                actualColumns.forEach((actualColumn, index) => {
-                    assert.strictEqual(actualColumns[index], expectedColumns[index]);
+                actualColumns.forEach((actualColumn, columnIndex) => {
+                    assert.strictEqual(actualColumns[columnIndex], expectedColumns[columnIndex]);
 
                     // then check the values for each column
                     const actualProperties = Object.keys(actualResult[actualResultTable][actualColumn]);
@@ -280,6 +280,62 @@ describe('lib/mysql/index', function () {
                     });
                 });
             });
+        });
+    });
+
+    describe('entityCandidatesColumns', function () {
+        const queryStub = sinon.stub();
+        const dummySession = {
+            connection: {
+                query: queryStub.resolves()
+            },
+            results: {},
+            schema: 'dummySchema',
+            entities: ['foo', 'bar']
+        };
+        const dummySchema = dummySession.schema;
+
+        it('returns the correctly updated session object', function () {
+            queryStub.onCall(0).callsArgWith(1, null, dummyQueryResults);
+            return index.entityCandidatesColumns(dummySession)
+                .then((resolvedValue) => {
+                    const actualResult = resolvedValue.entities;
+                    const expectedResult = dummyEntities;
+
+                    // first check we have the exact same number of tables, and the tables have the same name
+                    const actualResultTables = Object.keys(actualResult);
+                    const expectedResultTables = Object.keys(expectedResult);
+
+                    actualResultTables.forEach((actualResultTable, tableIndex) => {
+                        assert.strictEqual(actualResultTables[tableIndex], expectedResultTables[tableIndex]);
+                        const actualColumns = Object.keys(actualResult[actualResultTable]);
+                        const expectedColumns = Object.keys(expectedResult[actualResultTable]);
+
+                        // then do the same with the number of columns and their names
+                        actualColumns.forEach((actualColumn, columnIndex) => {
+                            assert.strictEqual(actualColumns[columnIndex], expectedColumns[columnIndex]);
+
+                            // then check the values for each column
+                            const actualProperties = Object.keys(actualResult[actualResultTable][actualColumn]);
+
+                            actualProperties.forEach((actualProperty) => {
+                                assert.strictEqual(actualResult[actualResultTable][actualColumn][actualProperty], expectedResult[actualResultTable][actualColumn][actualProperty]);
+                            });
+                        });
+                    });
+                });
+        });
+
+        it('rejects an error when it should reject an error', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(1, dummyError);
+
+            return index.entityCandidatesColumns(dummySession)
+                .then((resolvedValue) => {
+                    assert.fail('promise should be rejected');
+                }, (error) => {
+                    assert.strictEqual(error, dummyError);
+                });
         });
     });
 });

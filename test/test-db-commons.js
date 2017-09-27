@@ -28,32 +28,6 @@ describe('lib/db-commons', function () {
         sandbox.verifyAndRestore();
     });
 
-    describe('createEntities', function () {
-        let dummySession;
-        let createEntitiesStub;
-
-        beforeEach(function () {
-            createEntitiesStub = sandbox.stub().resolves();
-            dummySession = {
-                connection: {},
-                driver: {
-                    createEntities: createEntitiesStub
-                }
-            };
-        });
-
-        afterEach(function () {
-            sinon.assert.calledOnce(createEntitiesStub);
-        });
-
-        it('ends the session with an undefined value', function () {
-            assert(typeof db.createEntities === 'function');
-            return db.createEntities(dummySession).then((resolvedValue) => {
-                assert.strictEqual(resolvedValue, undefined);
-            });
-        });
-    });
-
     describe('connect', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
@@ -155,6 +129,56 @@ describe('lib/db-commons', function () {
             return db.entityCandidates(dummySession).then((session) => {
                 assert.strictEqual(session, dummySession);
             });
+        });
+    });
+
+    describe('createEntities', function () {
+        let dummySession;
+        let createEntitiesStub;
+
+        beforeEach(function () {
+            createEntitiesStub = sandbox.stub().resolves();
+            dummySession = {
+                connection: {},
+                driver: {
+                    createEntities: createEntitiesStub
+                }
+            };
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(createEntitiesStub);
+        });
+
+        it('ends the session with an undefined value', function () {
+            assert(typeof db.createEntities === 'function');
+            return db.createEntities(dummySession).then((resolvedValue) => {
+                assert.strictEqual(resolvedValue, undefined);
+            });
+        });
+    });
+
+    describe('entityCandidatesColumns', function () {
+        let dummySession;
+        let entityCandidatesColumnsStub;
+
+        beforeEach(function () {
+            entityCandidatesColumnsStub = sandbox.stub().resolves();
+            dummySession = {
+                connection: {},
+                driver: {
+                    entityCandidatesColumns: entityCandidatesColumnsStub
+                }
+            };
+        });
+
+        afterEach(function () {
+            sinon.assert.calledOnce(entityCandidatesColumnsStub);
+        });
+
+        it('ends the session with an undefined value', function () {
+            assert(typeof db.entityCandidatesColumns === 'function');
+            return db.entityCandidatesColumns(dummySession);
         });
     });
 });
