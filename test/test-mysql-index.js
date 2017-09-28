@@ -8,8 +8,65 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
+const log = require('../lib/log');
+const queries = require('../lib/mysql/queries');
 
 const sandbox = sinon.sandbox.create();
+
+const dummyQueryResults = [
+    {
+        table_name: 'authors',
+        column_name: 'id',
+        ordinal_position: 1,
+        column_type: 'int(11)'
+    }, {
+        table_name: 'authors',
+        column_name: 'name',
+        ordinal_position: 2,
+        column_type: 'varchar(255)'
+    }, {
+        table_name: 'authors',
+        column_name: 'birth_date',
+        ordinal_position: 3,
+        column_type: 'date'
+    }, {
+        table_name: 'books',
+        column_name: 'id',
+        ordinal_position: 1,
+        column_type: 'int(11)'
+    }, {
+        table_name: 'books',
+        column_name: 'title',
+        ordinal_position: 2,
+        column_type: 'varchar(255)'
+    }, {
+        table_name: 'books',
+        column_name: 'price',
+        ordinal_position: 3,
+        column_type: 'bigint(20)'
+    }, {
+        table_name: 'books',
+        column_name: 'author',
+        ordinal_position: 4,
+        column_type: 'int(11)'
+    }
+];
+
+const dummyTables = ['authors', 'books'];
+
+const dummyEntities = {
+    authors: {
+        id: { ordinalPosition: 1, columnType: 'int(11)' },
+        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+        birth_date: { ordinalPosition: 3, columnType: 'date' }
+    },
+    books: {
+        id: { ordinalPosition: 1, columnType: 'int(11)' },
+        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+        author: { ordinalPosition: 4, columnType: 'int(11)' }
+    }
+};
 
 describe('lib/mysql/index', function () {
     afterEach(function () {
@@ -162,8 +219,8 @@ describe('lib/mysql/index', function () {
     });
 
     describe('createEntities', function () {
-        let dummySession;
-        let queryStub;
+        let dummySession = null;
+        let queryStub = null;
 
         beforeEach(function () {
             queryStub = sandbox.stub();
@@ -185,16 +242,100 @@ describe('lib/mysql/index', function () {
                 });
         });
 
-        it('rejects an error when it should reject an error (kind of)', function () {
+        it('rejects an error when it should reject an error', function () {
             const dummyError = {};
             queryStub.callsArgWith(1, dummyError);
 
-            return index.createEntities(dummySession).then(() => {
+            return index.createEntities(dummySession).then((onResolved) => {
                 assert.fail('promise should be rejected');
             }, (error) => {
                 assert.strictEqual(error, dummyError);
             });
         });
     });
-});
 
+    describe('organizeColumns', function () {
+        it('returns an organized object representing the database structure', function () {
+            const actualResult = index.organizeColumns(dummyQueryResults, dummyTables);
+            const expectedResult = dummyEntities;
+
+            // first check we have the exact same number of tables, and the tables have the same name
+            const actualResultTables = Object.keys(actualResult);
+            const expectedResultTables = Object.keys(expectedResult);
+
+            actualResultTables.forEach((actualResultTable, tableIndex) => {
+                assert.strictEqual(actualResultTables[tableIndex], expectedResultTables[tableIndex]);
+                const actualColumns = Object.keys(actualResult[actualResultTable]);
+                const expectedColumns = Object.keys(expectedResult[actualResultTable]);
+
+                // then do the same with the number of columns and their names
+                actualColumns.forEach((actualColumn, columnIndex) => {
+                    assert.strictEqual(actualColumns[columnIndex], expectedColumns[columnIndex]);
+
+                    // then check the values for each column
+                    const actualProperties = Object.keys(actualResult[actualResultTable][actualColumn]);
+
+                    actualProperties.forEach((actualProperty) => {
+                        assert.strictEqual(actualResult[actualResultTable][actualColumn][actualProperty], expectedResult[actualResultTable][actualColumn][actualProperty]);
+                    });
+                });
+            });
+        });
+    });
+
+    describe('entityCandidatesColumns', function () {
+        const queryStub = sinon.stub();
+        const dummySession = {
+            connection: {
+                query: queryStub.resolves()
+            },
+            results: {},
+            schema: 'dummySchema',
+            entities: ['foo', 'bar']
+        };
+        const dummySchema = dummySession.schema;
+
+        it('returns the correctly updated session object', function () {
+            queryStub.onCall(0).callsArgWith(1, null, dummyQueryResults);
+            return index.entityCandidatesColumns(dummySession)
+                .then((resolvedValue) => {
+                    const actualResult = resolvedValue.entities;
+                    const expectedResult = dummyEntities;
+
+                    // first check we have the exact same number of tables, and the tables have the same name
+                    const actualResultTables = Object.keys(actualResult);
+                    const expectedResultTables = Object.keys(expectedResult);
+
+                    actualResultTables.forEach((actualResultTable, tableIndex) => {
+                        assert.strictEqual(actualResultTables[tableIndex], expectedResultTables[tableIndex]);
+                        const actualColumns = Object.keys(actualResult[actualResultTable]);
+                        const expectedColumns = Object.keys(expectedResult[actualResultTable]);
+
+                        // then do the same with the number of columns and their names
+                        actualColumns.forEach((actualColumn, columnIndex) => {
+                            assert.strictEqual(actualColumns[columnIndex], expectedColumns[columnIndex]);
+
+                            // then check the values for each column
+                            const actualProperties = Object.keys(actualResult[actualResultTable][actualColumn]);
+
+                            actualProperties.forEach((actualProperty) => {
+                                assert.strictEqual(actualResult[actualResultTable][actualColumn][actualProperty], expectedResult[actualResultTable][actualColumn][actualProperty]);
+                            });
+                        });
+                    });
+                });
+        });
+
+        it('rejects an error when it should reject an error', function () {
+            const dummyError = {};
+            queryStub.callsArgWith(1, dummyError);
+
+            return index.entityCandidatesColumns(dummySession)
+                .then((resolvedValue) => {
+                    assert.fail('promise should be rejected');
+                }, (error) => {
+                    assert.strictEqual(error, dummyError);
+                });
+        });
+    });
+});

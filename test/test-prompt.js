@@ -16,9 +16,113 @@ const db = require('../lib/db-commons');
 const sandbox = sinon.sandbox.create();
 const inquiries = cst.inquiries;
 
+// for testing selectColumns and selectColumnsQuestionChoices
+// generated with dbi_book_author
+const dummyEntities = {
+    authors: {
+        id: { ordinalPosition: 1, columnType: 'int(11)' },
+        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+        birth_date: { ordinalPosition: 3, columnType: 'date' } },
+    books: {
+        id: { ordinalPosition: 1, columnType: 'int(11)' },
+        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+        author: { ordinalPosition: 4, columnType: 'int(11)' }
+    }
+};
+
+
 describe('prompt', function () {
     afterEach(function () {
         sandbox.verifyAndRestore();
+    });
+
+    describe('removeColumns', function () {
+        const beforeEntities = {
+            authors: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
+        // this array + the dummy entities produces the expected entities
+        const dummySelectedColumns = [
+            'authors.name',
+            'authors.birth_date',
+            'books.title',
+            'books.price',
+            'books.author'
+        ];
+
+        const dummyUnselectedColumns = [
+            'authors.id',
+            'books.id'
+        ];
+
+        // expected entities after removal
+        // 'id' columns aren't selected
+        const afterEntities = {
+            authors: {
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
+        it('keeps the initial entities unchanged', function () {
+            // check that after using this function, the removed properties are still in the initial entities
+            prompt.removeColumns(beforeEntities, dummySelectedColumns);
+            assert(beforeEntities.authors.id !== undefined);
+            assert(beforeEntities.books.id !== undefined);
+        });
+
+        it('removes the columns that are not part of the source entities', function () {
+            const actualEntities = prompt.removeColumns(beforeEntities, dummySelectedColumns);
+
+            // check that both entities object (before & after removal) have the exact same number of tables
+            const beforeTables = Object.keys(beforeEntities);
+            const afterTables = Object.keys(afterEntities);
+            const actualTables = Object.keys(actualEntities);
+
+            assert((beforeTables.length === afterTables.length) && (beforeTables.length === actualTables.length));
+
+            beforeTables.forEach((beforeTable, index) => {
+                assert.strictEqual(beforeTables[index], afterTables[index]);
+                assert.strictEqual(beforeTables[index], actualTables[index]);
+            });
+
+            // check that the expected and actual entities with removed columns are identical
+            // and that the columns not selected are part of the dummy unselected columns
+            // and that the selected columns are part of the dummy selected columns
+            beforeTables.forEach((table) => {
+                const beforeColumns = Object.keys(beforeEntities[table]);
+                const afterColumns = Object.keys(afterEntities[table]);
+                const actualColumns = Object.keys(actualEntities[table]);
+                beforeColumns.forEach((column) => {
+                    // check a removed column is also removed from the actual entities & still exists in the initial object
+                    if (afterEntities[table][column] === undefined) {
+                        assert.strictEqual(actualEntities[table][column], undefined);
+                        assert(typeof beforeEntities[table][column] === 'object');
+                        // assert the removed column isn't part of the selected columns
+                        assert(!dummySelectedColumns.includes(`${table}.${column}`));
+                    } else {
+                        const afterProperties = Object.keys(afterEntities[table][column]);
+                        afterProperties.forEach((prop) => {
+                            assert.strictEqual(afterEntities[table][column][prop], actualEntities[table][column][prop]);
+                        });
+                    }
+                });
+            });
+        });
     });
 
     describe('askCredentials', function () {
@@ -95,9 +199,9 @@ describe('prompt', function () {
 
         it('warns user about invalid configuration properties and deletes them', function () {
             const dummyConfig = {
-                dbm: 'mysql',
+                dbm: 'mysql', // typo made on purpose
                 dbms: 'mysql',
-                hast: '192.65.32.65',
+                hast: '192.65.32.65', // typo made on purpose
                 port: 3306,
             };
             fseMock.expects('readJson').resolves(dummyConfig);
@@ -204,6 +308,89 @@ describe('prompt', function () {
             return prompt.selectEntities(dummyInput).then((result) => {
                 assert.deepStrictEqual(result, Object.assign(dummyInput, dummyAnswer));
             });
+        });
+    });
+
+    describe('selectColumnsQuestionChoices', function () {
+        // template choices, generated with dbi_book_author
+        const expectedChoices = [
+            { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
+            { name: 'id (int(11))', value: 'authors.id', checked: true },
+            { name: 'name (varchar(255))', value: 'authors.name', checked: true },
+            { name: 'birth_date (date)', value: 'authors.birth_date', checked: true },
+            { type: 'separator', line: '\u001b[2mbooks\u001b[22m' },
+            { name: 'id (int(11))', value: 'books.id', checked: true },
+            { name: 'title (varchar(255))', value: 'books.title', checked: true },
+            { name: 'price (bigint(20))', value: 'books.price', checked: true },
+            { name: 'author (int(11))', value: 'books.author', checked: true }
+        ];
+
+        // template question for selectColumns' and related functions' unit tests
+        const expectedQuestion = {
+            type: 'checkbox',
+            name: 'columns',
+            message: 'Select the columns you want to import:',
+            pageSize: 25,
+            choices: expectedChoices,
+        };
+
+        it('returns the expected choices', function () {
+            const actualChoices = prompt.selectColumnsQuestionChoices(dummyEntities);
+
+            let keys = null;
+
+            actualChoices.forEach((actualChoice, index) => {
+                keys = Object.keys(actualChoice);
+
+                // assert that each property value in the returned choices are correct
+                keys.forEach((key) => {
+                    assert.strictEqual(actualChoice[key], expectedChoices[index][key]);
+                });
+            });
+        });
+    });
+
+    describe('selectColumns', function () {
+        const expectedEntities = dummyEntities;
+
+        const dummySession = {
+            entities: dummyEntities
+        };
+
+        // user selects all questions
+        const expectedAnswer = { selectedColumns: [
+            'authors.id',
+            'authors.name',
+            'authors.birth_date',
+            'books.id',
+            'books.title',
+            'books.price',
+            'books.author'
+        ] };
+
+        let promptStub = null;
+
+        beforeEach(function () {
+            promptStub = sandbox.stub(inquirer, 'prompt');
+        });
+
+        it('returns the expected columns when user select all of them', function () {
+            promptStub.resolves(expectedAnswer);
+
+            return prompt.selectColumns(dummySession)
+                .then((answer) => {
+                    // the answer holds only entities
+                    const tables = Object.keys(answer.entities);
+                    tables.forEach((table) => {
+                        const columns = Object.keys(answer.entities[table]);
+                        columns.forEach((column) => {
+                            const properties = Object.keys(answer.entities[table][column]);
+                            properties.forEach((prop) => {
+                                assert.strictEqual(expectedEntities[table][column][prop], answer.entities[table][column][prop]);
+                            });
+                        });
+                    });
+                });
         });
     });
 });
