@@ -348,10 +348,6 @@ describe('prompt', function () {
                 });
             });
         });
-
-        it('throws an error with an empty parameter', function () {
-            assert.throws(() => (prompt.selectColumnsQuestionChoices({})), Error);
-        });
     });
 
     describe('selectColumns', function () {
