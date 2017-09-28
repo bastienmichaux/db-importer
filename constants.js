@@ -25,7 +25,7 @@ const inquiries = {
         name: 'dbms',
         message: 'DBMS:',
         choices: toArray(pickProperty(db.dbmsList, 'name')),
-        validate: validation.validateDbms,
+        validate: validation.inquirer.dbms,
         default: db.dbmsList.mysql.name
     },
     // ask the host name and validate it
@@ -33,7 +33,7 @@ const inquiries = {
         type: 'input',
         name: 'host',
         message: 'Host address:',
-        validate: validation.validateHost,
+        validate: validation.inquirer.host,
         default: 'localhost',
     },
     // ask the port and validate it
@@ -41,7 +41,7 @@ const inquiries = {
         type: 'input',
         name: 'port',
         message: 'port:',
-        validate: validation.validatePort,
+        validate: validation.inquirer.port,
         default: (input) => {
             if (input.dbms) {
                 return db.dbmsList[input.dbms].defaultPort;
@@ -55,19 +55,22 @@ const inquiries = {
         type: 'input',
         name: 'user',
         message: 'User name:',
+        validate: validation.inquirer.user,
         default: 'root'
     },
     // ask the DBMS server connection password
     password: {
         type: 'password',
         name: 'password',
-        message: 'Password:'
+        message: 'Password:',
+        validate: validation.inquirer.password,
     },
     // ask which database schema should be imported
     schema: {
         type: 'input',
         name: 'schema',
-        message: 'Database schema to import:'
+        message: 'Database schema to import:',
+        validate: validation.inquirer.schema,
     },
     // ask which tables should be imported
     entities: {
