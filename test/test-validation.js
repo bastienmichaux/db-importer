@@ -7,7 +7,6 @@ const sinon = require('sinon');
 const joi = require('joi');
 
 const validation = require('../lib/validation');
-const db = require('../lib/db-commons');
 
 
 const sandbox = sinon.sandbox.create();
@@ -52,19 +51,6 @@ describe('lib/validation', function () {
 
             assert.strictEqual(validateSpy.getCall(0).args[0], anyInput);
             assert.strictEqual(validateSpy.getCall(0).args[1], rule);
-        });
-    });
-
-    describe('validateDbms', function () {
-        // iterate over each key of dbmsList as it is by definition the dbms name
-        Object.keys(db.dbmsList).forEach(function (dbms) {
-            it(`returns true if input is ${dbms}`, function () {
-                assert(validation.validateDbms(dbms));
-            });
-        });
-
-        it('returns an error if input isn\'t a dbms from the list', function () {
-            assert.strictEqual(validation.validateDbms('mysl').constructor.name, 'Error');
         });
     });
 });

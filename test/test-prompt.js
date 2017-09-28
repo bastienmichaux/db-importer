@@ -177,63 +177,49 @@ describe('prompt', function () {
         });
 
         it('informs when there is no configuration file and resolves an empty object', function () {
-            fseMock.expects('readJson').rejects({ errno: -2 });
-
             logMock.expects('info').once().withArgs(cst.messages.noConfig);
+            fseMock.expects('pathExists').once().resolves(false);
 
             return prompt.loadConfigurationFile().then((config) => {
                 assert.deepStrictEqual(config, {});
             });
         });
 
-        it('logs file reading errors and resolves empty object (except for file absence)', function () {
-            const dummyError = new Error('dummy fse.readJson error');
-            fseMock.expects('readJson').rejects(dummyError);
-
-            logMock.expects('failure').once().withArgs(dummyError);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, {});
-            });
-        });
-
-        it('warns user about invalid configuration properties and deletes them', function () {
-            const dummyConfig = {
-                dbm: 'mysql', // typo made on purpose
+        it('informs it is loading the configuration file and return validated configuration object', function () {
+            const validConfiguration = {
                 dbms: 'mysql',
-                hast: '192.65.32.65', // typo made on purpose
-                port: 3306,
+                host: '192.168.32.2',
+                port: '3306',
+                user: 'root',
+                password: 'verystrongpassword'
             };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once(); // suppressing unwanted output
-            const dbmIsInvalid = `dbm is defined in ${cst.configFile} but is not a valid configuration property`;
-            const hastIsInvalid = `hast is defined in ${cst.configFile} but is not a valid configuration property`;
+            // cast number as validation framework would do.
+            const validatedConfiguration = Object.assign(validConfiguration, { port: 3306 });
 
-            logMock.expects('warning').once().withArgs(dbmIsInvalid);
-            logMock.expects('warning').once().withArgs(hastIsInvalid);
+            fseMock.expects('pathExists').once().resolves(true);
+            fseMock.expects('readJson').once().resolves(validConfiguration);
+
+            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
 
             return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, { dbms: 'mysql', port: 3306 });
+                assert.deepStrictEqual(config, validatedConfiguration);
             });
         });
 
-        it('warns user about invalid configuration item and deletes them', function () {
-            const dummyConfig = {
-                host: '19.168.32.',
-                port: '-',
-                user: 'root',
-                password: 'very-good'
+        it('throws validationError on invalid configuration', function () {
+            const invalidConfiguration = {
+                dbms: ''
             };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once(); // suppressing unwanted output
-            const invalidHost = `${cst.configFile} "host": "19.168.32." ${inquiries.host.validate(dummyConfig.host)}`;
-            const invalidPort = `${cst.configFile} "port": "-" ${inquiries.port.validate(dummyConfig.port)}`;
 
-            logMock.expects('warning').once().withArgs(invalidHost);
-            logMock.expects('warning').once().withArgs(invalidPort);
+            fseMock.expects('pathExists').once().resolves(true);
+            fseMock.expects('readJson').once().resolves(invalidConfiguration);
+
+            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
 
             return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, { user: 'root', password: 'very-good' });
+                assert.fail(config, undefined, 'Promise should have rejected with a ValidationError', '!==');
+            }, (error) => {
+                assert.ok(error, 'fails as expected');
             });
         });
     });
