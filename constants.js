@@ -12,6 +12,23 @@ const packageInfo = require('./package.json');
  */
 const configFile = '.db-config.json';
 
+/**
+ * defines how the program must behave
+ * - automatic: the whole process happens without user intervention
+ * the program will fail if the configuration isn't full and correct
+ *
+ * - default: the selection happens without user intervention
+ * the program will ask user help if it needs some (like missing or incorrect login)
+ *
+ * manual: the program prompts the user for each possible choice
+ *
+ * @type {{automatic: string, default: string, manual: string}}
+ */
+const modes = {
+    automatic: 'automatic',
+    default: 'default',
+    manual: 'manual',
+};
 
 /**
  * Messages displayed to the user
@@ -47,6 +64,7 @@ const headers = {
 
 module.exports = {
     configFile,
+    modes,
     messages,
     headers
 };

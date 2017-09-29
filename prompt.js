@@ -116,13 +116,7 @@ const loadConfigurationFile = () => fse.pathExists(cst.configFile)
         log.info(cst.messages.noConfig);
         return {};
     })
-    .then((config) => {
-        const { error, value } = validation.configuration.validate(config, { abortEarly: false });
-        if (error) {
-            throw error;
-        }
-        return value;
-    });
+    .then(config => validation.validateConfiguration(config));
 
 
 /**

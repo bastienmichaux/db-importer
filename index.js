@@ -23,9 +23,16 @@ const msg = cst.messages;
  * load configuration file, validate and clean it
  *
  * @resolves {askCredentials({dbms, host, port, user, password, schema})} configuration with any property possibly missing
+ * if mode === 'automatic', skips askCredentials and go to openSession
  */
 const getConfiguration = () => prompt.loadConfigurationFile()
-    .then(configuration => askCredentials(configuration));
+    .then((configuration) => {
+        // automatic mode doesn't askCredentials
+        if (configuration.mode !== cst.modes.automatic) {
+            return askCredentials(configuration);
+        }
+        return openSession(configuration);
+    });
 
 
 /**
