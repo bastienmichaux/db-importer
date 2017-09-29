@@ -2,7 +2,7 @@
  * @file Command-line interface functions
  */
 
-const lodash = require('lodash/object');
+const lodash = require('lodash');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 
@@ -283,7 +283,6 @@ module.exports = {
     askCredentials,
     selectEntities,
     selectColumnsQuestionChoices,
-    selectColumnsQuestion,
     selectColumns,
     removeColumns,
 };
