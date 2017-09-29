@@ -5,7 +5,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
-const lodash = require('lodash');
 const fse = require('fs-extra');
 
 const prompt = require('../prompt');
@@ -14,7 +13,6 @@ const cst = require('../constants');
 const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
-const inquiries = cst.inquiries;
 
 // for testing selectColumns and selectColumnsQuestionChoices
 // generated with dbi_book_author
@@ -60,11 +58,6 @@ describe('prompt', function () {
             'books.author'
         ];
 
-        const dummyUnselectedColumns = [
-            'authors.id',
-            'books.id'
-        ];
-
         // expected entities after removal
         // 'id' columns aren't selected
         const afterEntities = {
@@ -105,8 +98,6 @@ describe('prompt', function () {
             // and that the selected columns are part of the dummy selected columns
             beforeTables.forEach((table) => {
                 const beforeColumns = Object.keys(beforeEntities[table]);
-                const afterColumns = Object.keys(afterEntities[table]);
-                const actualColumns = Object.keys(actualEntities[table]);
                 beforeColumns.forEach((column) => {
                     // check a removed column is also removed from the actual entities & still exists in the initial object
                     if (afterEntities[table][column] === undefined) {
@@ -121,48 +112,6 @@ describe('prompt', function () {
                         });
                     }
                 });
-            });
-        });
-    });
-
-    describe('askCredentials', function () {
-        let stub;
-
-        beforeEach(function () {
-            stub = sandbox.stub(inquirer, 'prompt').resolves({});
-        });
-
-        it('asks all items if provided configuration is empty', function () {
-            return prompt.askCredentials({}).then(() => {
-                assert.deepStrictEqual(stub.getCall(0).args[0], [
-                    inquiries.dbms,
-                    inquiries.host,
-                    inquiries.port,
-                    inquiries.user,
-                    inquiries.password,
-                    inquiries.schema
-                ]);
-            });
-        });
-
-        it('doesn\'t ask items provided by the configuration', function () {
-            const partialConfiguration = { dbms: 'mysql', host: '192.168.32.2', password: 'nope' };
-
-            return prompt.askCredentials(partialConfiguration).then(() => {
-                const args = stub.getCall(0).args[0];
-                // filter args to only keep unexpected enquiries, which answers are already provided by configuration
-                const wronglyInquired = args.filter(inquiry => Object.keys(partialConfiguration).includes(inquiry.name));
-                assert.deepStrictEqual(wronglyInquired, []);
-            });
-        });
-
-        it('deduces default port from configured dbms', function () {
-            const configurationWithDbms = { dbms: db.dbmsList.mysql.name };
-
-            return prompt.askCredentials(configurationWithDbms).then(() => {
-                const inquiries = stub.getCall(0).args[0];
-                const portInquiry = inquiries.find(inquiry => inquiry.name === 'port');
-                assert.strictEqual(portInquiry.default, cst.inquiries.port.default(configurationWithDbms));
             });
         });
     });
@@ -194,7 +143,7 @@ describe('prompt', function () {
                 password: 'verystrongpassword'
             };
             // cast number as validation framework would do.
-            const validatedConfiguration = Object.assign(validConfiguration, { port: 3306 });
+            const validatedConfiguration = Object.assign({}, validConfiguration, { port: 3306 });
 
             fseMock.expects('pathExists').once().resolves(true);
             fseMock.expects('readJson').once().resolves(validConfiguration);
@@ -220,6 +169,48 @@ describe('prompt', function () {
                 assert.fail(config, undefined, 'Promise should have rejected with a ValidationError', '!==');
             }, (error) => {
                 assert.ok(error, 'fails as expected');
+            });
+        });
+    });
+
+    describe('askCredentials', function () {
+        let stub;
+
+        beforeEach(function () {
+            stub = sandbox.stub(inquirer, 'prompt').resolves({});
+        });
+
+        it('asks all items if provided configuration is empty', function () {
+            return prompt.askCredentials({}).then(() => {
+                assert.deepStrictEqual(stub.getCall(0).args[0], [
+                    prompt.inquiries.dbms,
+                    prompt.inquiries.host,
+                    prompt.inquiries.port,
+                    prompt.inquiries.user,
+                    prompt.inquiries.password,
+                    prompt.inquiries.schema
+                ]);
+            });
+        });
+
+        it('doesn\'t ask items provided by the configuration', function () {
+            const partialConfiguration = { dbms: 'mysql', host: '192.168.32.2', password: 'nope' };
+
+            return prompt.askCredentials(partialConfiguration).then(() => {
+                const args = stub.getCall(0).args[0];
+                // filter args to only keep unexpected enquiries, which answers are already provided by configuration
+                const wronglyInquired = args.filter(inquiry => Object.keys(partialConfiguration).includes(inquiry.name));
+                assert.deepStrictEqual(wronglyInquired, []);
+            });
+        });
+
+        it('deduces default port from configured dbms', function () {
+            const configurationWithDbms = { dbms: db.dbmsList.mysql.name };
+
+            return prompt.askCredentials(configurationWithDbms).then(() => {
+                const inquiries = stub.getCall(0).args[0];
+                const portInquiry = inquiries.find(inquiry => inquiry.name === 'port');
+                assert.strictEqual(portInquiry.default, prompt.inquiries.port.default(configurationWithDbms));
             });
         });
     });
@@ -262,8 +253,7 @@ describe('prompt', function () {
                 { value: dummyLiquibase, checked: false }
             ];
 
-            const dummyEnquiry = lodash.clone(cst.inquiries.entities);
-            dummyEnquiry.choices = dummyChoices;
+            const dummyEnquiry = Object.assign({}, prompt.inquiries.entities, { choices: dummyChoices });
 
             const separatorStub = sandbox.stub(inquirer, 'Separator');
             separatorStub.withArgs(cst.headers.tables).returns(dummySeparatorTable);
@@ -292,7 +282,7 @@ describe('prompt', function () {
             promptStub.resolves(dummyAnswer);
 
             return prompt.selectEntities(dummyInput).then((result) => {
-                assert.deepStrictEqual(result, Object.assign(dummyInput, dummyAnswer));
+                assert.deepStrictEqual(result, Object.assign({}, dummyInput, dummyAnswer));
             });
         });
     });
@@ -310,15 +300,6 @@ describe('prompt', function () {
             { name: 'price (bigint(20))', value: 'books.price', checked: true },
             { name: 'author (int(11))', value: 'books.author', checked: true }
         ];
-
-        // template question for selectColumns' and related functions' unit tests
-        const expectedQuestion = {
-            type: 'checkbox',
-            name: 'columns',
-            message: 'Select the columns you want to import:',
-            pageSize: 25,
-            choices: expectedChoices,
-        };
 
         it('returns the expected choices', function () {
             const actualChoices = prompt.selectColumnsQuestionChoices(dummyEntities);

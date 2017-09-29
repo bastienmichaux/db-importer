@@ -2,84 +2,7 @@
  * @file Program constants
  */
 
-const lodash = require('lodash/object');
-
 const packageInfo = require('./package.json');
-const validation = require('./lib/validation');
-const db = require('./lib/db-commons');
-
-const toArray = lodash.values;
-const pickProperty = lodash.mapValues;
-
-
-/**
- * Question objects required by the inquirer node module for user interaction.
- *
- * @enum {Object}
- * @see {@link https://www.npmjs.com/package/inquirer#question|How to use inquirer questions}
- */
-const inquiries = {
-    // ask the user which DBMS will be used (default is MySQL)
-    dbms: {
-        type: 'list',
-        name: 'dbms',
-        message: 'DBMS:',
-        choices: toArray(pickProperty(db.dbmsList, 'name')),
-        validate: validation.inquirer.dbms,
-        default: db.dbmsList.mysql.name
-    },
-    // ask the host name and validate it
-    host: {
-        type: 'input',
-        name: 'host',
-        message: 'Host address:',
-        validate: validation.inquirer.host,
-        default: 'localhost',
-    },
-    // ask the port and validate it
-    port: {
-        type: 'input',
-        name: 'port',
-        message: 'port:',
-        validate: validation.inquirer.port,
-        default: (input) => {
-            if (input.dbms) {
-                return db.dbmsList[input.dbms].defaultPort;
-            }
-            // It means we offer no default
-            return null;
-        }
-    },
-    // ask the username for the selected DBMS server
-    user: {
-        type: 'input',
-        name: 'user',
-        message: 'User name:',
-        validate: validation.inquirer.user,
-        default: 'root'
-    },
-    // ask the DBMS server connection password
-    password: {
-        type: 'password',
-        name: 'password',
-        message: 'Password:',
-        validate: validation.inquirer.password,
-    },
-    // ask which database schema should be imported
-    schema: {
-        type: 'input',
-        name: 'schema',
-        message: 'Database schema to import:',
-        validate: validation.inquirer.schema,
-    },
-    // ask which tables should be imported
-    entities: {
-        type: 'checkbox',
-        name: 'entities',
-        message: 'Select the tables you want to import:',
-        pageSize: 25
-    }
-};
 
 
 /**
@@ -123,7 +46,6 @@ const headers = {
 
 
 module.exports = {
-    inquiries,
     configFile,
     messages,
     headers

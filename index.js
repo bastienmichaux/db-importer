@@ -35,7 +35,7 @@ const getConfiguration = () => prompt.loadConfigurationFile()
  * @resolves {openSession({dbms, host, port, user, password, schema})} complete credentials plus schema to extract
  */
 const askCredentials = configuration => prompt.askCredentials(configuration)
-    .then(credentials => Object.assign(configuration, credentials))
+    .then(credentials => Object.assign({}, configuration, credentials))
     .then(credentials => openSession(credentials));
 
 
