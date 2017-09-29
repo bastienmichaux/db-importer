@@ -1,0 +1,165 @@
+/*
+ * this database holds a table for each mysql 5.7 type
+ * goal: test conversion of all types, test type limits too (max, min, precision, etc)
+ * todo: play with type attributes for types that accept parameters
+ */
+
+DROP SCHEMA IF EXISTS dbi_types;
+CREATE SCHEMA dbi_types;
+USE dbi_types;
+
+DROP TABLE IF EXISTS tbl_integer;
+CREATE TABLE tbl_integer
+(`integer` INTEGER)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_int;
+CREATE TABLE tbl_int
+(`int` INT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_smallint;
+CREATE TABLE tbl_smallint
+(`smallint` SMALLINT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_tinyint;
+CREATE TABLE tbl_tinyint
+(`tinyint` TINYINT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_bigint;
+CREATE TABLE tbl_bigint
+(`bigint` BIGINT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_decimal;
+CREATE TABLE tbl_decimal
+(`decimal` DECIMAL)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_numeric;
+CREATE TABLE tbl_numeric
+(`numeric` NUMERIC)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_float;
+CREATE TABLE tbl_float
+(`float` FLOAT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_double;
+CREATE TABLE tbl_double
+(`double` DOUBLE)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_bit;
+CREATE TABLE tbl_bit
+(`bit` BIT)
+ENGINE=INNODB CHARSET=UTF8;
+
+/* string types */
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`char` CHAR)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`varchar` VARCHAR(8))
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`binary` BINARY)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`varbinary` VARBINARY(8))
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`blob` BLOB)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`text` TEXT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`enum` ENUM('Coffee', 'Tea', 'Other'))
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`set` SET('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'))
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`tinyblob` TINYBLOB)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`mediumblob` MEDIUMBLOB)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`longblob` LONGBLOB)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`tinytext` TINYTEXT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`mediumtext` MEDIUMTEXT)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_char;
+CREATE TABLE tbl_char
+(`longtext` LONGTEXT)
+ENGINE=INNODB CHARSET=UTF8;
+
+/* date types */
+
+DROP TABLE IF EXISTS tbl_date;
+CREATE TABLE tbl_date
+(`date` DATE)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_datetime;
+CREATE TABLE tbl_datetime
+(`datetime` DATETIME)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_timestamp;
+CREATE TABLE tbl_timestamp
+(`timestamp` TIMESTAMP)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_time;
+CREATE TABLE tbl_time
+(`time` TIME)
+ENGINE=INNODB CHARSET=UTF8;
+
+DROP TABLE IF EXISTS tbl_year;
+CREATE TABLE tbl_year
+(`year` YEAR)
+ENGINE=INNODB CHARSET=UTF8;
+
+/* json type */
+
+DROP TABLE IF EXISTS tbl_json;
+CREATE TABLE tbl_json
+(`json` JSON)
+ENGINE=INNODB CHARSET=UTF8;
