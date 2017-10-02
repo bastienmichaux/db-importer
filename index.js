@@ -12,6 +12,7 @@ const prompt = require('./prompt');
 const err = require('./error-handler');
 const log = require('./lib/log');
 const db = require('./lib/db-commons');
+const def = require('./lib/default-choices');
 
 const msg = cst.messages;
 
@@ -71,7 +72,12 @@ const openSession = credentials => db.connect(credentials)
  * @resolves {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
  */
 const getEntityCandidates = session => db.entityCandidates(session)
-    .then(session => selectEntities(session)); // store all the tables of the database we're connected to into the session
+    .then((session) => {
+        if (session.mode === cst.modes.manual) {
+            return selectEntities(session);
+        }
+        return setEntities(session);
+    }); // store all the tables of the database we're connected to into the session
 
 
 /**
@@ -83,6 +89,15 @@ const getEntityCandidates = session => db.entityCandidates(session)
 const selectEntities = session => prompt.selectEntities(session)
     .then(session => getEntityCandidatesColumns(session)); // retrieve the columns of the selected tables
 
+/**
+ * set which table should be used to create entities, stores the resulting array under the entities key of the received
+ * object.
+ * it excludes jhipster own tables, liquibase tables and junction tables (between two tables only).
+ *
+ * @param {{results: {tables}}} session
+ * @resolves {getEntityCandidatesColumns({entities: [tables]})}
+ */
+const setEntities = session => getEntityCandidatesColumns(def.entities(session));
 
 // retrieve the columns of the selected tables
 const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
