@@ -29,7 +29,8 @@
     "jhipster-core": "^1.2.9",
     "joi": "^10.6.0",
     "lodash": "^4.17.4",
-    "mysql": "^2.13.0"
+    "mysql": "^2.13.0",
+    "voca": "^1.3.0"
   },
   "devDependencies": {
     "coveralls": "^2.13.1",
