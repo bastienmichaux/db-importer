@@ -13,6 +13,7 @@ const err = require('./error-handler');
 const log = require('./lib/log');
 const db = require('./lib/db-commons');
 const def = require('./lib/default-choices');
+const exp = require('./lib/exportEntities');
 
 const msg = cst.messages;
 
@@ -105,22 +106,13 @@ const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);
         }
-        return createEntities(session);
+        return closeSession(session);
     }); // ask the user which columns should be selected
 
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
-    .then(session => createEntities(session));
-
-
-/**
- * @todo WIP function, used for integration testing purpose at the moment
- *
- * @param {results} results the results of all previous steps
- */
-const createEntities = results => db.createEntities(results)
-    .then(session => closeSession(session)); // close the connection
+    .then(session => closeSession(session));
 
 
 /**
@@ -129,7 +121,11 @@ const createEntities = results => db.createEntities(results)
  * @param {{driver, connection, schema, results: {entities}}} session
  * @resolves {createEntities(results)}
  */
-const closeSession = session => db.close(session);
+const closeSession = session => db.close(session)
+    .then(session => exportEntities(session));
+
+
+const exportEntities = session => exp.exportEntities(session.entities);
 
 
 /**

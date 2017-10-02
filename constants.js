@@ -13,6 +13,13 @@ const packageInfo = require('./package.json');
 const configFile = '.db-config.json';
 
 /**
+ * File to store export results
+ *
+ * @type {string}
+ */
+const exportFile = 'db-export.json';
+
+/**
  * defines how the program must behave
  * - automatic: the whole process happens without user intervention
  * the program will fail if the configuration isn't full and correct
@@ -64,6 +71,7 @@ const headers = {
 
 module.exports = {
     configFile,
+    exportFile,
     modes,
     messages,
     headers
