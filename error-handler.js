@@ -1,3 +1,4 @@
+const cst = require('./constants');
 const db = require('./lib/db-constants');
 const log = require('./lib/log');
 
@@ -13,6 +14,11 @@ const handleConnectionError = (error) => {
     const dbms = brokenSession.dbms;
 
     log.failure(`${dbms}: ${error.errno} - ${error.code}`);
+
+    // automatic mode doesn't allow to recover from errors, it must fail
+    if (brokenSession.mode === cst.modes.automatic) {
+        throw error;
+    }
 
     switch (db.ERROR_DICTIONARIES[dbms][error.code]) {
     case db.DB_ERRORS.ACCESS_DENIED:

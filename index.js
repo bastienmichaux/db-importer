@@ -1,7 +1,7 @@
 /**
  * @file Entry point of the program
  *
- * Uses a chain of function, meaning each function starts the next function
+ * Uses a chained functions, meaning each function calls the next function
  * This enables to arbitrarily jump to a any step, in case of error for example
  */
 
@@ -105,24 +105,13 @@ const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);
         }
-        return setColumns(session);
+        return createEntities(session);
     }); // ask the user which columns should be selected
 
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
     .then(session => createEntities(session));
-
-const setColumns = session => createEntities(def.columns(session));
-
-
-/**
- * close session and forward results
- *
- * @param {{driver, connection, schema, results: {entities}}} session
- * @resolves {createEntities(results)}
- */
-const closeSession = session => db.close(session);
 
 
 /**
@@ -132,6 +121,15 @@ const closeSession = session => db.close(session);
  */
 const createEntities = results => db.createEntities(results)
     .then(session => closeSession(session)); // close the connection
+
+
+/**
+ * close session and forward results
+ *
+ * @param {{driver, connection, schema, results: {entities}}} session
+ * @resolves {createEntities(results)}
+ */
+const closeSession = session => db.close(session);
 
 
 /**

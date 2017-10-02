@@ -125,12 +125,12 @@ describe('prompt', function () {
             logMock = sandbox.mock(log);
         });
 
-        it('informs when there is no configuration file and resolves an empty object', function () {
+        it('informs when there is no configuration file and resolves a default object', function () {
             logMock.expects('info').once().withArgs(cst.messages.noConfig);
             fseMock.expects('pathExists').once().resolves(false);
 
             return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, {});
+                assert.deepStrictEqual(config, { mode: cst.modes.manual });
             });
         });
 
@@ -143,7 +143,7 @@ describe('prompt', function () {
                 password: 'verystrongpassword'
             };
             // cast number as validation framework would do.
-            const validatedConfiguration = Object.assign({}, validConfiguration, { port: 3306 });
+            const validatedConfiguration = Object.assign({ mode: cst.modes.manual }, validConfiguration, { port: 3306 });
 
             fseMock.expects('pathExists').once().resolves(true);
             fseMock.expects('readJson').once().resolves(validConfiguration);
