@@ -101,12 +101,19 @@ const setEntities = session => getEntityCandidatesColumns(def.entities(session))
 
 // retrieve the columns of the selected tables
 const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
-    .then(session => selectColumns(session)); // ask the user which columns should be selected
+    .then((session) => {
+        if (session.mode === cst.modes.manual) {
+            return selectColumns(session);
+        }
+        return setColumns(session);
+    }); // ask the user which columns should be selected
 
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
     .then(session => createEntities(session));
+
+const setColumns = session => createEntities(def.columns(session));
 
 
 /**
