@@ -26,62 +26,58 @@ USE dbi_europe;
 /* Table structure for table `cities` */
 DROP TABLE IF EXISTS `cities`;
 CREATE TABLE `cities` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `name` CHAR(35) NOT NULL DEFAULT 'N/A',
-  `country` INT(11) NOT NULL,
-  `is_capital` BOOLEAN NOT NULL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `name` CHAR(35) NOT NULL DEFAULT 'N/A',
+    `country` BIGINT NOT NULL,
+    `is_capital` BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 
 /* Table structure for table `countries` */
 DROP TABLE IF EXISTS `countries`;
 CREATE TABLE `countries` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `name` CHAR(35) NOT NULL DEFAULT 'N/A',
-  `continent` ENUM('asia', 'europe', 'north america', 'africa', 'oceania', 'antarctica', 'south america') NOT NULL DEFAULT 'europe',
-  `capital` INT(11) DEFAULT NULL,
-  `code` CHAR(2) DEFAULT '', /* iso 3166-1 alpha-2 code */
-  /* country code allows null because iso standard doesn't currently include countries like Kosovo */
-  PRIMARY KEY (`id`)
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `name` CHAR(35) NOT NULL DEFAULT 'N/A',
+    `continent` ENUM('asia', 'europe', 'north america', 'africa', 'oceania', 'antarctica', 'south america') NOT NULL DEFAULT 'europe',
+    `capital` BIGINT DEFAULT NULL,
+    `code` CHAR(2) DEFAULT '' /* iso 3166-1 alpha-2 code */
+    /* country code allows null because iso standard doesn't currently include countries like Kosovo */
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 
 /* Table structure for table `code` */
 DROP TABLE IF EXISTS `country_codes`;
 CREATE TABLE `country_codes` (
-  `code` CHAR(2) NOT NULL DEFAULT '', /* iso 3166-1 alpha-2 code */
-  PRIMARY KEY (`code`)
+    `code` CHAR(2) PRIMARY KEY DEFAULT '' /* iso 3166-1 alpha-2 code */
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 
 /* Table structure for table `languages` */
 DROP TABLE IF EXISTS `languages`;
 CREATE TABLE `languages` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `name` CHAR(52) NOT NULL DEFAULT '',
-  `iso_code` CHAR(3) NOT NULL DEFAULT '', /* iso 639.3 */
-  PRIMARY KEY (`id`)
+    `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `name` CHAR(52) NOT NULL DEFAULT '',
+    `iso_code` CHAR(3) NOT NULL DEFAULT '' /* iso 639.3 */
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 /* many-to-many relationship through a junction table */
 DROP TABLE IF EXISTS `country_languages`;
 CREATE TABLE `country_languages` (
-  `country_id` INT(11) NOT NULL,
-  `language_id` INT(11) NOT NULL,
-  PRIMARY KEY (`country_id`, `language_id`),
-  CONSTRAINT country_languages_country_fk FOREIGN KEY (`country_id`) REFERENCES countries(`id`),
-  CONSTRAINT country_languages_language_fk FOREIGN KEY (`language_id`) REFERENCES languages(`id`)
+    `country_id` BIGINT,
+    `language_id` BIGINT,
+    PRIMARY KEY (`country_id`, `language_id`),
+    CONSTRAINT country_languages_country_fk FOREIGN KEY (`country_id`) REFERENCES countries(`id`),
+    CONSTRAINT country_languages_language_fk FOREIGN KEY (`language_id`) REFERENCES languages(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 /* reflexive one-to-many relationship through a junction table */
 DROP TABLE IF EXISTS `country_neighbors`;
 CREATE TABLE `country_neighbors` (
-  `country_id` INT(11) NOT NULL,
-  `neighbor_id` INT(11) NOT NULL,
-  PRIMARY KEY (`country_id`, `neighbor_id`),
-  CONSTRAINT neighbor_country_fk FOREIGN KEY (`country_id`) REFERENCES countries(`id`),
-  CONSTRAINT neighbors_fk FOREIGN KEY (`neighbor_id`) REFERENCES countries(`id`)
+    `country_id` BIGINT,
+    `neighbor_id` BIGINT,
+    PRIMARY KEY (`country_id`, `neighbor_id`),
+    CONSTRAINT neighbor_country_fk FOREIGN KEY (`country_id`) REFERENCES countries(`id`),
+    CONSTRAINT neighbors_fk FOREIGN KEY (`neighbor_id`) REFERENCES countries(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8;
 
 /* implement relationships */
