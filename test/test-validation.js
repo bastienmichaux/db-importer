@@ -53,4 +53,36 @@ describe('lib/validation', function () {
             assert.strictEqual(validateSpy.getCall(0).args[1], rule);
         });
     });
+
+    describe('validateConfiguration', function () {
+        it('throws validationError on invalid configuration', function () {
+            const invalidConfiguration = {
+                dbms: ''
+            };
+
+            assert.throws(() => validation.validateConfiguration(invalidConfiguration), /ValidationError/, 'error thrown');
+        });
+
+        it('throws on incomplete configuration with automatic mode', function () {
+            const incompleteConfiguration = {
+                mode: 'automatic'
+            };
+
+            assert.throws(() => validation.validateConfiguration(incompleteConfiguration), /ValidationError/, 'error thrown');
+        });
+
+        it('accepts full configuration with automatic mode', function () {
+            const completeConfiguration = {
+                mode: 'automatic',
+                dbms: 'mysql',
+                host: '192.168.32.2',
+                port: '3306',
+                user: 'root',
+                password: 'password',
+                schema: 'elearning',
+            };
+
+            assert.doesNotThrow(() => validation.validateConfiguration(completeConfiguration));
+        });
+    });
 });

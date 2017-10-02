@@ -154,23 +154,6 @@ describe('prompt', function () {
                 assert.deepStrictEqual(config, validatedConfiguration);
             });
         });
-
-        it('throws validationError on invalid configuration', function () {
-            const invalidConfiguration = {
-                dbms: ''
-            };
-
-            fseMock.expects('pathExists').once().resolves(true);
-            fseMock.expects('readJson').once().resolves(invalidConfiguration);
-
-            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.fail(config, undefined, 'Promise should have rejected with a ValidationError', '!==');
-            }, (error) => {
-                assert.ok(error, 'fails as expected');
-            });
-        });
     });
 
     describe('askCredentials', function () {
