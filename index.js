@@ -125,7 +125,13 @@ const closeSession = session => db.close(session)
     .then(session => exportEntities(session));
 
 
-const exportEntities = session => exp.exportEntities(session.entities);
+const exportEntities = session => exp.exportEntities(session.entities)
+    .then(() => goodbye());
+
+
+const goodbye = () => {
+    log.emphasize(msg.goodbye);
+};
 
 
 /**
