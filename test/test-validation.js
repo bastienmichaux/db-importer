@@ -7,7 +7,6 @@ const sinon = require('sinon');
 const joi = require('joi');
 
 const validation = require('../lib/validation');
-const db = require('../lib/db-commons');
 
 
 const sandbox = sinon.sandbox.create();
@@ -55,16 +54,35 @@ describe('lib/validation', function () {
         });
     });
 
-    describe('validateDbms', function () {
-        // iterate over each key of dbmsList as it is by definition the dbms name
-        Object.keys(db.dbmsList).forEach(function (dbms) {
-            it(`returns true if input is ${dbms}`, function () {
-                assert(validation.validateDbms(dbms));
-            });
+    describe('validateConfiguration', function () {
+        it('throws validationError on invalid configuration', function () {
+            const invalidConfiguration = {
+                dbms: ''
+            };
+
+            assert.throws(() => validation.validateConfiguration(invalidConfiguration), /ValidationError/, 'error thrown');
         });
 
-        it('returns an error if input isn\'t a dbms from the list', function () {
-            assert.strictEqual(validation.validateDbms('mysl').constructor.name, 'Error');
+        it('throws on incomplete configuration with automatic mode', function () {
+            const incompleteConfiguration = {
+                mode: 'automatic'
+            };
+
+            assert.throws(() => validation.validateConfiguration(incompleteConfiguration), /ValidationError/, 'error thrown');
+        });
+
+        it('accepts full configuration with automatic mode', function () {
+            const completeConfiguration = {
+                mode: 'automatic',
+                dbms: 'mysql',
+                host: '192.168.32.2',
+                port: '3306',
+                user: 'root',
+                password: 'password',
+                schema: 'elearning',
+            };
+
+            assert.doesNotThrow(() => validation.validateConfiguration(completeConfiguration));
         });
     });
 });

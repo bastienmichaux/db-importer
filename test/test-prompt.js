@@ -5,7 +5,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const inquirer = require('inquirer');
-const lodash = require('lodash');
 const fse = require('fs-extra');
 
 const prompt = require('../prompt');
@@ -14,7 +13,6 @@ const cst = require('../constants');
 const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
-const inquiries = cst.inquiries;
 
 // for testing selectColumns and selectColumnsQuestionChoices
 // generated with dbi_book_author
@@ -60,11 +58,6 @@ describe('prompt', function () {
             'books.author'
         ];
 
-        const dummyUnselectedColumns = [
-            'authors.id',
-            'books.id'
-        ];
-
         // expected entities after removal
         // 'id' columns aren't selected
         const afterEntities = {
@@ -105,8 +98,6 @@ describe('prompt', function () {
             // and that the selected columns are part of the dummy selected columns
             beforeTables.forEach((table) => {
                 const beforeColumns = Object.keys(beforeEntities[table]);
-                const afterColumns = Object.keys(afterEntities[table]);
-                const actualColumns = Object.keys(actualEntities[table]);
                 beforeColumns.forEach((column) => {
                     // check a removed column is also removed from the actual entities & still exists in the initial object
                     if (afterEntities[table][column] === undefined) {
@@ -125,6 +116,46 @@ describe('prompt', function () {
         });
     });
 
+    describe('loadConfigurationFile', function () {
+        let fseMock;
+        let logMock;
+
+        beforeEach(function () {
+            fseMock = sandbox.mock(fse);
+            logMock = sandbox.mock(log);
+        });
+
+        it('informs when there is no configuration file and resolves a default object', function () {
+            logMock.expects('info').once().withArgs(cst.messages.noConfig);
+            fseMock.expects('pathExists').once().resolves(false);
+
+            return prompt.loadConfigurationFile().then((config) => {
+                assert.deepStrictEqual(config, { mode: cst.modes.manual });
+            });
+        });
+
+        it('informs it is loading the configuration file and return validated configuration object', function () {
+            const validConfiguration = {
+                dbms: 'mysql',
+                host: '192.168.32.2',
+                port: '3306',
+                user: 'root',
+                password: 'verystrongpassword'
+            };
+            // cast number as validation framework would do.
+            const validatedConfiguration = Object.assign({ mode: cst.modes.manual }, validConfiguration, { port: 3306 });
+
+            fseMock.expects('pathExists').once().resolves(true);
+            fseMock.expects('readJson').once().resolves(validConfiguration);
+
+            logMock.expects('info').once().withArgs(cst.messages.loadingConfig);
+
+            return prompt.loadConfigurationFile().then((config) => {
+                assert.deepStrictEqual(config, validatedConfiguration);
+            });
+        });
+    });
+
     describe('askCredentials', function () {
         let stub;
 
@@ -135,12 +166,12 @@ describe('prompt', function () {
         it('asks all items if provided configuration is empty', function () {
             return prompt.askCredentials({}).then(() => {
                 assert.deepStrictEqual(stub.getCall(0).args[0], [
-                    inquiries.dbms,
-                    inquiries.host,
-                    inquiries.port,
-                    inquiries.user,
-                    inquiries.password,
-                    inquiries.schema
+                    prompt.inquiries.dbms,
+                    prompt.inquiries.host,
+                    prompt.inquiries.port,
+                    prompt.inquiries.user,
+                    prompt.inquiries.password,
+                    prompt.inquiries.schema
                 ]);
             });
         });
@@ -162,78 +193,7 @@ describe('prompt', function () {
             return prompt.askCredentials(configurationWithDbms).then(() => {
                 const inquiries = stub.getCall(0).args[0];
                 const portInquiry = inquiries.find(inquiry => inquiry.name === 'port');
-                assert.strictEqual(portInquiry.default, cst.inquiries.port.default(configurationWithDbms));
-            });
-        });
-    });
-
-    describe('loadConfigurationFile', function () {
-        let fseMock;
-        let logMock;
-
-        beforeEach(function () {
-            fseMock = sandbox.mock(fse);
-            logMock = sandbox.mock(log);
-        });
-
-        it('informs when there is no configuration file and resolves an empty object', function () {
-            fseMock.expects('readJson').rejects({ errno: -2 });
-
-            logMock.expects('info').once().withArgs(cst.messages.noConfig);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, {});
-            });
-        });
-
-        it('logs file reading errors and resolves empty object (except for file absence)', function () {
-            const dummyError = new Error('dummy fse.readJson error');
-            fseMock.expects('readJson').rejects(dummyError);
-
-            logMock.expects('failure').once().withArgs(dummyError);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, {});
-            });
-        });
-
-        it('warns user about invalid configuration properties and deletes them', function () {
-            const dummyConfig = {
-                dbm: 'mysql', // typo made on purpose
-                dbms: 'mysql',
-                hast: '192.65.32.65', // typo made on purpose
-                port: 3306,
-            };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once(); // suppressing unwanted output
-            const dbmIsInvalid = `dbm is defined in ${cst.configFile} but is not a valid configuration property`;
-            const hastIsInvalid = `hast is defined in ${cst.configFile} but is not a valid configuration property`;
-
-            logMock.expects('warning').once().withArgs(dbmIsInvalid);
-            logMock.expects('warning').once().withArgs(hastIsInvalid);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, { dbms: 'mysql', port: 3306 });
-            });
-        });
-
-        it('warns user about invalid configuration item and deletes them', function () {
-            const dummyConfig = {
-                host: '19.168.32.',
-                port: '-',
-                user: 'root',
-                password: 'very-good'
-            };
-            fseMock.expects('readJson').resolves(dummyConfig);
-            logMock.expects('info').once(); // suppressing unwanted output
-            const invalidHost = `${cst.configFile} "host": "19.168.32." ${inquiries.host.validate(dummyConfig.host)}`;
-            const invalidPort = `${cst.configFile} "port": "-" ${inquiries.port.validate(dummyConfig.port)}`;
-
-            logMock.expects('warning').once().withArgs(invalidHost);
-            logMock.expects('warning').once().withArgs(invalidPort);
-
-            return prompt.loadConfigurationFile().then((config) => {
-                assert.deepStrictEqual(config, { user: 'root', password: 'very-good' });
+                assert.strictEqual(portInquiry.default, prompt.inquiries.port.default(configurationWithDbms));
             });
         });
     });
@@ -276,8 +236,7 @@ describe('prompt', function () {
                 { value: dummyLiquibase, checked: false }
             ];
 
-            const dummyEnquiry = lodash.clone(cst.inquiries.entities);
-            dummyEnquiry.choices = dummyChoices;
+            const dummyEnquiry = Object.assign({}, prompt.inquiries.entities, { choices: dummyChoices });
 
             const separatorStub = sandbox.stub(inquirer, 'Separator');
             separatorStub.withArgs(cst.headers.tables).returns(dummySeparatorTable);
@@ -306,7 +265,7 @@ describe('prompt', function () {
             promptStub.resolves(dummyAnswer);
 
             return prompt.selectEntities(dummyInput).then((result) => {
-                assert.deepStrictEqual(result, Object.assign(dummyInput, dummyAnswer));
+                assert.deepStrictEqual(result, Object.assign({}, dummyInput, dummyAnswer));
             });
         });
     });
@@ -324,15 +283,6 @@ describe('prompt', function () {
             { name: 'price (bigint(20))', value: 'books.price', checked: true },
             { name: 'author (int(11))', value: 'books.author', checked: true }
         ];
-
-        // template question for selectColumns' and related functions' unit tests
-        const expectedQuestion = {
-            type: 'checkbox',
-            name: 'columns',
-            message: 'Select the columns you want to import:',
-            pageSize: 25,
-            choices: expectedChoices,
-        };
 
         it('returns the expected choices', function () {
             const actualChoices = prompt.selectColumnsQuestionChoices(dummyEntities);

@@ -8,8 +8,6 @@ const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
-const log = require('../lib/log');
-const queries = require('../lib/mysql/queries');
 
 const sandbox = sinon.sandbox.create();
 
@@ -218,42 +216,6 @@ describe('lib/mysql/index', function () {
         });
     });
 
-    describe('createEntities', function () {
-        let dummySession = null;
-        let queryStub = null;
-
-        beforeEach(function () {
-            queryStub = sandbox.stub();
-            dummySession = {
-                connection: {
-                    query: queryStub.resolves()
-                },
-                results: {},
-                schema: 'dummySchema',
-                entities: ['foo', 'bar']
-            };
-        });
-
-        it('works as intended', function () {
-            queryStub.onCall(0).callsArgWith(1, null, '');
-            return index.createEntities(dummySession)
-                .then((resolvedValue) => {
-                    assert.deepStrictEqual(dummySession, resolvedValue);
-                });
-        });
-
-        it('rejects an error when it should reject an error', function () {
-            const dummyError = {};
-            queryStub.callsArgWith(1, dummyError);
-
-            return index.createEntities(dummySession).then((onResolved) => {
-                assert.fail('promise should be rejected');
-            }, (error) => {
-                assert.strictEqual(error, dummyError);
-            });
-        });
-    });
-
     describe('organizeColumns', function () {
         it('returns an organized object representing the database structure', function () {
             const actualResult = index.organizeColumns(dummyQueryResults, dummyTables);
@@ -293,7 +255,6 @@ describe('lib/mysql/index', function () {
             schema: 'dummySchema',
             entities: ['foo', 'bar']
         };
-        const dummySchema = dummySession.schema;
 
         it('returns the correctly updated session object', function () {
             queryStub.onCall(0).callsArgWith(1, null, dummyQueryResults);
@@ -331,7 +292,7 @@ describe('lib/mysql/index', function () {
             queryStub.callsArgWith(1, dummyError);
 
             return index.entityCandidatesColumns(dummySession)
-                .then((resolvedValue) => {
+                .then(() => {
                     assert.fail('promise should be rejected');
                 }, (error) => {
                     assert.strictEqual(error, dummyError);

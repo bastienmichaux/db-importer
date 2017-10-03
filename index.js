@@ -1,7 +1,7 @@
 /**
  * @file Entry point of the program
  *
- * Uses a chain of function, meaning each function starts the next function
+ * Uses a chained functions, meaning each function calls the next function
  * This enables to arbitrarily jump to a any step, in case of error for example
  */
 
@@ -12,6 +12,8 @@ const prompt = require('./prompt');
 const err = require('./error-handler');
 const log = require('./lib/log');
 const db = require('./lib/db-commons');
+const def = require('./lib/default-choices');
+const exp = require('./lib/exportEntities');
 
 const msg = cst.messages;
 
@@ -23,9 +25,16 @@ const msg = cst.messages;
  * load configuration file, validate and clean it
  *
  * @resolves {askCredentials({dbms, host, port, user, password, schema})} configuration with any property possibly missing
+ * if mode === 'automatic', skips askCredentials and go to openSession
  */
 const getConfiguration = () => prompt.loadConfigurationFile()
-    .then(configuration => askCredentials(configuration));
+    .then((configuration) => {
+        // automatic mode doesn't askCredentials
+        if (configuration.mode !== cst.modes.automatic) {
+            return askCredentials(configuration);
+        }
+        return openSession(configuration);
+    });
 
 
 /**
@@ -35,7 +44,7 @@ const getConfiguration = () => prompt.loadConfigurationFile()
  * @resolves {openSession({dbms, host, port, user, password, schema})} complete credentials plus schema to extract
  */
 const askCredentials = configuration => prompt.askCredentials(configuration)
-    .then(credentials => Object.assign(configuration, credentials))
+    .then(credentials => Object.assign({}, configuration, credentials))
     .then(credentials => openSession(credentials));
 
 
@@ -64,7 +73,12 @@ const openSession = credentials => db.connect(credentials)
  * @resolves {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
  */
 const getEntityCandidates = session => db.entityCandidates(session)
-    .then(session => selectEntities(session)); // store all the tables of the database we're connected to into the session
+    .then((session) => {
+        if (session.mode === cst.modes.manual) {
+            return selectEntities(session);
+        }
+        return setEntities(session);
+    }); // store all the tables of the database we're connected to into the session
 
 
 /**
@@ -76,15 +90,29 @@ const getEntityCandidates = session => db.entityCandidates(session)
 const selectEntities = session => prompt.selectEntities(session)
     .then(session => getEntityCandidatesColumns(session)); // retrieve the columns of the selected tables
 
+/**
+ * set which table should be used to create entities, stores the resulting array under the entities key of the received
+ * object.
+ * it excludes jhipster own tables, liquibase tables and junction tables (between two tables only).
+ *
+ * @param {{results: {tables}}} session
+ * @resolves {getEntityCandidatesColumns({entities: [tables]})}
+ */
+const setEntities = session => getEntityCandidatesColumns(def.entities(session));
 
 // retrieve the columns of the selected tables
 const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
-    .then(session => selectColumns(session)); // ask the user which columns should be selected
+    .then((session) => {
+        if (session.mode === cst.modes.manual) {
+            return selectColumns(session);
+        }
+        return closeSession(session);
+    }); // ask the user which columns should be selected
 
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
-    .then(session => createEntities(session));
+    .then(session => closeSession(session));
 
 
 /**
@@ -93,16 +121,17 @@ const selectColumns = session => prompt.selectColumns(session)
  * @param {{driver, connection, schema, results: {entities}}} session
  * @resolves {createEntities(results)}
  */
-const closeSession = session => db.close(session);
+const closeSession = session => db.close(session)
+    .then(session => exportEntities(session));
 
 
-/**
- * @todo WIP function, used for integration testing purpose at the moment
- *
- * @param {results} results the results of all previous steps
- */
-const createEntities = results => db.createEntities(results)
-    .then(session => closeSession(session)); // close the connection
+const exportEntities = session => exp.exportEntities(session.entities)
+    .then(() => goodbye());
+
+
+const goodbye = () => {
+    log.emphasize(msg.goodbye);
+};
 
 
 /**

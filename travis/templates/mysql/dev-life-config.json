@@ -1,0 +1,9 @@
+{
+    "mode": "automatic",
+    "dbms": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "user": "travis",
+    "password": "",
+    "schema": "dev_life"
+}

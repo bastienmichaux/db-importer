@@ -2,14 +2,17 @@
  * @file Command-line interface functions
  */
 
+const lodash = require('lodash');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
-const lodash = require('lodash');
 
 const log = require('./lib/log');
 const cst = require('./constants');
+const validation = require('./lib/validation');
+const db = require('./lib/db-commons');
 
-const inquiries = cst.inquiries;
+const toArray = lodash.values;
+const pickProperty = lodash.mapValues;
 
 
 /**
@@ -28,57 +31,92 @@ const uncheckChoice = value => ({
     checked: false
 });
 
+/**
+ * Question objects required by the inquirer node module for user interaction.
+ *
+ * @enum {Object}
+ * @see {@link https://www.npmjs.com/package/inquirer#question|How to use inquirer questions}
+ */
+const inquiries = {
+    // ask the user which DBMS will be used (default is MySQL)
+    dbms: {
+        type: 'list',
+        name: 'dbms',
+        message: 'DBMS:',
+        choices: toArray(pickProperty(db.dbmsList, 'name')),
+        validate: validation.inquirer.dbms,
+        default: db.dbmsList.mysql.name
+    },
+    // ask the host name and validate it
+    host: {
+        type: 'input',
+        name: 'host',
+        message: 'Host address:',
+        validate: validation.inquirer.host,
+        default: 'localhost',
+    },
+    // ask the port and validate it
+    port: {
+        type: 'input',
+        name: 'port',
+        message: 'port:',
+        validate: validation.inquirer.port,
+        default: (input) => {
+            if (input.dbms) {
+                return db.dbmsList[input.dbms].defaultPort;
+            }
+            // It means we offer no default
+            return null;
+        }
+    },
+    // ask the username for the selected DBMS server
+    user: {
+        type: 'input',
+        name: 'user',
+        message: 'User name:',
+        validate: validation.inquirer.user,
+        default: 'root'
+    },
+    // ask the DBMS server connection password
+    password: {
+        type: 'password',
+        name: 'password',
+        message: 'Password:',
+        validate: validation.inquirer.password,
+    },
+    // ask which database schema should be imported
+    schema: {
+        type: 'input',
+        name: 'schema',
+        message: 'Database schema to import:',
+        validate: validation.inquirer.schema,
+    },
+    // ask which tables should be imported
+    entities: {
+        type: 'checkbox',
+        name: 'entities',
+        message: 'Select the tables you want to import:',
+        pageSize: 25
+    }
+};
 
 /**
  * Read the configuration file if it exists
  * then extract a configuration from its values.
  * The returned configuration is used to skip the specified questions.
  *
- * @returns {Object} Either the config object in case of success
- * or a null object in case of error
+ * @returns {Object} The config object, possibly empty.
  */
-const loadConfigurationFile = () => fse.readJson(cst.configFile)
-    .then((config) => {
-        log.info(cst.messages.loadingConfig);
-
-        // test existence of each config key
-        Object.keys(config).forEach((key) => {
-            if (!inquiries[key]) {
-                log.warning(`${key} is defined in ${cst.configFile} but is not a valid configuration property`);
-                delete config[key];
-            }
-        });
-
-        // validate value of each config value
-        Object.keys(config).forEach((key) => {
-            // not all inquiries have a validation method, we must thus safely access it
-            if (typeof (inquiries[key].validate) === 'function' && inquiries[key].validate(config[key]).constructor.name === 'Error') {
-                // warn user if the item is invalid
-                log.warning(`${cst.configFile} "${key}": "${config[key]}" ${inquiries[key].validate(config[key])}`);
-                delete config[key];
-            }
-        });
-
-        /**
-         * as inquirer won't have access to items loaded from configuration file,
-         * we must handle default values relying on them here.
-         */
-        Object.keys(inquiries).forEach((key) => {
-        });
-
-        return config;
-    })
-    // in case of error reading the JSON file
-    .catch((error) => {
-        // this is the error number when fse.readJson tries to open an non existent file
-        if (error.errno === -2) {
-            log.info(cst.messages.noConfig);
-        } else {
-            log.failure(error);
+const loadConfigurationFile = () => fse.pathExists(cst.configFile)
+    .then((exist) => {
+        if (exist) {
+            log.info(cst.messages.loadingConfig);
+            return fse.readJson(cst.configFile);
         }
-        // if an error occurs, load nothing
+        log.info(cst.messages.noConfig);
         return {};
-    });
+    })
+    .then(config => validation.validateConfiguration(config));
 
 
 /**
@@ -101,6 +139,7 @@ const askCredentials = (configuration) => {
             }
         }
     });
+
     return inquirer.prompt(missingItems);
 };
 
@@ -137,7 +176,7 @@ const removeColumns = (entities, selectedColumns) => {
  * Return the list of tables the user can select for conversion to JSON entities
  *
  * @param {object} session - data retrieved during a sql session
- * @returns the list of tables, separated by categories
+ * @returns {Promise} the list of tables, separated by categories
  * (tables, twoTypeJunction, jhipster, liquibase)
  */
 const selectEntities = (session) => {
@@ -162,9 +201,9 @@ const selectEntities = (session) => {
     choices.push(new inquirer.Separator(cst.headers.liquibase));
     choices = choices.concat(liquibase);
 
-    cst.inquiries.entities.choices = choices;
+    const inquiryCopy = Object.assign({ choices }, inquiries.entities);
 
-    return inquirer.prompt(cst.inquiries.entities).then(answers => Object.assign(session, answers));
+    return inquirer.prompt(inquiryCopy).then(answers => Object.assign({}, session, answers));
 };
 
 
@@ -233,11 +272,11 @@ const selectColumns = (session) => {
 
 
 module.exports = {
+    inquiries,
     loadConfigurationFile,
     askCredentials,
     selectEntities,
     selectColumnsQuestionChoices,
-    selectColumnsQuestion,
     selectColumns,
     removeColumns,
 };
