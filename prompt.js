@@ -218,6 +218,8 @@ const selectColumnsQuestionChoices = (entities) => {
 
     // create the choices as a list of checked boxes, one box per column
     tables.forEach((table) => {
+        // @todo: check for undefined object properties
+
         const tableColumns = Object.keys(entities[table]);
 
         // separate columns belonging to the same table with an inquirer separator
