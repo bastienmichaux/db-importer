@@ -7,64 +7,10 @@ const sinon = require('sinon');
 const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
+const dummies = require('./templates/dummies.js');
 const index = require('../lib/mysql/index');
 
 const sandbox = sinon.sandbox.create();
-
-const dummyQueryResults = [
-    {
-        table_name: 'authors',
-        column_name: 'id',
-        ordinal_position: 1,
-        column_type: 'int(11)'
-    }, {
-        table_name: 'authors',
-        column_name: 'name',
-        ordinal_position: 2,
-        column_type: 'varchar(255)'
-    }, {
-        table_name: 'authors',
-        column_name: 'birth_date',
-        ordinal_position: 3,
-        column_type: 'date'
-    }, {
-        table_name: 'books',
-        column_name: 'id',
-        ordinal_position: 1,
-        column_type: 'int(11)'
-    }, {
-        table_name: 'books',
-        column_name: 'title',
-        ordinal_position: 2,
-        column_type: 'varchar(255)'
-    }, {
-        table_name: 'books',
-        column_name: 'price',
-        ordinal_position: 3,
-        column_type: 'bigint(20)'
-    }, {
-        table_name: 'books',
-        column_name: 'author',
-        ordinal_position: 4,
-        column_type: 'int(11)'
-    }
-];
-
-const dummyTables = ['authors', 'books'];
-
-const dummyEntities = {
-    authors: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        birth_date: { ordinalPosition: 3, columnType: 'date' }
-    },
-    books: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
-        author: { ordinalPosition: 4, columnType: 'int(11)' }
-    }
-};
 
 describe('lib/mysql/index', function () {
     afterEach(function () {
@@ -153,6 +99,8 @@ describe('lib/mysql/index', function () {
         let dummySession;
         let queryStub;
 
+        const dummyTables = ['authors', 'books'];
+
         beforeEach(function () {
             queryStub = sandbox.stub();
             dummySession = {
@@ -217,8 +165,12 @@ describe('lib/mysql/index', function () {
     });
 
     describe('organizeColumns', function () {
+        const dummyQueryResults = dummies.dummyQueryResults;
+
+        const dummyEntities = dummies.dummyEntities;
+
         it('returns an organized object representing the database structure', function () {
-            const actualResult = index.organizeColumns(dummyQueryResults, dummyTables);
+            const actualResult = index.organizeColumns(dummyQueryResults);
             const expectedResult = dummyEntities;
 
             // first check we have the exact same number of tables, and the tables have the same name
@@ -247,6 +199,155 @@ describe('lib/mysql/index', function () {
 
     describe('entityCandidatesColumns', function () {
         const queryStub = sinon.stub();
+
+        const dummyQueryResults = [
+            {
+                table_name: 'authors',
+                column_name: 'id',
+                ordinal_position: 1,
+                column_default: null,
+                is_nullable: 'NO',
+                data_type: 'int',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: 10,
+                numeric_scale: 0,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'int(11)',
+                column_comment: ''
+            }, {
+                table_name: 'authors',
+                column_name: 'name',
+                ordinal_position: 2,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'varchar',
+                character_maximum_length: 255,
+                character_octet_length: 765,
+                numeric_precision: null,
+                numeric_scale: null,
+                datetime_precision: null,
+                character_set_name: 'utf8',
+                collation_name: 'utf8_general_ci',
+                column_type: 'varchar(255)',
+                column_comment: ''
+            }, {
+                table_name: 'authors',
+                column_name: 'birth_date',
+                ordinal_position: 3,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'date',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: null,
+                numeric_scale: null,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'date',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'id',
+                ordinal_position: 1,
+                column_default: null,
+                is_nullable: 'NO',
+                data_type: 'int',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: 10,
+                numeric_scale: 0,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'int(11)',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'title',
+                ordinal_position: 2,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'varchar',
+                character_maximum_length: 255,
+                character_octet_length: 765,
+                numeric_precision: null,
+                numeric_scale: null,
+                datetime_precision: null,
+                character_set_name: 'utf8',
+                collation_name: 'utf8_general_ci',
+                column_type: 'varchar(255)',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'description',
+                ordinal_position: 3,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'varchar',
+                character_maximum_length: 255,
+                character_octet_length: 765,
+                numeric_precision: null,
+                numeric_scale: null,
+                datetime_precision: null,
+                character_set_name: 'utf8',
+                collation_name: 'utf8_general_ci',
+                column_type: 'varchar(255)',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'publication_date',
+                ordinal_position: 4,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'date',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: null,
+                numeric_scale: null,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'date',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'price',
+                ordinal_position: 5,
+                column_default: null,
+                is_nullable: 'YES',
+                data_type: 'bigint',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: 19,
+                numeric_scale: 0,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'bigint(20)',
+                column_comment: ''
+            }, {
+                table_name: 'books',
+                column_name: 'author',
+                ordinal_position: 6,
+                column_default: null,
+                is_nullable: 'NO',
+                data_type: 'int',
+                character_maximum_length: null,
+                character_octet_length: null,
+                numeric_precision: 10,
+                numeric_scale: 0,
+                datetime_precision: null,
+                character_set_name: null,
+                collation_name: null,
+                column_type: 'int(11)',
+                column_comment: ''
+            }
+        ];
+
         const dummySession = {
             connection: {
                 query: queryStub.resolves()
@@ -255,6 +356,10 @@ describe('lib/mysql/index', function () {
             schema: 'dummySchema',
             entities: ['foo', 'bar']
         };
+
+        const dummyEntities = dummies.dummyEntities;
+
+        const dummySchema = dummySession.schema;
 
         it('returns the correctly updated session object', function () {
             queryStub.onCall(0).callsArgWith(1, null, dummyQueryResults);

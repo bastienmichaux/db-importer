@@ -133,7 +133,18 @@ const allColumnsQueryWithFilter = `SELECT
 col.table_name,
 col.column_name,
 col.ordinal_position,
-col.column_type
+col.column_default,
+col.is_nullable,
+col.data_type,
+col.character_maximum_length,
+col.character_octet_length,
+col.numeric_precision,
+col.numeric_scale,
+col.datetime_precision,
+col.character_set_name,
+col.collation_name,
+col.column_type,
+col.column_comment
 FROM information_schema.columns col
 WHERE col.table_schema LIKE 'dummy_schema'
 AND col.table_name IN ('table_1', 'table_2', 'last_table');`;
@@ -143,7 +154,18 @@ const allColumnsQueryWithoutFilter = `SELECT
 col.table_name,
 col.column_name,
 col.ordinal_position,
-col.column_type
+col.column_default,
+col.is_nullable,
+col.data_type,
+col.character_maximum_length,
+col.character_octet_length,
+col.numeric_precision,
+col.numeric_scale,
+col.datetime_precision,
+col.character_set_name,
+col.collation_name,
+col.column_type,
+col.column_comment
 FROM information_schema.columns col
 WHERE col.table_schema LIKE 'dummy_schema'
 ;`;
