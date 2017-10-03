@@ -1,70 +1,70 @@
 {
-  "DBBeverage": {
-    "DBId": {
-      "ordinalPosition": 1,
-      "columnType": "bigint(20) unsigned"
+    "DBBeverage": {
+        "DBId": {
+            "ordinalPosition": 1,
+            "columnType": "bigint(20) unsigned"
+        },
+        "DBName": {
+            "ordinalPosition": 2,
+            "columnType": "varchar(50)"
+        },
+        "DBEnergizing": {
+            "ordinalPosition": 3,
+            "columnType": "tinyint(1)"
+        }
     },
-    "DBName": {
-      "ordinalPosition": 2,
-      "columnType": "varchar(50)"
+    "DBBug": {
+        "DBId": {
+            "ordinalPosition": 1,
+            "columnType": "bigint(20) unsigned"
+        },
+        "DBPriority": {
+            "ordinalPosition": 2,
+            "columnType": "int(11)"
+        },
+        "DBTitle": {
+            "ordinalPosition": 3,
+            "columnType": "varchar(100)"
+        }
     },
-    "DBEnergizing": {
-      "ordinalPosition": 3,
-      "columnType": "tinyint(1)"
+    "DBDeveloper": {
+        "DBId": {
+            "ordinalPosition": 1,
+            "columnType": "bigint(20) unsigned"
+        },
+        "DBFirstname": {
+            "ordinalPosition": 2,
+            "columnType": "varchar(50)"
+        },
+        "DBLastName": {
+            "ordinalPosition": 3,
+            "columnType": "varchar(100)"
+        },
+        "DBBirthDate": {
+            "ordinalPosition": 4,
+            "columnType": "date"
+        },
+        "DBFKBeverage": {
+            "ordinalPosition": 5,
+            "columnType": "bigint(20) unsigned"
+        }
+    },
+    "DBMug": {
+        "DBId": {
+            "ordinalPosition": 1,
+            "columnType": "bigint(20) unsigned"
+        },
+        "DBAppearance": {
+            "ordinalPosition": 2,
+            "columnType": "varchar(500)"
+        },
+        "DBCapacity": {
+            "ordinalPosition": 3,
+            "columnType": "float"
+        },
+        "DBFKDeveloper": {
+            "ordinalPosition": 4,
+            "columnType": "bigint(20) unsigned"
+        }
     }
-  },
-  "DBBug": {
-    "DBId": {
-      "ordinalPosition": 1,
-      "columnType": "bigint(20) unsigned"
-    },
-    "DBPriority": {
-      "ordinalPosition": 2,
-      "columnType": "int(11)"
-    },
-    "DBTitle": {
-      "ordinalPosition": 3,
-      "columnType": "varchar(100)"
-    }
-  },
-  "DBDeveloper": {
-    "DBId": {
-      "ordinalPosition": 1,
-      "columnType": "bigint(20) unsigned"
-    },
-    "DBFirstname": {
-      "ordinalPosition": 2,
-      "columnType": "varchar(50)"
-    },
-    "DBLastName": {
-      "ordinalPosition": 3,
-      "columnType": "varchar(100)"
-    },
-    "DBBirthDate": {
-      "ordinalPosition": 4,
-      "columnType": "date"
-    },
-    "DBFKBeverage": {
-      "ordinalPosition": 5,
-      "columnType": "bigint(20) unsigned"
-    }
-  },
-  "DBMug": {
-    "DBId": {
-      "ordinalPosition": 1,
-      "columnType": "bigint(20) unsigned"
-    },
-    "DBAppearance": {
-      "ordinalPosition": 2,
-      "columnType": "varchar(500)"
-    },
-    "DBCapacity": {
-      "ordinalPosition": 3,
-      "columnType": "float"
-    },
-    "DBFKDeveloper": {
-      "ordinalPosition": 4,
-      "columnType": "bigint(20) unsigned"
-    }
-  }
 }
