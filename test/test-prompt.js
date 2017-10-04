@@ -14,22 +14,6 @@ const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
 
-// for testing selectColumns and selectColumnsQuestionChoices
-// generated with dbi_book_author
-const dummyEntities = {
-    authors: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        birth_date: { ordinalPosition: 3, columnType: 'date' } },
-    books: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
-        author: { ordinalPosition: 4, columnType: 'int(11)' }
-    }
-};
-
-
 describe('prompt', function () {
     afterEach(function () {
         sandbox.verifyAndRestore();
@@ -271,6 +255,20 @@ describe('prompt', function () {
     });
 
     describe('selectColumnsQuestionChoices', function () {
+        // generated with dbi_book_author
+        const dummyEntities = {
+            authors: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
         // template choices, generated with dbi_book_author
         const expectedChoices = [
             { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
@@ -301,7 +299,32 @@ describe('prompt', function () {
     });
 
     describe('selectColumns', function () {
-        const expectedEntities = dummyEntities;
+        // generated with dbi_book_author
+        const dummyEntities = {
+            authors: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
+
+        const expectedEntities = {
+            authors: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                name: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                birth_date: { ordinalPosition: 3, columnType: 'date' } },
+            books: {
+                id: { ordinalPosition: 1, columnType: 'int(11)' },
+                title: { ordinalPosition: 2, columnType: 'varchar(255)' },
+                price: { ordinalPosition: 3, columnType: 'bigint(20)' },
+                author: { ordinalPosition: 4, columnType: 'int(11)' }
+            }
+        };
 
         const dummySession = {
             entities: dummyEntities
@@ -324,7 +347,7 @@ describe('prompt', function () {
             promptStub = sandbox.stub(inquirer, 'prompt');
         });
 
-        it('returns the expected columns when user select all of them', function () {
+        it('returns the expected columns when user selects all of them', function () {
             promptStub.resolves(expectedAnswer);
 
             return prompt.selectColumns(dummySession)
