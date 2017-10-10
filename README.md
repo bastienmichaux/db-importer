@@ -58,7 +58,7 @@ and you'll be offered to give a new value.
 
 It will classify found tables into four categories :
 1. tables : any table which doesn't fit the following categories, **checked by default**
-1. twoTypeJunction : tables used as a junction table between two other tables,
+1. manyToManyTablesOnly : tables used as a junction table between two other tables,
 you most probably want to let the module to create a many-to-many relationship with it.
 1. jhipster: jhipster own tables, depending the customisation of your project you want them or not.
 1. liquibase: liquibase tables, you most probably don't want anything to do with it.

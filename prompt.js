@@ -177,7 +177,7 @@ const removeColumns = (entities, selectedColumns) => {
  *
  * @param {object} session - data retrieved during a sql session
  * @returns {Promise} the list of tables, separated by categories
- * (tables, twoTypeJunction, jhipster, liquibase)
+ * (tables, manyToManyTablesOnly, jhipster, liquibase)
  */
 const selectEntities = (session) => {
     const results = session.results;
@@ -185,14 +185,14 @@ const selectEntities = (session) => {
     let choices = [];
 
     const tables = results.tables.map(checkChoice);
-    const twoTypeJunction = results.twoTypeJunction.map(uncheckChoice);
+    const twoTypeJunction = results.manyToManyTablesOnly.map(uncheckChoice);
     const jhipster = results.jhipster.map(uncheckChoice);
     const liquibase = results.liquibase.map(uncheckChoice);
 
     choices.push(new inquirer.Separator(cst.headers.tables));
     choices = choices.concat(tables);
 
-    choices.push(new inquirer.Separator(cst.headers.twoTypeJunction));
+    choices.push(new inquirer.Separator(cst.headers.manyToManyTablesOnly));
     choices = choices.concat(twoTypeJunction);
 
     choices.push(new inquirer.Separator(cst.headers.jhipster));

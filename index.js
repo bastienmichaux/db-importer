@@ -70,9 +70,9 @@ const openSession = credentials => db.connect(credentials)
  * structure them depending their probable usage
  *
  * @param {{driver, connection, schema}} session
- * @resolves {selectEntities({driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}})} session
+ * @resolves {selectEntities({driver, connection, schema, results: {tables, manyToManyTablesOnly, jhipster, liquibase}})} session
  */
-const getEntityCandidates = session => db.entityCandidates(session)
+const getEntityCandidates = session => db.entitiesTables(session)
     .then((session) => {
         if (session.mode === cst.modes.manual) {
             return selectEntities(session);
@@ -84,7 +84,7 @@ const getEntityCandidates = session => db.entityCandidates(session)
 /**
  * ask user which table should be used to create entities
  *
- * @param {{driver, connection, schema, results: {tables, twoTypeJunction, jhipster, liquibase}}} session
+ * @param {{driver, connection, schema, results: {tables, manyToManyTablesOnly, jhipster, liquibase}}} session
  * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
  */
 const selectEntities = session => prompt.selectEntities(session)

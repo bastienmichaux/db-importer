@@ -7,7 +7,6 @@ const sinon = require('sinon');
 const lodash = require('lodash');
 
 const db = require('../lib/db-commons');
-const cst = require('../lib/db-constants');
 
 const sandbox = sinon.sandbox.create();
 
@@ -101,32 +100,32 @@ describe('lib/db-commons', function () {
         });
     });
 
-    describe('entityCandidates', function () {
+    describe('entitiesTables', function () {
         let dummySession;
-        let entityCandidatesStub;
+        let entitiesTablesSub;
 
         beforeEach(function () {
-            entityCandidatesStub = sandbox.stub().resolves();
+            entitiesTablesSub = sandbox.stub().resolves();
             dummySession = {
                 connection: {},
                 driver: {
-                    entityCandidates: entityCandidatesStub
+                    entitiesTables: entitiesTablesSub
                 }
             };
         });
 
         afterEach(function () {
-            sinon.assert.calledOnce(entityCandidatesStub);
+            sinon.assert.calledOnce(entitiesTablesSub);
         });
 
-        it('calls the embedded driver entityCandidates method on the provided session', function () {
-            return db.entityCandidates(dummySession).then(() => {
-                assert.strictEqual(entityCandidatesStub.firstCall.args[0], dummySession);
+        it('calls the embedded driver entitiesTables method on the provided session', function () {
+            return db.entitiesTables(dummySession).then(() => {
+                assert.strictEqual(entitiesTablesSub.firstCall.args[0], dummySession);
             });
         });
 
         it('resolves the provided session object', function () {
-            return db.entityCandidates(dummySession).then((session) => {
+            return db.entitiesTables(dummySession).then((session) => {
                 assert.strictEqual(session, dummySession);
             });
         });

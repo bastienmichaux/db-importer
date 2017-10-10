@@ -65,7 +65,7 @@ I need information before importing your db.\n`,
  */
 const headers = {
     tables: '--- tables ---',
-    twoTypeJunction: '--- two tables junctions ---',
+    manyToManyTablesOnly: '--- many-to-many junction tables ---',
     jhipster: '--- JHipster tables ---',
     liquibase: '--- Liquibase tables ---'
 };

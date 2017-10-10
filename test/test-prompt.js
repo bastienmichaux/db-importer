@@ -214,7 +214,7 @@ describe('prompt', function () {
             const dummySession = {
                 results: {
                     tables: [dummyTable],
-                    twoTypeJunction: [dummyTwoTypeJunction],
+                    manyToManyTablesOnly: [dummyTwoTypeJunction],
                     jhipster: [dummyJhipster],
                     liquibase: [dummyLiquibase],
                 }
@@ -240,7 +240,7 @@ describe('prompt', function () {
 
             const separatorStub = sandbox.stub(inquirer, 'Separator');
             separatorStub.withArgs(cst.headers.tables).returns(dummySeparatorTable);
-            separatorStub.withArgs(cst.headers.twoTypeJunction).returns(dummySeparatorTwoTypeJunction);
+            separatorStub.withArgs(cst.headers.manyToManyTablesOnly).returns(dummySeparatorTwoTypeJunction);
             separatorStub.withArgs(cst.headers.jhipster).returns(dummySeparatorJhipster);
             separatorStub.withArgs(cst.headers.liquibase).returns(dummySeparatorLiquibase);
 
@@ -255,7 +255,7 @@ describe('prompt', function () {
             const dummyInput = {
                 results: {
                     tables: ['tables'],
-                    twoTypeJunction: ['twoTypeJunction'],
+                    manyToManyTablesOnly: ['manyToManyTablesOnly'],
                     jhipster: ['jhipster'],
                     liquibase: ['liquibase']
                 }
