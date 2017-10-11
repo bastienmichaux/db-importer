@@ -88,7 +88,7 @@ const getEntityCandidates = session => db.entitiesTables(session)
  * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
  */
 const selectEntities = session => prompt.selectEntities(session)
-    .then(session => getEntityCandidatesColumns(session)); // retrieve the columns of the selected tables
+    .then(session => getManyToManyJunctions(session)); // retrieve the columns of the selected tables
 
 /**
  * set which table should be used to create entities, stores the resulting array under the entities key of the received
@@ -98,7 +98,10 @@ const selectEntities = session => prompt.selectEntities(session)
  * @param {{results: {tables}}} session
  * @resolves {getEntityCandidatesColumns({entities: [tables]})}
  */
-const setEntities = session => getEntityCandidatesColumns(def.entities(session));
+const setEntities = session => getManyToManyJunctions(def.entities(session));
+
+const getManyToManyJunctions = session => db.manyToManyJunctions(session)
+    .then(session => getEntityCandidatesColumns(session));
 
 // retrieve the columns of the selected tables
 const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
