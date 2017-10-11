@@ -188,11 +188,19 @@ const selectColumns = (session) => {
     let choices = [];
 
     columnsByTable.forEach((table) => {
-        choices.push(new inquirer.Separator(`--- ${table.TABLE_NAME} ---`));
+        choices.push(new inquirer.Separator(`--- ${table.tableName} ---`));
 
-        const columns = JSON.parse(`[${table.columns}]`);
+        const columns = table.columns;
 
-        const columnsChoices = columns.map(column => inquirerChoice({ [table]: { [column.name]: column.type } }, `${column.name} - ${column.type}`, true));
+        const columnsChoices = columns.map(column => inquirerChoice({
+            [table.tableName]: {
+                columnName: column.name,
+                columnType: column.type
+            }
+        },
+        `${column.name} - ${column.type}`,
+        true));
+
         choices = choices.concat(columnsChoices);
     });
 
