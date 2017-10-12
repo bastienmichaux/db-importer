@@ -193,10 +193,9 @@ const selectColumns = (session) => {
         const columns = table.columns;
 
         const columnsChoices = columns.map(column => inquirerChoice({
-            [table.tableName]: {
-                columnName: column.name,
-                columnType: column.type
-            }
+            tableName: table.tableName,
+            columnName: column.name,
+            columnType: column.type
         },
         `${column.name} - ${column.type}`,
         true));
