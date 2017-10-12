@@ -6,7 +6,6 @@ const assert = require('assert');
 const sinon = require('sinon');
 const mysql = require('mysql');
 
-const cst = require('../lib/mysql/constants');
 const index = require('../lib/mysql/index');
 
 
@@ -123,10 +122,10 @@ describe('lib/mysql/index', function () {
 
         it('stores connection.query in session.results', function () {
             // we want something like [ RawDataPacket{ TABLE_NAME: 'value' }]
-            const dummyJhipster = [{ [cst.fields.tableName]: {} }];
-            const dummyLiquibase = [{ [cst.fields.tableName]: {} }];
-            const dummyTwoTypeJunction = [{ [cst.fields.tableName]: {} }];
-            const dummyTables = [{ [cst.fields.tableName]: {} }];
+            const dummyJhipster = [{ TABLE_NAME: {} }];
+            const dummyLiquibase = [{ TABLE_NAME: {} }];
+            const dummyTwoTypeJunction = [{ TABLE_NAME: {} }];
+            const dummyTables = [{ TABLE_NAME: {} }];
 
             /**
              * we want something like :
@@ -138,10 +137,10 @@ describe('lib/mysql/index', function () {
              * }
              */
             const dummyResults = {
-                jhipster: [dummyJhipster[0][cst.fields.tableName]],
-                liquibase: [dummyLiquibase[0][cst.fields.tableName]],
-                manyToManyTablesOnly: [dummyLiquibase[0][cst.fields.tableName]],
-                tables: [dummyLiquibase[0][cst.fields.tableName]]
+                jhipster: [dummyJhipster[0].TABLE_NAME],
+                liquibase: [dummyLiquibase[0].TABLE_NAME],
+                manyToManyTablesOnly: [dummyLiquibase[0].TABLE_NAME],
+                tables: [dummyLiquibase[0].TABLE_NAME]
             };
 
             queryStub.onCall(0).callsArgWith(1, null, dummyJhipster);
@@ -154,10 +153,10 @@ describe('lib/mysql/index', function () {
                 assert.deepStrictEqual(dummySession.results, dummyResults);
 
                 // checking each reference, that is, it uses the exact 'value' it received
-                assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0][cst.fields.tableName]);
-                assert.strictEqual(dummySession.results.liquibase[0], dummyLiquibase[0][cst.fields.tableName]);
-                assert.strictEqual(dummySession.results.manyToManyTablesOnly[0], dummyTwoTypeJunction[0][cst.fields.tableName]);
-                assert.strictEqual(dummySession.results.tables[0], dummyTables[0][cst.fields.tableName]);
+                assert.strictEqual(dummySession.results.jhipster[0], dummyJhipster[0].TABLE_NAME);
+                assert.strictEqual(dummySession.results.liquibase[0], dummyLiquibase[0].TABLE_NAME);
+                assert.strictEqual(dummySession.results.manyToManyTablesOnly[0], dummyTwoTypeJunction[0].TABLE_NAME);
+                assert.strictEqual(dummySession.results.tables[0], dummyTables[0].TABLE_NAME);
             });
         });
     });
