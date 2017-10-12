@@ -131,7 +131,7 @@ describe('lib/db-commons', function () {
         });
     });
 
-    describe('entityCandidatesColumns', function () {
+    describe('entityColumns', function () {
         let dummySession;
         let entityCandidatesColumnsStub;
 
@@ -140,7 +140,7 @@ describe('lib/db-commons', function () {
             dummySession = {
                 connection: {},
                 driver: {
-                    entityCandidatesColumns: entityCandidatesColumnsStub
+                    entityColumns: entityCandidatesColumnsStub
                 }
             };
         });
@@ -150,8 +150,8 @@ describe('lib/db-commons', function () {
         });
 
         it('ends the session with an undefined value', function () {
-            assert(typeof db.entityCandidatesColumns === 'function');
-            return db.entityCandidatesColumns(dummySession);
+            assert(typeof db.entityColumns === 'function');
+            return db.entityColumns(dummySession);
         });
     });
 });

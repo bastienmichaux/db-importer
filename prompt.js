@@ -92,9 +92,9 @@ const inquiries = {
         pageSize: 25,
     },
     // ask which columns should be used as files
-    columns: {
+    fields: {
         type: 'checkbox',
-        name: 'columns',
+        name: 'fields',
         message: 'Select the columns you want to use as fields:',
         pageSize: 25,
     }
@@ -204,7 +204,7 @@ const selectColumns = (session) => {
         choices = choices.concat(columnsChoices);
     });
 
-    const inquiryCopy = Object.assign({ choices }, inquiries.columns);
+    const inquiryCopy = Object.assign({ choices }, inquiries.fields);
 
     return inquirer.prompt(inquiryCopy).then(answers => Object.assign({}, session, answers));
 };

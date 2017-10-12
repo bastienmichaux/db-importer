@@ -104,7 +104,7 @@ const getManyToManyJunctions = session => db.manyToManyJunctions(session)
     .then(session => getEntityCandidatesColumns(session));
 
 // retrieve the columns of the selected tables
-const getEntityCandidatesColumns = session => db.entityCandidatesColumns(session)
+const getEntityCandidatesColumns = session => db.entityColumns(session)
     .then((session) => {
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);
