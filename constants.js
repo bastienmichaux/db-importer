@@ -48,7 +48,8 @@ const messages = {
     contributeOnFailure: `Would you kindly fill an issue ? https://github.com/bastienmichaux/db-importer/issues
 Also check if the issue is already being tracked before posting, would you kindly ?
 "I forked, I fixed, I PR'ed" - Julius Caesar`,
-    goodbye: '/ᐠ｡ꞈ｡ᐟ\\ C U',
+    goodbye: `Everything we got was exported into the file '${exportFile}'
+/ᐠ｡ꞈ｡ᐟ\\ C U`,
     greeting: `/ᐠ｡ꞈ｡ᐟ\\ Oh hai. I'm Node-db-importer v${packageInfo.version}.
 I need information before importing your db.\n`,
     loadingConfig: `loading ${configFile}`,
