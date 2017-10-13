@@ -108,7 +108,7 @@ const getManyToManyJunctions = session => db.manyToManyJunctions(session)
         return setManyToManyJunctions(session);
     });
 
-const selectManyToManyJunctions = session => prompt.manyToMany(session)
+const selectManyToManyJunctions = session => prompt.selectManyToMany(session)
     .then(session => getEntityCandidatesColumns(session));
 
 const setManyToManyJunctions = session => getEntityCandidatesColumns(def.manyToMany(session));

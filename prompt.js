@@ -97,6 +97,12 @@ const inquiries = {
         name: 'fields',
         message: 'Select the columns you want to use as fields:',
         pageSize: 25,
+    },
+    manyToMany: {
+        type: 'checkbox',
+        name: 'manyToMany',
+        message: 'Select the junction tables you want to use as many-to-many relationships:',
+        pageSize: 25,
     }
 };
 
@@ -166,16 +172,21 @@ const selectEntities = (session) => {
     return inquirer.prompt(inquiryCopy).then(answers => Object.assign({}, session, answers));
 };
 
-    choices.push(new inquirer.Separator(cst.headers.manyToManyTablesOnly));
-    choices = choices.concat(twoTypeJunction);
+const selectManyToMany = (session) => {
+    const { manyToManyJunctions } = session.results;
 
-    choices.push(new inquirer.Separator(cst.headers.jhipster));
-    choices = choices.concat(jhipster);
+    const choices = manyToManyJunctions.map((junction) => {
+        const refs = junction.references;
+        const firstRef = `${refs[0].referencedTable}(${refs[0].referencedColumnName}) <- ${refs[0].key}`;
+        const secondRef = `${refs[1].key} -> ${refs[1].referencedTable}(${refs[1].referencedColumnName})`;
 
-    choices.push(new inquirer.Separator(cst.headers.liquibase));
-    choices = choices.concat(liquibase);
+        return inquirerChoice(
+            junction,
+            `${junction.junctionTable}:\n${firstRef}|${secondRef}`,
+            true);
+    });
 
-    const inquiryCopy = Object.assign({ choices }, inquiries.entities);
+    const inquiryCopy = Object.assign({ choices }, inquiries.manyToMany);
 
     return inquirer.prompt(inquiryCopy).then(answers => Object.assign({}, session, answers));
 };
@@ -200,7 +211,7 @@ const selectColumns = (session) => {
             columnName: column.name,
             columnType: column.type
         },
-        `${column.name} - ${column.type}`,
+        `${column.name}, ${column.type}`,
         true));
 
         choices = choices.concat(columnsChoices);
@@ -217,5 +228,6 @@ module.exports = {
     loadConfigurationFile,
     askCredentials,
     selectEntities,
+    selectManyToMany,
     selectColumns,
 };
