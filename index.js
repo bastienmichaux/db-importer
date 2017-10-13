@@ -101,7 +101,17 @@ const selectEntities = session => prompt.selectEntities(session)
 const setEntities = session => getManyToManyJunctions(def.entities(session));
 
 const getManyToManyJunctions = session => db.manyToManyJunctions(session)
+    .then((session) => {
+        if (session.mode === cst.modes.manual) {
+            return selectManyToManyJunctions(session);
+        }
+        return setManyToManyJunctions(session);
+    });
+
+const selectManyToManyJunctions = session => prompt.manyToMany(session)
     .then(session => getEntityCandidatesColumns(session));
+
+const setManyToManyJunctions = session => getEntityCandidatesColumns(def.manyToMany(session));
 
 // retrieve the columns of the selected tables
 const getEntityCandidatesColumns = session => db.entityColumns(session)
@@ -109,13 +119,15 @@ const getEntityCandidatesColumns = session => db.entityColumns(session)
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);
         }
-        return closeSession(session);
+        return setColumns(session);
     }); // ask the user which columns should be selected
 
 
 // ask the user which columns should be selected for each table
 const selectColumns = session => prompt.selectColumns(session)
     .then(session => closeSession(session));
+
+const setColumns = session => closeSession(def.columns(session));
 
 
 /**
