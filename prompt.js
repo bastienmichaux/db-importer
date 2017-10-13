@@ -155,13 +155,16 @@ const selectEntities = (session) => {
 
     let choices = [];
 
-    const tables = results.tables.map(table => inquirerChoice(table, null, true));
-    const twoTypeJunction = results.manyToManyTablesOnly.map(table => inquirerChoice(table, null, false));
-    const jhipster = results.jhipster.map(table => inquirerChoice(table, null, false));
-    const liquibase = results.liquibase.map(table => inquirerChoice(table, null, false));
+    [{ name: 'tables', check: true }, { name: 'manyToManyTablesOnly', check: false }, { name: 'jhipster', check: false }, { name: 'liquibase', check: false }].forEach((tableType) => {
+        const tables = results[tableType.name].map(table => inquirerChoice(table, null, tableType.check));
+        choices.push(new inquirer.Separator(cst.headers[tableType.name]));
+        choices = choices.concat(tables);
+    });
 
-    choices.push(new inquirer.Separator(cst.headers.tables));
-    choices = choices.concat(tables);
+    const inquiryCopy = Object.assign({ choices }, inquiries.entities);
+
+    return inquirer.prompt(inquiryCopy).then(answers => Object.assign({}, session, answers));
+};
 
     choices.push(new inquirer.Separator(cst.headers.manyToManyTablesOnly));
     choices = choices.concat(twoTypeJunction);
