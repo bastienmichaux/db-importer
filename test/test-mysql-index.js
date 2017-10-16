@@ -71,7 +71,9 @@ describe('lib/mysql/index', function () {
         it('resolves when session.connection.end returns an error of values null', function () {
             endStub = sandbox.stub().callsArgWith(0, null);
             const dummySession = {
-                end: endStub
+                connection: {
+                    end: endStub
+                }
             };
 
             return index.close(dummySession).then(() => {
@@ -83,7 +85,9 @@ describe('lib/mysql/index', function () {
             const dummyError = {};
             endStub = sandbox.stub().callsArgWith(0, dummyError);
             const dummySession = {
-                end: endStub
+                connection: {
+                    end: endStub
+                }
             };
 
             return index.close(dummySession).then((session) => {

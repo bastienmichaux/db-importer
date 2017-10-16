@@ -109,7 +109,10 @@ AND TABLE_TYPE LIKE 'BASE TABLE'
 
 const columnsQueryWithFilter = `SELECT
 col.TABLE_NAME,
-GROUP_CONCAT(CONCAT('{"name":"', col.COLUMN_NAME, '","type":"', col.COLUMN_TYPE, '"}' )) AS "COLUMNS"
+CONCAT('[',
+		GROUP_CONCAT(CONCAT('{"name":"', col.COLUMN_NAME, 
+                            '","type":"', col.COLUMN_TYPE, '"}' )),
+		']') AS "COLUMNS"
 FROM INFORMATION_SCHEMA.COLUMNS col
 WHERE col.TABLE_SCHEMA = 'dummy_schema'
 AND col.TABLE_NAME IN ('table_1', 'table_2', 'last_table')
@@ -117,7 +120,10 @@ GROUP BY col.TABLE_NAME;`;
 
 const columnsQueryWithoutFilter = `SELECT
 col.TABLE_NAME,
-GROUP_CONCAT(CONCAT('{"name":"', col.COLUMN_NAME, '","type":"', col.COLUMN_TYPE, '"}' )) AS "COLUMNS"
+CONCAT('[',
+		GROUP_CONCAT(CONCAT('{"name":"', col.COLUMN_NAME, 
+                            '","type":"', col.COLUMN_TYPE, '"}' )),
+		']') AS "COLUMNS"
 FROM INFORMATION_SCHEMA.COLUMNS col
 WHERE col.TABLE_SCHEMA = 'dummy_schema'
 

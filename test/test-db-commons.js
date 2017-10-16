@@ -31,7 +31,7 @@ describe('lib/db-commons', function () {
         const dbmsNameList = lodash.values(lodash.mapValues(db.dbmsList, 'name'));
 
         dbmsNameList.forEach((dbmsName) => {
-            it(`returns an object containing the corresponding ${dbmsName} driver`, function () {
+            it(`stores the ${dbmsName} driver into the session before resolving it`, function () {
                 const driver = db.dbmsList[dbmsName].driver; // the driver we want to find at the end of the test
 
                 sandbox.mock(driver).expects('connect').once().resolves();
@@ -43,16 +43,6 @@ describe('lib/db-commons', function () {
                 return db.connect(credentials).then((session) => {
                     assert.strictEqual(session.driver, driver);
                 });
-            });
-        });
-
-        it('resolves his completed input', function () {
-            const driver = db.dbmsList[anyDriverName].driver;
-
-            sandbox.mock(driver).expects('connect').once().resolves();
-
-            return db.connect(dummySession).then((session) => {
-                assert.strictEqual(session, dummySession);
             });
         });
 
@@ -88,8 +78,7 @@ describe('lib/db-commons', function () {
 
         it('calls the embedded driver close method on the embedded connection', function () {
             return db.close(dummySession).then(() => {
-                assert.strictEqual(closeStub.firstCall.args[0], dummySession.connection);
-                assert.strictEqual(closeStub.firstCall.args[1], dummySession.driver);
+                assert.strictEqual(closeStub.firstCall.args[0], dummySession);
             });
         });
 
