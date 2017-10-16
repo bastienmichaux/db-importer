@@ -1,8 +1,8 @@
 /**
  * @file Entry point of the program
  *
- * Uses a chained functions, meaning each function calls the next function
- * This enables to arbitrarily jump to a any step, in case of error for example
+ * Uses chained functions, meaning each function calls the next function
+ * This enables to arbitrarily jump to a any step, in case of an error for example
  */
 
 /* eslint no-use-before-define: 0 */
@@ -18,7 +18,7 @@ const exp = require('./lib/exportEntities');
 const msg = cst.messages;
 
 /**
- * CHAIN OF FUNCTIONS
+ * CHAINED FUNCTIONS
  */
 
 /**
@@ -52,7 +52,8 @@ const askCredentials = configuration => prompt.askCredentials(configuration)
  * use credentials to open a session on the database
  *
  * @param {{dbms, host, port, user, password, schema}} credentials
- * @resolves {getEntityCandidates({driver, connection, schema})} session
+ * @resolves getEntityCandidates
+ * @rejects askCredentials  - if connection failed
  * @throws {Error} Whatever error we don't handle ourselves
  */
 const openSession = credentials => db.connect(credentials)
@@ -70,7 +71,7 @@ const openSession = credentials => db.connect(credentials)
  * structure them depending their probable usage
  *
  * @param {{driver, connection, schema}} session
- * @resolves {selectEntities({driver, connection, schema, results: {tables, manyToManyTablesOnly, jhipster, liquibase}})} session
+ * @resolves selectEntities or setEntities if mode is automatic
  */
 const getEntityCandidates = session => db.entitiesTables(session)
     .then((session) => {
@@ -85,7 +86,7 @@ const getEntityCandidates = session => db.entitiesTables(session)
  * ask user which table should be used to create entities
  *
  * @param {{driver, connection, schema, results: {tables, manyToManyTablesOnly, jhipster, liquibase}}} session
- * @resolves {closeSession({driver, connection, schema, results: {entities}})} session
+ * @resolves getManyToManyJunctions
  */
 const selectEntities = session => prompt.selectEntities(session)
     .then(session => getManyToManyJunctions(session)); // retrieve the columns of the selected tables
@@ -96,10 +97,18 @@ const selectEntities = session => prompt.selectEntities(session)
  * it excludes jhipster own tables, liquibase tables and junction tables (between two tables only).
  *
  * @param {{results: {tables}}} session
- * @resolves {getEntityCandidatesColumns({entities: [tables]})}
+ * @resolves getEntityCandidatesColumns
  */
 const setEntities = session => getManyToManyJunctions(def.entities(session));
 
+/**
+ * query junction tables at the condition that it wasn't previously select as an entity and that linked tables were
+ * selected as entities.
+ * As the purpose is to create many-to-many relationship, it only includes junction between two tables
+ *
+ * @param {{driver, connection, schema}} session
+ * @resolves selectManyToManyJunctions or setManyToManyJunctions if mode is automatic
+ */
 const getManyToManyJunctions = session => db.manyToManyJunctions(session)
     .then((session) => {
         if (session.mode === cst.modes.manual) {
@@ -108,13 +117,30 @@ const getManyToManyJunctions = session => db.manyToManyJunctions(session)
         return setManyToManyJunctions(session);
     });
 
+/**
+ * ask user which junction tables should be used to create many-to-many relationships
+ *
+ * @param {{driver, connection, schema, results: {manyToManyJunctions}}} session
+ * @resolves getColumns
+ */
 const selectManyToManyJunctions = session => prompt.selectManyToMany(session)
-    .then(session => getEntityCandidatesColumns(session));
+    .then(session => getColumns(session));
 
-const setManyToManyJunctions = session => getEntityCandidatesColumns(def.manyToMany(session));
+/**
+ * set which junction tables should be used to create many-to-many relationships (all of them)
+ *
+ * @param {{driver, connection, schema, results: {manyToManyJunctions}}} session
+ * @resolves getColumns
+ */
+const setManyToManyJunctions = session => getColumns(def.manyToMany(session));
 
-// retrieve the columns of the selected tables
-const getEntityCandidatesColumns = session => db.entityColumns(session)
+/**
+ * query columns for the selected tables
+ *
+ * @param {{driver, connection, schema, entities}} session
+ * @resolves selectColumns or setColumns if mode is automatic
+ */
+const getColumns = session => db.entityColumns(session)
     .then((session) => {
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);
@@ -123,27 +149,44 @@ const getEntityCandidatesColumns = session => db.entityColumns(session)
     }); // ask the user which columns should be selected
 
 
-// ask the user which columns should be selected for each table
+/**
+ * ask user to select which columns should be used as fields
+ *
+ * @param {{driver, connection, schema, results: {columnsByTable}}} session
+ * @resolves closeSession
+ */
 const selectColumns = session => prompt.selectColumns(session)
     .then(session => closeSession(session));
 
+/**
+ * set which columns should be used as fields (non id or foreign key columns)
+ *
+ * @param {{driver, connection, schema, results: {columnsByTable}}} session
+ * @resolves closeSession
+ */
 const setColumns = session => closeSession(def.columns(session));
 
 
 /**
- * close session and forward results
+ * close session
  *
  * @param {{driver, connection, schema, results: {entities}}} session
- * @resolves {createEntities(results)}
+ * @resolves exportEntities
  */
 const closeSession = session => db.close(session)
     .then(session => exportEntities(session));
 
-
+/**
+ * format as JSON and print results from previous steps into a file
+ *
+ * @param {{entities, manyToManyJunctions, columns}} session
+ */
 const exportEntities = session => exp.exportEntities(session)
     .then(() => goodbye());
 
-
+/**
+ * Say goodbye to the user
+ */
 const goodbye = () => {
     log.emphasize(msg.goodbye);
 };
@@ -157,7 +200,9 @@ const main = () => {
     // greet the user
     log.emphasize(msg.greeting);
 
+    // Start the chain of junctions
     getConfiguration()
+        // catch any unknown error to print information about it and gracefully close the application
         .catch((error) => {
             log.failure(error.stack);
             log.emphasize(msg.contributeOnFailure);
