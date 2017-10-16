@@ -7,9 +7,9 @@ const sinon = require('sinon');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 
-const prompt = require('../prompt');
+const prompt = require('../lib/prompt');
 const log = require('../lib/log');
-const cst = require('../constants');
+const cst = require('../lib/constants');
 const db = require('../lib/db-commons');
 
 const sandbox = sinon.sandbox.create();
