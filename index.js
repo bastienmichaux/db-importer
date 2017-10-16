@@ -7,9 +7,9 @@
 
 /* eslint no-use-before-define: 0 */
 
-const cst = require('./constants');
-const prompt = require('./prompt');
-const err = require('./error-handler');
+const cst = require('./lib/constants');
+const prompt = require('./lib/prompt');
+const err = require('./lib/error-handler');
 const log = require('./lib/log');
 const db = require('./lib/db-commons');
 const def = require('./lib/default-choices');
