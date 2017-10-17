@@ -165,7 +165,7 @@ describe('lib/mysql/index', function () {
         });
     });
 
-    describe('entityColumns', function () {
+    describe('entitiesColumns', function () {
         it('works');
     });
 });

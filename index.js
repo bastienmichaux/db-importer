@@ -140,7 +140,7 @@ const setManyToManyJunctions = session => getColumns(def.manyToMany(session));
  * @param {{driver, connection, schema, entities}} session
  * @resolves selectColumns or setColumns if mode is automatic
  */
-const getColumns = session => db.entityColumns(session)
+const getColumns = session => db.entitiesColumns(session)
     .then((session) => {
         if (session.mode === cst.modes.manual) {
             return selectColumns(session);

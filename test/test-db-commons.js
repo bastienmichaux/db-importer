@@ -120,27 +120,27 @@ describe('lib/db-commons', function () {
         });
     });
 
-    describe('entityColumns', function () {
+    describe('entitiesColumns', function () {
         let dummySession;
-        let entityCandidatesColumnsStub;
+        let entitiesColumnsStub;
 
         beforeEach(function () {
-            entityCandidatesColumnsStub = sandbox.stub().resolves();
+            entitiesColumnsStub = sandbox.stub().resolves();
             dummySession = {
                 connection: {},
                 driver: {
-                    entityColumns: entityCandidatesColumnsStub
+                    entitiesColumns: entitiesColumnsStub
                 }
             };
         });
 
         afterEach(function () {
-            sinon.assert.calledOnce(entityCandidatesColumnsStub);
+            sinon.assert.calledOnce(entitiesColumnsStub);
         });
 
         it('ends the session with an undefined value', function () {
-            assert(typeof db.entityColumns === 'function');
-            return db.entityColumns(dummySession);
+            assert(typeof db.entitiesColumns === 'function');
+            return db.entitiesColumns(dummySession);
         });
     });
 });
