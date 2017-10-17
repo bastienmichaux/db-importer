@@ -125,22 +125,40 @@ describe('lib/db-commons', function () {
         let entitiesColumnsStub;
 
         beforeEach(function () {
-            entitiesColumnsStub = sandbox.stub().resolves();
+            entitiesColumnsStub = sandbox.stub().withArgs(dummySession).resolves();
             dummySession = {
-                connection: {},
                 driver: {
                     entitiesColumns: entitiesColumnsStub
                 }
             };
         });
 
-        afterEach(function () {
-            sinon.assert.calledOnce(entitiesColumnsStub);
+        it('calls the embedded driver entitiesColumns method in the provided session', function () {
+            return db.entitiesColumns(dummySession)
+                .then(() => {
+                    sinon.assert.calledOnce(entitiesColumnsStub);
+                });
+        });
+    });
+
+    describe('manyToManyJunctions', function () {
+        let dummySession;
+        let manyToManyJunctionsStub;
+
+        beforeEach(function () {
+            manyToManyJunctionsStub = sandbox.stub().withArgs(dummySession).resolves();
+            dummySession = {
+                driver: {
+                    manyToManyJunctions: manyToManyJunctionsStub
+                }
+            };
         });
 
-        it('ends the session with an undefined value', function () {
-            assert(typeof db.entitiesColumns === 'function');
-            return db.entitiesColumns(dummySession);
+        it('calls the embedded driver manyToManyJunctions method in the provided session', function () {
+            return db.manyToManyJunctions(dummySession)
+                .then(() => {
+                    sinon.assert.calledOnce(manyToManyJunctionsStub);
+                });
         });
     });
 });
