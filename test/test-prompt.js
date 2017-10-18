@@ -11,6 +11,7 @@ const prompt = require('../prompt');
 const log = require('../lib/log');
 const cst = require('../constants');
 const db = require('../lib/db-commons');
+const dummies = require('./templates/dummies');
 
 const sandbox = sinon.sandbox.create();
 
@@ -272,17 +273,7 @@ describe('prompt', function () {
 
     describe('selectColumnsQuestionChoices', function () {
         // template choices, generated with dbi_book_author
-        const expectedChoices = [
-            { type: 'separator', line: '\u001b[2mauthors\u001b[22m' },
-            { name: 'id (int(11))', value: 'authors.id', checked: true },
-            { name: 'name (varchar(255))', value: 'authors.name', checked: true },
-            { name: 'birth_date (date)', value: 'authors.birth_date', checked: true },
-            { type: 'separator', line: '\u001b[2mbooks\u001b[22m' },
-            { name: 'id (int(11))', value: 'books.id', checked: true },
-            { name: 'title (varchar(255))', value: 'books.title', checked: true },
-            { name: 'price (bigint(20))', value: 'books.price', checked: true },
-            { name: 'author (int(11))', value: 'books.author', checked: true }
-        ];
+        const expectedChoices = dummies.expectedColumnsSelectionChoices;
 
         it('returns the expected choices', function () {
             const actualChoices = prompt.selectColumnsQuestionChoices(dummyEntities);
