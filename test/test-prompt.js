@@ -11,7 +11,7 @@ const prompt = require('../prompt');
 const log = require('../lib/log');
 const cst = require('../constants');
 const db = require('../lib/db-commons');
-const dummies = require('./templates/dummies');
+const dummies = require('./templates/test-prompt-dummies');
 
 const sandbox = sinon.sandbox.create();
 

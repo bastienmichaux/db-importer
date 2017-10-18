@@ -6,7 +6,7 @@ const assert = require('assert');
 const mysql = require('mysql');
 
 
-const dummies = require('./templates/dummies');
+const dummies = require('./templates/test-mysql-queries-dummies');
 const queries = require('../lib/mysql/queries');
 
 

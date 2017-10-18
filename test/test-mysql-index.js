@@ -7,7 +7,7 @@ const sinon = require('sinon');
 const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
-const dummies = require('./templates/dummies');
+const dummies = require('./templates/test-mysql-index-dummies');
 const index = require('../lib/mysql/index');
 
 const sandbox = sinon.sandbox.create();
