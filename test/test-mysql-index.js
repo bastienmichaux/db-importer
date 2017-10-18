@@ -7,64 +7,10 @@ const sinon = require('sinon');
 const mysql = require('mysql');
 
 const cst = require('../lib/mysql/constants');
+const dummies = require('./templates/dummies');
 const index = require('../lib/mysql/index');
 
 const sandbox = sinon.sandbox.create();
-
-const dummyQueryResults = [
-    {
-        table_name: 'authors',
-        column_name: 'id',
-        ordinal_position: 1,
-        column_type: 'int(11)'
-    }, {
-        table_name: 'authors',
-        column_name: 'name',
-        ordinal_position: 2,
-        column_type: 'varchar(255)'
-    }, {
-        table_name: 'authors',
-        column_name: 'birth_date',
-        ordinal_position: 3,
-        column_type: 'date'
-    }, {
-        table_name: 'books',
-        column_name: 'id',
-        ordinal_position: 1,
-        column_type: 'int(11)'
-    }, {
-        table_name: 'books',
-        column_name: 'title',
-        ordinal_position: 2,
-        column_type: 'varchar(255)'
-    }, {
-        table_name: 'books',
-        column_name: 'price',
-        ordinal_position: 3,
-        column_type: 'bigint(20)'
-    }, {
-        table_name: 'books',
-        column_name: 'author',
-        ordinal_position: 4,
-        column_type: 'int(11)'
-    }
-];
-
-const dummyTables = ['authors', 'books'];
-
-const dummyEntities = {
-    authors: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        name: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        birth_date: { ordinalPosition: 3, columnType: 'date' }
-    },
-    books: {
-        id: { ordinalPosition: 1, columnType: 'int(11)' },
-        title: { ordinalPosition: 2, columnType: 'varchar(255)' },
-        price: { ordinalPosition: 3, columnType: 'bigint(20)' },
-        author: { ordinalPosition: 4, columnType: 'int(11)' }
-    }
-};
 
 describe('lib/mysql/index', function () {
     afterEach(function () {
@@ -218,8 +164,10 @@ describe('lib/mysql/index', function () {
 
     describe('organizeColumns', function () {
         it('returns an organized object representing the database structure', function () {
+            const dummyQueryResults = dummies.dummyQueryResults;
+            const dummyTables = ['authors', 'books'];
             const actualResult = index.organizeColumns(dummyQueryResults, dummyTables);
-            const expectedResult = dummyEntities;
+            const expectedResult = dummies.dummyEntities;
 
             // first check we have the exact same number of tables, and the tables have the same name
             const actualResultTables = Object.keys(actualResult);
@@ -257,11 +205,12 @@ describe('lib/mysql/index', function () {
         };
 
         it('returns the correctly updated session object', function () {
+            const dummyQueryResults = dummies.dummyQueryResults;
             queryStub.onCall(0).callsArgWith(1, null, dummyQueryResults);
             return index.entityCandidatesColumns(dummySession)
                 .then((resolvedValue) => {
                     const actualResult = resolvedValue.entities;
-                    const expectedResult = dummyEntities;
+                    const expectedResult = dummies.dummyEntities;
 
                     // first check we have the exact same number of tables, and the tables have the same name
                     const actualResultTables = Object.keys(actualResult);
